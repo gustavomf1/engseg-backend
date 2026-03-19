@@ -42,8 +42,13 @@ public class NaoConformidadeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(naoConformidadeService.create(request));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> update(@PathVariable UUID id, @Valid @RequestBody NaoConformidadeRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.update(id, request));
+    }
+
     @PostMapping("/{id}/devolutiva")
-    @PreAuthorize("hasRole('EXTERNO')")
     public ResponseEntity<NaoConformidadeResponse> registrarDevolutiva(
             @PathVariable UUID id,
             @Valid @RequestBody DevolutivaRequest request) {
@@ -51,7 +56,6 @@ public class NaoConformidadeController {
     }
 
     @PostMapping("/{id}/execucao-acao")
-    @PreAuthorize("hasRole('EXTERNO')")
     public ResponseEntity<NaoConformidadeResponse> registrarExecucaoAcao(
             @PathVariable UUID id,
             @Valid @RequestBody ExecucaoAcaoRequest request) {
@@ -59,7 +63,6 @@ public class NaoConformidadeController {
     }
 
     @PostMapping("/{id}/validacao")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
     public ResponseEntity<NaoConformidadeResponse> validar(
             @PathVariable UUID id,
             @Valid @RequestBody ValidacaoRequest request) {

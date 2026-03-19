@@ -36,6 +36,12 @@ public class DesvioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(desvioService.create(request));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<DesvioResponse> update(@PathVariable UUID id, @Valid @RequestBody DesvioRequest request) {
+        return ResponseEntity.ok(desvioService.update(id, request));
+    }
+
     @PutMapping("/{id}/resolver")
     @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<DesvioResponse> resolver(@PathVariable UUID id) {

@@ -92,6 +92,37 @@ public class NaoConformidadeService {
     }
 
     @Transactional
+    public NaoConformidadeResponse update(UUID id, NaoConformidadeRequest request) {
+        NaoConformidade nc = naoConformidadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+
+        var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + request.estabelecimentoId()));
+
+        var engConstrutora = request.engResponsavelConstrutoraId() != null
+                ? usuarioRepository.findById(request.engResponsavelConstrutoraId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Engenheiro (construtora) não encontrado: " + request.engResponsavelConstrutoraId()))
+                : null;
+
+        var engVerificacao = request.engResponsavelVerificacaoId() != null
+                ? usuarioRepository.findById(request.engResponsavelVerificacaoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Engenheiro (verificação) não encontrado: " + request.engResponsavelVerificacaoId()))
+                : null;
+
+        nc.setEstabelecimento(estabelecimento);
+        nc.setTitulo(request.titulo());
+        nc.setLocalizacao(request.localizacao());
+        nc.setDescricao(request.descricao());
+        nc.setRegraDeOuro(request.regraDeOuro());
+        nc.setNrRelacionada(request.nrRelacionada());
+        nc.setNivelSeveridade(request.nivelSeveridade());
+        nc.setEngResponsavelConstrutora(engConstrutora);
+        nc.setEngResponsavelVerificacao(engVerificacao);
+
+        return toResponse(naoConformidadeRepository.save(nc));
+    }
+
+    @Transactional
     public NaoConformidadeResponse registrarDevolutiva(UUID id, DevolutivaRequest request) {
         NaoConformidade nc = naoConformidadeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));

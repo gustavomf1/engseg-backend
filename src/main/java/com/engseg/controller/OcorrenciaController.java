@@ -50,6 +50,8 @@ public class OcorrenciaController {
             item.put("nrRelacionada", nc.nrRelacionada());
             item.put("nivelSeveridade", nc.nivelSeveridade());
             item.put("estabelecimentoNome", nc.estabelecimentoNome());
+            item.put("engResponsavelConstrutoraId", nc.engResponsavelConstrutoraId());
+            item.put("engResponsavelVerificacaoId", nc.engResponsavelVerificacaoId());
             resultado.add(item);
         }
 

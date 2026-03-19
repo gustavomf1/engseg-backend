@@ -60,6 +60,24 @@ public class DesvioService {
     }
 
     @Transactional
+    public DesvioResponse update(UUID id, DesvioRequest request) {
+        Desvio desvio = desvioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
+
+        var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + request.estabelecimentoId()));
+
+        desvio.setEstabelecimento(estabelecimento);
+        desvio.setTitulo(request.titulo());
+        desvio.setLocalizacao(request.localizacao());
+        desvio.setDescricao(request.descricao());
+        desvio.setRegraDeOuro(request.regraDeOuro());
+        desvio.setOrientacaoRealizada(request.orientacaoRealizada());
+
+        return toResponse(desvioRepository.save(desvio));
+    }
+
+    @Transactional
     public DesvioResponse resolver(UUID id) {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
