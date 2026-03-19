@@ -1,0 +1,51 @@
+package com.engseg.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import java.time.LocalDate;
+import java.util.List;
+
+@Entity
+@Table(name = "nao_conformidade")
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class NaoConformidade extends Ocorrencia {
+
+    @Column(name = "nr_relacionada", nullable = false)
+    private String nrRelacionada;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nivel_severidade", nullable = false)
+    private NivelSeveridade nivelSeveridade;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "eng_responsavel_construtora_id")
+    private Usuario engResponsavelConstrutora;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "eng_responsavel_verificacao_id")
+    private Usuario engResponsavelVerificacao;
+
+    @Column(name = "data_limite_resolucao")
+    private LocalDate dataLimiteResolucao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private StatusNaoConformidade status = StatusNaoConformidade.ABERTA;
+
+    @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Devolutiva> devolutivas;
+
+    @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ExecucaoAcao> execucoes;
+
+    @OneToOne(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Validacao validacao;
+}
