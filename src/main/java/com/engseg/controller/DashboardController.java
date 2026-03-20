@@ -60,7 +60,7 @@ public class DashboardController {
             item.put("tipo", "DESVIO");
             item.put("id", d.id());
             item.put("titulo", d.titulo());
-            item.put("localizacao", d.localizacao());
+            item.put("localizacao", d.localizacaoNome());
             item.put("descricao", d.descricao());
             item.put("dataRegistro", d.dataRegistro());
             item.put("regraDeOuro", d.regraDeOuro());
@@ -74,7 +74,7 @@ public class DashboardController {
             item.put("tipo", "NAO_CONFORMIDADE");
             item.put("id", nc.id());
             item.put("titulo", nc.titulo());
-            item.put("localizacao", nc.localizacao());
+            item.put("localizacao", nc.localizacaoNome());
             item.put("descricao", nc.descricao());
             item.put("dataRegistro", nc.dataRegistro());
             item.put("regraDeOuro", nc.regraDeOuro());

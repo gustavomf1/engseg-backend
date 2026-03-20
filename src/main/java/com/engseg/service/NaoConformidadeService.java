@@ -28,6 +28,7 @@ public class NaoConformidadeService {
 
     private final NaoConformidadeRepository naoConformidadeRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
+    private final LocalizacaoRepository localizacaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final DevolutivaRepository devolutivaRepository;
     private final ExecucaoAcaoRepository execucaoAcaoRepository;
@@ -68,6 +69,11 @@ public class NaoConformidadeService {
                         .orElseThrow(() -> new ResourceNotFoundException("Engenheiro (verificação) não encontrado: " + request.engResponsavelVerificacaoId()))
                 : null;
 
+        var localizacao = request.localizacaoId() != null
+                ? localizacaoRepository.findById(request.localizacaoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + request.localizacaoId()))
+                : null;
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var tecnico = usuarioRepository.findByEmail(email).orElse(null);
 
@@ -76,7 +82,7 @@ public class NaoConformidadeService {
         NaoConformidade nc = new NaoConformidade();
         nc.setEstabelecimento(estabelecimento);
         nc.setTitulo(request.titulo());
-        nc.setLocalizacao(request.localizacao());
+        nc.setLocalizacao(localizacao);
         nc.setDescricao(request.descricao());
         nc.setDataRegistro(now);
         nc.setTecnico(tecnico);
@@ -109,9 +115,14 @@ public class NaoConformidadeService {
                         .orElseThrow(() -> new ResourceNotFoundException("Engenheiro (verificação) não encontrado: " + request.engResponsavelVerificacaoId()))
                 : null;
 
+        var localizacao = request.localizacaoId() != null
+                ? localizacaoRepository.findById(request.localizacaoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + request.localizacaoId()))
+                : null;
+
         nc.setEstabelecimento(estabelecimento);
         nc.setTitulo(request.titulo());
-        nc.setLocalizacao(request.localizacao());
+        nc.setLocalizacao(localizacao);
         nc.setDescricao(request.descricao());
         nc.setRegraDeOuro(request.regraDeOuro());
         nc.setNrRelacionada(request.nrRelacionada());
@@ -243,7 +254,8 @@ public class NaoConformidadeService {
                 nc.getEstabelecimento().getId(),
                 nc.getEstabelecimento().getNome(),
                 nc.getTitulo(),
-                nc.getLocalizacao(),
+                nc.getLocalizacao() != null ? nc.getLocalizacao().getId() : null,
+                nc.getLocalizacao() != null ? nc.getLocalizacao().getNome() : null,
                 nc.getDescricao(),
                 nc.getDataRegistro(),
                 nc.getTecnico() != null ? nc.getTecnico().getNome() : null,

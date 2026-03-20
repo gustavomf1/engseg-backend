@@ -25,8 +25,9 @@ public abstract class Ocorrencia {
     @Column(nullable = false)
     private String titulo;
 
-    @Column(nullable = false)
-    private String localizacao;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "localizacao_id")
+    private Localizacao localizacao;
 
     @Column(nullable = false)
     private String descricao;

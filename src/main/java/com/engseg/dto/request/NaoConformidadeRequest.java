@@ -8,7 +8,7 @@ import java.util.UUID;
 public record NaoConformidadeRequest(
         @NotNull UUID estabelecimentoId,
         @NotBlank String titulo,
-        @NotBlank String localizacao,
+        UUID localizacaoId,
         @NotBlank String descricao,
         @NotBlank String nrRelacionada,
         @NotNull NivelSeveridade nivelSeveridade,

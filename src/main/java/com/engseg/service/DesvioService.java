@@ -7,6 +7,7 @@ import com.engseg.entity.StatusDesvio;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EstabelecimentoRepository;
+import com.engseg.repository.LocalizacaoRepository;
 import com.engseg.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +24,7 @@ public class DesvioService {
 
     private final DesvioRepository desvioRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
+    private final LocalizacaoRepository localizacaoRepository;
     private final UsuarioRepository usuarioRepository;
 
     public List<DesvioResponse> findAll() {
@@ -42,13 +44,18 @@ public class DesvioService {
         var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + request.estabelecimentoId()));
 
+        var localizacao = request.localizacaoId() != null
+                ? localizacaoRepository.findById(request.localizacaoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + request.localizacaoId()))
+                : null;
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var tecnico = usuarioRepository.findByEmail(email).orElse(null);
 
         Desvio desvio = new Desvio();
         desvio.setEstabelecimento(estabelecimento);
         desvio.setTitulo(request.titulo());
-        desvio.setLocalizacao(request.localizacao());
+        desvio.setLocalizacao(localizacao);
         desvio.setDescricao(request.descricao());
         desvio.setDataRegistro(LocalDateTime.now());
         desvio.setTecnico(tecnico);
@@ -67,9 +74,14 @@ public class DesvioService {
         var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + request.estabelecimentoId()));
 
+        var localizacao = request.localizacaoId() != null
+                ? localizacaoRepository.findById(request.localizacaoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + request.localizacaoId()))
+                : null;
+
         desvio.setEstabelecimento(estabelecimento);
         desvio.setTitulo(request.titulo());
-        desvio.setLocalizacao(request.localizacao());
+        desvio.setLocalizacao(localizacao);
         desvio.setDescricao(request.descricao());
         desvio.setRegraDeOuro(request.regraDeOuro());
         desvio.setOrientacaoRealizada(request.orientacaoRealizada());
@@ -83,7 +95,8 @@ public class DesvioService {
                 d.getEstabelecimento().getId(),
                 d.getEstabelecimento().getNome(),
                 d.getTitulo(),
-                d.getLocalizacao(),
+                d.getLocalizacao() != null ? d.getLocalizacao().getId() : null,
+                d.getLocalizacao() != null ? d.getLocalizacao().getNome() : null,
                 d.getDescricao(),
                 d.getDataRegistro(),
                 d.getTecnico() != null ? d.getTecnico().getNome() : null,
