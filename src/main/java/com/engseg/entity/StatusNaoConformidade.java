@@ -3,6 +3,6 @@ package com.engseg.entity;
 public enum StatusNaoConformidade {
     ABERTA,
     EM_TRATAMENTO,
-    CONCLUIDA,
+    CONCLUIDO,
     NAO_RESOLVIDA
 }

@@ -9,6 +9,5 @@ public record DashboardStatsResponse(
         long ncEmTratamento,
         long ncConcluidas,
         long ncNaoResolvidas,
-        long totalDesviosRegistrados,
-        long totalDesviosResolvidos
+        long totalDesviosConcluidos
 ) {}

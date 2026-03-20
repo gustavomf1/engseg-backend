@@ -10,6 +10,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Validacao.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/EngSegApplication.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/ExecucaoAcaoRepository.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/OcorrenciaController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/DevolutivaResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/UsuarioRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/DevolutivaRequest.java

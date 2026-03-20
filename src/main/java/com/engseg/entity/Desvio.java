@@ -21,5 +21,5 @@ public class Desvio extends Ocorrencia {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private StatusDesvio status = StatusDesvio.REGISTRADO;
+    private StatusDesvio status = StatusDesvio.CONCLUIDO;
 }

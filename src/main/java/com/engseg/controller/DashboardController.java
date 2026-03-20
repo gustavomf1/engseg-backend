@@ -34,10 +34,9 @@ public class DashboardController {
                 + naoConformidadeRepository.countByRegraDeOuro(true);
         long abertas = naoConformidadeRepository.countByStatus(StatusNaoConformidade.ABERTA);
         long emTratamento = naoConformidadeRepository.countByStatus(StatusNaoConformidade.EM_TRATAMENTO);
-        long concluidas = naoConformidadeRepository.countByStatus(StatusNaoConformidade.CONCLUIDA);
+        long concluidas = naoConformidadeRepository.countByStatus(StatusNaoConformidade.CONCLUIDO);
         long naoResolvidas = naoConformidadeRepository.countByStatus(StatusNaoConformidade.NAO_RESOLVIDA);
-        long totalDesviosRegistrados = desvioRepository.countByStatus(StatusDesvio.REGISTRADO);
-        long totalDesviosResolvidos = desvioRepository.countByStatus(StatusDesvio.RESOLVIDO);
+        long totalDesviosConcluidos = desvioRepository.countByStatus(StatusDesvio.CONCLUIDO);
 
         return ResponseEntity.ok(new DashboardStatsResponse(
                 totalOcorrencias,
@@ -48,8 +47,7 @@ public class DashboardController {
                 emTratamento,
                 concluidas,
                 naoResolvidas,
-                totalDesviosRegistrados,
-                totalDesviosResolvidos
+                totalDesviosConcluidos
         ));
     }
 

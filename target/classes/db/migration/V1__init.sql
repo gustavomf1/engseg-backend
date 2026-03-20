@@ -104,4 +104,4 @@ VALUES ('00000000-0000-0000-0000-000000000001', 'EngSeg Administração', '00000
 
 -- BCrypt hash of "admin123"
 INSERT INTO usuario (id, nome, email, senha, perfil, empresa_id, telefone, ativo)
-VALUES ('00000000-0000-0000-0000-000000000001', 'Administrador', 'admin@engseg.com', '$2a$10$EblZqNptyYvcLm/VwDptlOEAAOMbd2N8Fq/MuEcAWkFGf7.MBWB76', 'ENGENHEIRO', '00000000-0000-0000-0000-000000000001', null, true);
+VALUES ('00000000-0000-0000-0000-000000000001', 'Administrador', 'admin@engseg.com', '$2a$10$BWoAiefODks4bb7jkkrH5uUieEvDcgArjI0dJIlaIvnnJeo19h1Eq', 'ENGENHEIRO', '00000000-0000-0000-0000-000000000001', null, true);

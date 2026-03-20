@@ -39,6 +39,7 @@ com/engseg/entity/NivelSeveridade.class
 com/engseg/dto/response/ValidacaoResponse.class
 com/engseg/dto/response/LoginResponse.class
 com/engseg/entity/Ocorrencia$OcorrenciaBuilder.class
+com/engseg/controller/OcorrenciaController.class
 com/engseg/repository/EvidenciaRepository.class
 com/engseg/exception/GlobalExceptionHandler.class
 com/engseg/dto/response/ExecucaoAcaoResponse.class

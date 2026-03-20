@@ -54,7 +54,7 @@ public class DesvioService {
         desvio.setTecnico(tecnico);
         desvio.setRegraDeOuro(request.regraDeOuro());
         desvio.setOrientacaoRealizada(request.orientacaoRealizada());
-        desvio.setStatus(StatusDesvio.REGISTRADO);
+        desvio.setStatus(StatusDesvio.CONCLUIDO);
 
         return toResponse(desvioRepository.save(desvio));
     }
@@ -74,15 +74,6 @@ public class DesvioService {
         desvio.setRegraDeOuro(request.regraDeOuro());
         desvio.setOrientacaoRealizada(request.orientacaoRealizada());
 
-        return toResponse(desvioRepository.save(desvio));
-    }
-
-    @Transactional
-    public DesvioResponse resolver(UUID id) {
-        Desvio desvio = desvioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
-
-        desvio.setStatus(StatusDesvio.RESOLVIDO);
         return toResponse(desvioRepository.save(desvio));
     }
 

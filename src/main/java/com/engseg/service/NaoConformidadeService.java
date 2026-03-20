@@ -191,7 +191,7 @@ public class NaoConformidadeService {
         validacaoRepository.save(validacao);
 
         if (request.parecer() == ParecerValidacao.APROVADO) {
-            nc.setStatus(StatusNaoConformidade.CONCLUIDA);
+            nc.setStatus(StatusNaoConformidade.CONCLUIDO);
             naoConformidadeRepository.save(nc);
         }
 
@@ -251,8 +251,10 @@ public class NaoConformidadeService {
                 nc.getNrRelacionada(),
                 nc.getNivelSeveridade(),
                 nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getId() : null,
+                nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getNome() : null,
                 nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getEmail() : null,
                 nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getId() : null,
+                nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getNome() : null,
                 nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getEmail() : null,
                 nc.getDataLimiteResolucao(),
                 nc.getStatus(),

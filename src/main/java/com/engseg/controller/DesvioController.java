@@ -41,10 +41,4 @@ public class DesvioController {
     public ResponseEntity<DesvioResponse> update(@PathVariable UUID id, @Valid @RequestBody DesvioRequest request) {
         return ResponseEntity.ok(desvioService.update(id, request));
     }
-
-    @PutMapping("/{id}/resolver")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
-    public ResponseEntity<DesvioResponse> resolver(@PathVariable UUID id) {
-        return ResponseEntity.ok(desvioService.resolver(id));
-    }
 }
