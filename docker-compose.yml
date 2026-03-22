@@ -19,6 +19,25 @@ services:
     networks:
       - engseg-network
 
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - engseg-network
+
   engseg-api:
     build: .
     ports:
@@ -27,6 +46,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/engseg
       SPRING_DATASOURCE_USERNAME: engseg
       SPRING_DATASOURCE_PASSWORD: engseg123
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: engseg-evidencias
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,6 +58,7 @@ services:
 
 volumes:
   postgres_data:
+  minio_data:
 
 networks:
   engseg-network:

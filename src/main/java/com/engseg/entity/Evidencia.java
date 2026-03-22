@@ -26,6 +26,10 @@ public class Evidencia {
     @Column(name = "data_upload", nullable = false)
     private LocalDateTime dataUpload;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_evidencia", nullable = false)
+    private TipoEvidencia tipoEvidencia;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nao_conformidade_id")
     private NaoConformidade naoConformidade;

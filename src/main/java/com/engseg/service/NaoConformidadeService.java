@@ -33,6 +33,8 @@ public class NaoConformidadeService {
     private final DevolutivaRepository devolutivaRepository;
     private final ExecucaoAcaoRepository execucaoAcaoRepository;
     private final ValidacaoRepository validacaoRepository;
+    private final EvidenciaRepository evidenciaRepository;
+    private final S3StorageService s3StorageService;
 
     public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId) {
         List<NaoConformidade> list;
@@ -102,6 +104,15 @@ public class NaoConformidadeService {
         NaoConformidade nc = naoConformidadeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
 
+        // Técnico só pode editar NC com status ABERTA
+        if (nc.getStatus() != StatusNaoConformidade.ABERTA) {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            var usuario = usuarioRepository.findByEmail(email).orElse(null);
+            if (usuario != null && usuario.getPerfil() == PerfilUsuario.TECNICO) {
+                throw new BusinessException("Técnico não pode editar uma NC que não está com status ABERTA");
+            }
+        }
+
         var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + request.estabelecimentoId()));
 
@@ -131,6 +142,29 @@ public class NaoConformidadeService {
         nc.setEngResponsavelVerificacao(engVerificacao);
 
         return toResponse(naoConformidadeRepository.save(nc));
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        NaoConformidade nc = naoConformidadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+
+        // Técnico só pode excluir NC com status ABERTA
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario != null && usuario.getPerfil() == PerfilUsuario.TECNICO && nc.getStatus() != StatusNaoConformidade.ABERTA) {
+            throw new BusinessException("Técnico só pode excluir NC com status ABERTA");
+        }
+
+        // Deletar evidências do S3
+        List<Evidencia> evidencias = evidenciaRepository.findByNaoConformidadeId(id);
+        for (Evidencia ev : evidencias) {
+            s3StorageService.delete(ev.getUrlArquivo());
+        }
+        evidenciaRepository.deleteAll(evidencias);
+
+        // Cascade deleta devolutivas, execuções e validação
+        naoConformidadeRepository.delete(nc);
     }
 
     @Transactional

@@ -89,6 +89,13 @@ public class DesvioService {
         return toResponse(desvioRepository.save(desvio));
     }
 
+    @Transactional
+    public void delete(UUID id) {
+        Desvio desvio = desvioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
+        desvioRepository.delete(desvio);
+    }
+
     private DesvioResponse toResponse(Desvio d) {
         return new DesvioResponse(
                 d.getId(),

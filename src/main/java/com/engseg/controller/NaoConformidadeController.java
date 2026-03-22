@@ -48,6 +48,13 @@ public class NaoConformidadeController {
         return ResponseEntity.ok(naoConformidadeService.update(id, request));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        naoConformidadeService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/devolutiva")
     public ResponseEntity<NaoConformidadeResponse> registrarDevolutiva(
             @PathVariable UUID id,
