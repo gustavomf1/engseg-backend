@@ -14,6 +14,8 @@ public record DesvioResponse(
         String descricao,
         LocalDateTime dataRegistro,
         String tecnicoNome,
+        String usuarioCriacaoNome,
+        String usuarioCriacaoEmail,
         String orientacaoRealizada,
         StatusDesvio status
 ) {}

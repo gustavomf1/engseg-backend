@@ -35,6 +35,10 @@ public class NaoConformidade extends Ocorrencia {
     @Column(name = "data_limite_resolucao")
     private LocalDate dataLimiteResolucao;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_criacao_id")
+    private Usuario usuarioCriacao;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

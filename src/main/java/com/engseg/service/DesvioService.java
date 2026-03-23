@@ -59,6 +59,7 @@ public class DesvioService {
         desvio.setDescricao(request.descricao());
         desvio.setDataRegistro(LocalDateTime.now());
         desvio.setTecnico(tecnico);
+        desvio.setUsuarioCriacao(tecnico);
         desvio.setRegraDeOuro(false);
         desvio.setOrientacaoRealizada(request.orientacaoRealizada());
         desvio.setStatus(StatusDesvio.CONCLUIDO);
@@ -106,6 +107,8 @@ public class DesvioService {
                 d.getDescricao(),
                 d.getDataRegistro(),
                 d.getTecnico() != null ? d.getTecnico().getNome() : null,
+                d.getUsuarioCriacao() != null ? d.getUsuarioCriacao().getNome() : null,
+                d.getUsuarioCriacao() != null ? d.getUsuarioCriacao().getEmail() : null,
                 d.getOrientacaoRealizada(),
                 d.getStatus()
         );

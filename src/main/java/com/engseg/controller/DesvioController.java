@@ -43,7 +43,7 @@ public class DesvioController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         desvioService.delete(id);
         return ResponseEntity.noContent().build();

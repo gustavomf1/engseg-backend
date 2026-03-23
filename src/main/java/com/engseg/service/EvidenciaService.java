@@ -1,14 +1,14 @@
 package com.engseg.service;
 
-import com.engseg.entity.Desvio;
-import com.engseg.entity.Evidencia;
-import com.engseg.entity.NaoConformidade;
-import com.engseg.entity.TipoEvidencia;
+import com.engseg.entity.*;
+import com.engseg.exception.BusinessException;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EvidenciaRepository;
 import com.engseg.repository.NaoConformidadeRepository;
+import com.engseg.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,11 +24,22 @@ public class EvidenciaService {
     private final EvidenciaRepository evidenciaRepository;
     private final NaoConformidadeRepository naoConformidadeRepository;
     private final DesvioRepository desvioRepository;
+    private final UsuarioRepository usuarioRepository;
     private final S3StorageService s3StorageService;
+
+    private boolean isTecnico() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        return usuario != null && usuario.getPerfil() == PerfilUsuario.TECNICO;
+    }
 
     public Evidencia uploadParaNaoConformidade(UUID naoConformidadeId, MultipartFile file, TipoEvidencia tipo) throws IOException {
         NaoConformidade nc = naoConformidadeRepository.findById(naoConformidadeId)
                 .orElseThrow(() -> new EntityNotFoundException("Não conformidade não encontrada"));
+
+        if (isTecnico() && nc.getStatus() != StatusNaoConformidade.ABERTA) {
+            throw new BusinessException("Técnico não pode adicionar evidências em NC que não está com status ABERTA");
+        }
 
         String key = s3StorageService.upload(file, "nao-conformidades/" + naoConformidadeId);
 
@@ -53,6 +64,10 @@ public class EvidenciaService {
     public Evidencia uploadParaDesvio(UUID desvioId, MultipartFile file, TipoEvidencia tipo) throws IOException {
         Desvio desvio = desvioRepository.findById(desvioId)
                 .orElseThrow(() -> new EntityNotFoundException("Desvio não encontrado"));
+
+        if (isTecnico()) {
+            throw new BusinessException("Técnico não pode adicionar evidências em desvio concluído");
+        }
 
         String key = s3StorageService.upload(file, "desvios/" + desvioId);
 
@@ -86,6 +101,16 @@ public class EvidenciaService {
 
     public void deletar(UUID evidenciaId) {
         Evidencia evidencia = buscarPorId(evidenciaId);
+
+        if (isTecnico()) {
+            if (evidencia.getDesvio() != null) {
+                throw new BusinessException("Técnico não pode excluir evidências de desvio concluído");
+            }
+            if (evidencia.getNaoConformidade() != null && evidencia.getNaoConformidade().getStatus() != StatusNaoConformidade.ABERTA) {
+                throw new BusinessException("Técnico não pode excluir evidências de NC que não está com status ABERTA");
+            }
+        }
+
         s3StorageService.delete(evidencia.getUrlArquivo());
         evidenciaRepository.delete(evidencia);
     }

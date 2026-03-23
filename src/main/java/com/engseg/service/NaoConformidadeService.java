@@ -88,6 +88,7 @@ public class NaoConformidadeService {
         nc.setDescricao(request.descricao());
         nc.setDataRegistro(now);
         nc.setTecnico(tecnico);
+        nc.setUsuarioCriacao(tecnico);
         nc.setRegraDeOuro(request.regraDeOuro());
         nc.setNrRelacionada(request.nrRelacionada());
         nc.setNivelSeveridade(request.nivelSeveridade());
@@ -303,6 +304,8 @@ public class NaoConformidadeService {
                 nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getNome() : null,
                 nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getEmail() : null,
                 nc.getDataLimiteResolucao(),
+                nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getNome() : null,
+                nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getEmail() : null,
                 nc.getStatus(),
                 devolutivas,
                 execucoes,

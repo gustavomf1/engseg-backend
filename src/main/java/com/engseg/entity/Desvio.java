@@ -18,6 +18,10 @@ public class Desvio extends Ocorrencia {
     @Column(name = "orientacao_realizada", nullable = false)
     private String orientacaoRealizada;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_criacao_id")
+    private Usuario usuarioCriacao;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

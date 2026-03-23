@@ -27,6 +27,8 @@ public record NaoConformidadeResponse(
         String engVerificacaoNome,
         String engVerificacaoEmail,
         LocalDate dataLimiteResolucao,
+        String usuarioCriacaoNome,
+        String usuarioCriacaoEmail,
         StatusNaoConformidade status,
         List<DevolutivaResponse> devolutivas,
         List<ExecucaoAcaoResponse> execucoes,
