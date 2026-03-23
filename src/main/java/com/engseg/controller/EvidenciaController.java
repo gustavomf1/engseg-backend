@@ -41,6 +41,26 @@ public class EvidenciaController {
         return ResponseEntity.ok(list);
     }
 
+    @PostMapping("/desvio/{desvioId}")
+    public ResponseEntity<EvidenciaResponse> uploadDesvio(
+            @PathVariable UUID desvioId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "tipo", defaultValue = "OCORRENCIA") TipoEvidencia tipo) throws IOException {
+        Evidencia evidencia = evidenciaService.uploadParaDesvio(desvioId, file, tipo);
+        return ResponseEntity.ok(toResponse(evidencia));
+    }
+
+    @GetMapping("/desvio/{desvioId}")
+    public ResponseEntity<List<EvidenciaResponse>> listarDesvio(
+            @PathVariable UUID desvioId,
+            @RequestParam(value = "tipo", required = false) TipoEvidencia tipo) {
+        List<EvidenciaResponse> list = evidenciaService.listarPorDesvio(desvioId, tipo)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping("/{id}/download")
     public ResponseEntity<byte[]> download(@PathVariable UUID id) {
         Evidencia evidencia = evidenciaService.buscarPorId(id);

@@ -35,6 +35,10 @@ public class Evidencia {
     private NaoConformidade naoConformidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "desvio_id")
+    private Desvio desvio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "execucao_acao_id")
     private ExecucaoAcao execucaoAcao;
 }

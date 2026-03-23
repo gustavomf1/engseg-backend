@@ -30,8 +30,7 @@ public class DashboardController {
         long totalDesvios = desvioRepository.count();
         long totalNCs = naoConformidadeRepository.count();
         long totalOcorrencias = totalDesvios + totalNCs;
-        long totalRegraDeOuro = desvioRepository.countByRegraDeOuro(true)
-                + naoConformidadeRepository.countByRegraDeOuro(true);
+        long totalRegraDeOuro = naoConformidadeRepository.countByRegraDeOuro(true);
         long abertas = naoConformidadeRepository.countByStatus(StatusNaoConformidade.ABERTA);
         long emTratamento = naoConformidadeRepository.countByStatus(StatusNaoConformidade.EM_TRATAMENTO);
         long concluidas = naoConformidadeRepository.countByStatus(StatusNaoConformidade.CONCLUIDO);
@@ -63,7 +62,6 @@ public class DashboardController {
             item.put("localizacao", d.localizacaoNome());
             item.put("descricao", d.descricao());
             item.put("dataRegistro", d.dataRegistro());
-            item.put("regraDeOuro", d.regraDeOuro());
             item.put("status", d.status());
             item.put("estabelecimentoNome", d.estabelecimentoNome());
             resultado.add(item);

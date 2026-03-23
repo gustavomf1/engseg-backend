@@ -59,7 +59,7 @@ public class DesvioService {
         desvio.setDescricao(request.descricao());
         desvio.setDataRegistro(LocalDateTime.now());
         desvio.setTecnico(tecnico);
-        desvio.setRegraDeOuro(request.regraDeOuro());
+        desvio.setRegraDeOuro(false);
         desvio.setOrientacaoRealizada(request.orientacaoRealizada());
         desvio.setStatus(StatusDesvio.CONCLUIDO);
 
@@ -83,7 +83,6 @@ public class DesvioService {
         desvio.setTitulo(request.titulo());
         desvio.setLocalizacao(localizacao);
         desvio.setDescricao(request.descricao());
-        desvio.setRegraDeOuro(request.regraDeOuro());
         desvio.setOrientacaoRealizada(request.orientacaoRealizada());
 
         return toResponse(desvioRepository.save(desvio));
@@ -107,7 +106,6 @@ public class DesvioService {
                 d.getDescricao(),
                 d.getDataRegistro(),
                 d.getTecnico() != null ? d.getTecnico().getNome() : null,
-                d.isRegraDeOuro(),
                 d.getOrientacaoRealizada(),
                 d.getStatus()
         );

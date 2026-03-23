@@ -10,6 +10,4 @@ import java.util.UUID;
 public interface DesvioRepository extends JpaRepository<Desvio, UUID> {
 
     long countByStatus(StatusDesvio status);
-
-    long countByRegraDeOuro(boolean regraDeOuro);
 }

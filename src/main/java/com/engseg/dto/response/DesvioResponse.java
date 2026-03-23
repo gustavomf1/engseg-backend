@@ -14,7 +14,6 @@ public record DesvioResponse(
         String descricao,
         LocalDateTime dataRegistro,
         String tecnicoNome,
-        boolean regraDeOuro,
         String orientacaoRealizada,
         StatusDesvio status
 ) {}

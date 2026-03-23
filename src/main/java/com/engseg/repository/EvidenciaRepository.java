@@ -11,5 +11,7 @@ import java.util.UUID;
 public interface EvidenciaRepository extends JpaRepository<Evidencia, UUID> {
     List<Evidencia> findByNaoConformidadeId(UUID naoConformidadeId);
     List<Evidencia> findByNaoConformidadeIdAndTipoEvidencia(UUID naoConformidadeId, TipoEvidencia tipoEvidencia);
+    List<Evidencia> findByDesvioId(UUID desvioId);
+    List<Evidencia> findByDesvioIdAndTipoEvidencia(UUID desvioId, TipoEvidencia tipoEvidencia);
     List<Evidencia> findByExecucaoAcaoId(UUID execucaoAcaoId);
 }

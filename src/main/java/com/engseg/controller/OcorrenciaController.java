@@ -30,7 +30,6 @@ public class OcorrenciaController {
             item.put("localizacao", d.localizacaoNome());
             item.put("descricao", d.descricao());
             item.put("dataRegistro", d.dataRegistro());
-            item.put("regraDeOuro", d.regraDeOuro());
             item.put("status", d.status());
             item.put("estabelecimentoNome", d.estabelecimentoNome());
             resultado.add(item);

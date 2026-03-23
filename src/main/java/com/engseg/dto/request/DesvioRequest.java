@@ -9,6 +9,5 @@ public record DesvioRequest(
         @NotBlank String titulo,
         UUID localizacaoId,
         @NotBlank String descricao,
-        @NotBlank String orientacaoRealizada,
-        boolean regraDeOuro
+        @NotBlank String orientacaoRealizada
 ) {}

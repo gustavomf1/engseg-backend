@@ -1,8 +1,10 @@
 package com.engseg.service;
 
+import com.engseg.entity.Desvio;
 import com.engseg.entity.Evidencia;
 import com.engseg.entity.NaoConformidade;
 import com.engseg.entity.TipoEvidencia;
+import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EvidenciaRepository;
 import com.engseg.repository.NaoConformidadeRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,6 +23,7 @@ public class EvidenciaService {
 
     private final EvidenciaRepository evidenciaRepository;
     private final NaoConformidadeRepository naoConformidadeRepository;
+    private final DesvioRepository desvioRepository;
     private final S3StorageService s3StorageService;
 
     public Evidencia uploadParaNaoConformidade(UUID naoConformidadeId, MultipartFile file, TipoEvidencia tipo) throws IOException {
@@ -45,6 +48,30 @@ public class EvidenciaService {
             return evidenciaRepository.findByNaoConformidadeIdAndTipoEvidencia(naoConformidadeId, tipo);
         }
         return evidenciaRepository.findByNaoConformidadeId(naoConformidadeId);
+    }
+
+    public Evidencia uploadParaDesvio(UUID desvioId, MultipartFile file, TipoEvidencia tipo) throws IOException {
+        Desvio desvio = desvioRepository.findById(desvioId)
+                .orElseThrow(() -> new EntityNotFoundException("Desvio não encontrado"));
+
+        String key = s3StorageService.upload(file, "desvios/" + desvioId);
+
+        Evidencia evidencia = Evidencia.builder()
+                .nomeArquivo(file.getOriginalFilename())
+                .urlArquivo(key)
+                .dataUpload(LocalDateTime.now())
+                .tipoEvidencia(tipo)
+                .desvio(desvio)
+                .build();
+
+        return evidenciaRepository.save(evidencia);
+    }
+
+    public List<Evidencia> listarPorDesvio(UUID desvioId, TipoEvidencia tipo) {
+        if (tipo != null) {
+            return evidenciaRepository.findByDesvioIdAndTipoEvidencia(desvioId, tipo);
+        }
+        return evidenciaRepository.findByDesvioId(desvioId);
     }
 
     public Evidencia buscarPorId(UUID id) {
