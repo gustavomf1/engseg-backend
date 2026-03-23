@@ -8,5 +8,6 @@ public record LoginResponse(
         UUID id,
         String token,
         String nome,
+        String email,
         PerfilUsuario perfil
 ) {}
