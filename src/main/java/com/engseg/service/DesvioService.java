@@ -3,10 +3,12 @@ package com.engseg.service;
 import com.engseg.dto.request.DesvioRequest;
 import com.engseg.dto.response.DesvioResponse;
 import com.engseg.entity.Desvio;
+import com.engseg.entity.Evidencia;
 import com.engseg.entity.StatusDesvio;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EstabelecimentoRepository;
+import com.engseg.repository.EvidenciaRepository;
 import com.engseg.repository.LocalizacaoRepository;
 import com.engseg.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,8 @@ public class DesvioService {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final LocalizacaoRepository localizacaoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final EvidenciaRepository evidenciaRepository;
+    private final S3StorageService s3StorageService;
 
     public List<DesvioResponse> findAll() {
         return desvioRepository.findAll().stream()
@@ -93,6 +97,13 @@ public class DesvioService {
     public void delete(UUID id) {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
+
+        List<Evidencia> evidencias = evidenciaRepository.findByDesvioId(id);
+        for (Evidencia ev : evidencias) {
+            s3StorageService.delete(ev.getUrlArquivo());
+        }
+        evidenciaRepository.deleteAll(evidencias);
+
         desvioRepository.delete(desvio);
     }
 

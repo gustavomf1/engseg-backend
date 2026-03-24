@@ -157,12 +157,23 @@ public class NaoConformidadeService {
             throw new BusinessException("Técnico só pode excluir NC com status ABERTA");
         }
 
-        // Deletar evidências do S3
-        List<Evidencia> evidencias = evidenciaRepository.findByNaoConformidadeId(id);
-        for (Evidencia ev : evidencias) {
+        // Deletar evidências da NC
+        List<Evidencia> evidenciasNc = evidenciaRepository.findByNaoConformidadeId(id);
+        for (Evidencia ev : evidenciasNc) {
             s3StorageService.delete(ev.getUrlArquivo());
         }
-        evidenciaRepository.deleteAll(evidencias);
+        evidenciaRepository.deleteAll(evidenciasNc);
+
+        // Deletar evidências das execuções de ação (FK execucao_acao_id)
+        if (nc.getExecucoes() != null) {
+            for (ExecucaoAcao execucao : nc.getExecucoes()) {
+                List<Evidencia> evidenciasExec = evidenciaRepository.findByExecucaoAcaoId(execucao.getId());
+                for (Evidencia ev : evidenciasExec) {
+                    s3StorageService.delete(ev.getUrlArquivo());
+                }
+                evidenciaRepository.deleteAll(evidenciasExec);
+            }
+        }
 
         // Cascade deleta devolutivas, execuções e validação
         naoConformidadeRepository.delete(nc);

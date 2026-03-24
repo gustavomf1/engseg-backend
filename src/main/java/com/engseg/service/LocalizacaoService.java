@@ -21,7 +21,7 @@ public class LocalizacaoService {
     private final EstabelecimentoRepository estabelecimentoRepository;
 
     public List<LocalizacaoResponse> findAll() {
-        return localizacaoRepository.findAll().stream()
+        return localizacaoRepository.findAllByAtivo(true).stream()
                 .map(this::toResponse)
                 .toList();
     }

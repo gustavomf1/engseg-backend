@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface EstabelecimentoRepository extends JpaRepository<Estabelecimento, UUID> {
     List<Estabelecimento> findByEmpresaId(UUID empresaId);
+    List<Estabelecimento> findAllByAtivo(boolean ativo);
 }

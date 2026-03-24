@@ -23,7 +23,7 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
 
     public List<UsuarioResponse> findAll() {
-        return usuarioRepository.findAll().stream()
+        return usuarioRepository.findAllByAtivo(true).stream()
                 .map(this::toResponse)
                 .toList();
     }
