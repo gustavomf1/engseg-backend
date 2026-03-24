@@ -3,6 +3,7 @@ package com.engseg.dto.request;
 import com.engseg.entity.NivelSeveridade;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import java.util.UUID;
 
 public record NaoConformidadeRequest(
@@ -10,9 +11,9 @@ public record NaoConformidadeRequest(
         @NotBlank String titulo,
         UUID localizacaoId,
         @NotBlank String descricao,
-        @NotBlank String nrRelacionada,
-        @NotNull NivelSeveridade nivelSeveridade,
+@NotNull NivelSeveridade nivelSeveridade,
         UUID engResponsavelConstrutoraId,
         UUID engResponsavelVerificacaoId,
-        boolean regraDeOuro
+        boolean regraDeOuro,
+        List<UUID> normaIds
 ) {}

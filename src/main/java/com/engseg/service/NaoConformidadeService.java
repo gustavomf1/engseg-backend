@@ -35,6 +35,7 @@ public class NaoConformidadeService {
     private final ValidacaoRepository validacaoRepository;
     private final EvidenciaRepository evidenciaRepository;
     private final S3StorageService s3StorageService;
+    private final NormaRepository normaRepository;
 
     public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId) {
         List<NaoConformidade> list;
@@ -90,12 +91,15 @@ public class NaoConformidadeService {
         nc.setTecnico(tecnico);
         nc.setUsuarioCriacao(tecnico);
         nc.setRegraDeOuro(request.regraDeOuro());
-        nc.setNrRelacionada(request.nrRelacionada());
         nc.setNivelSeveridade(request.nivelSeveridade());
         if (engConstrutora != null) nc.setEngResponsavelConstrutora(engConstrutora);
         if (engVerificacao != null) nc.setEngResponsavelVerificacao(engVerificacao);
         nc.setDataLimiteResolucao(now.toLocalDate().plusDays(30));
         nc.setStatus(StatusNaoConformidade.ABERTA);
+
+        if (request.normaIds() != null && !request.normaIds().isEmpty()) {
+            nc.setNormas(normaRepository.findAllById(request.normaIds()));
+        }
 
         return toResponse(naoConformidadeRepository.save(nc));
     }
@@ -137,10 +141,13 @@ public class NaoConformidadeService {
         nc.setLocalizacao(localizacao);
         nc.setDescricao(request.descricao());
         nc.setRegraDeOuro(request.regraDeOuro());
-        nc.setNrRelacionada(request.nrRelacionada());
         nc.setNivelSeveridade(request.nivelSeveridade());
         nc.setEngResponsavelConstrutora(engConstrutora);
         nc.setEngResponsavelVerificacao(engVerificacao);
+
+        if (request.normaIds() != null) {
+            nc.setNormas(request.normaIds().isEmpty() ? new java.util.ArrayList<>() : normaRepository.findAllById(request.normaIds()));
+        }
 
         return toResponse(naoConformidadeRepository.save(nc));
     }
@@ -295,6 +302,11 @@ public class NaoConformidadeService {
             );
         }
 
+        List<NormaResponse> normas = nc.getNormas() == null ? List.of() :
+                nc.getNormas().stream().map(n -> new NormaResponse(
+                        n.getId(), n.getTitulo(), n.getDescricao(), n.isAtivo()
+                )).toList();
+
         return new NaoConformidadeResponse(
                 nc.getId(),
                 nc.getEstabelecimento().getId(),
@@ -306,7 +318,6 @@ public class NaoConformidadeService {
                 nc.getDataRegistro(),
                 nc.getTecnico() != null ? nc.getTecnico().getNome() : null,
                 nc.isRegraDeOuro(),
-                nc.getNrRelacionada(),
                 nc.getNivelSeveridade(),
                 nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getId() : null,
                 nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getNome() : null,
@@ -320,7 +331,8 @@ public class NaoConformidadeService {
                 nc.getStatus(),
                 devolutivas,
                 execucoes,
-                validacaoResponse
+                validacaoResponse,
+                normas
         );
     }
 }

@@ -18,8 +18,7 @@ public record NaoConformidadeResponse(
         LocalDateTime dataRegistro,
         String tecnicoNome,
         boolean regraDeOuro,
-        String nrRelacionada,
-        NivelSeveridade nivelSeveridade,
+NivelSeveridade nivelSeveridade,
         UUID engResponsavelConstrutoraId,
         String engConstruturaNome,
         String engConstrutoraEmail,
@@ -32,5 +31,6 @@ public record NaoConformidadeResponse(
         StatusNaoConformidade status,
         List<DevolutivaResponse> devolutivas,
         List<ExecucaoAcaoResponse> execucoes,
-        ValidacaoResponse validacao
+        ValidacaoResponse validacao,
+        List<NormaResponse> normas
 ) {}

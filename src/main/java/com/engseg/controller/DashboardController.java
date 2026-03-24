@@ -78,7 +78,6 @@ public class DashboardController {
             item.put("regraDeOuro", nc.regraDeOuro());
             item.put("status", nc.status());
             item.put("dataLimiteResolucao", nc.dataLimiteResolucao());
-            item.put("nrRelacionada", nc.nrRelacionada());
             item.put("nivelSeveridade", nc.nivelSeveridade());
             item.put("estabelecimentoNome", nc.estabelecimentoNome());
             resultado.add(item);

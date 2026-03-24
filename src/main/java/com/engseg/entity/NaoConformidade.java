@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,10 +18,7 @@ import java.util.List;
 @ToString(callSuper = true)
 public class NaoConformidade extends Ocorrencia {
 
-    @Column(name = "nr_relacionada", nullable = false)
-    private String nrRelacionada;
-
-    @Enumerated(EnumType.STRING)
+@Enumerated(EnumType.STRING)
     @Column(name = "nivel_severidade", nullable = false)
     private NivelSeveridade nivelSeveridade;
 
@@ -43,6 +41,15 @@ public class NaoConformidade extends Ocorrencia {
     @Column(nullable = false)
     @Builder.Default
     private StatusNaoConformidade status = StatusNaoConformidade.ABERTA;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "nao_conformidade_norma",
+            joinColumns = @JoinColumn(name = "nao_conformidade_id"),
+            inverseJoinColumns = @JoinColumn(name = "norma_id")
+    )
+    @Builder.Default
+    private List<Norma> normas = new ArrayList<>();
 
     @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Devolutiva> devolutivas;
