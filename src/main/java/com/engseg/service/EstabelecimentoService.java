@@ -41,6 +41,10 @@ public class EstabelecimentoService {
                 .nome(request.nome())
                 .codigo(request.codigo())
                 .empresa(empresa)
+                .cep(request.cep())
+                .logradouro(request.logradouro())
+                .numero(request.numero())
+                .bairro(request.bairro())
                 .cidade(request.cidade())
                 .estado(request.estado())
                 .ativo(true)
@@ -60,6 +64,10 @@ public class EstabelecimentoService {
         estabelecimento.setNome(request.nome());
         estabelecimento.setCodigo(request.codigo());
         estabelecimento.setEmpresa(empresa);
+        estabelecimento.setCep(request.cep());
+        estabelecimento.setLogradouro(request.logradouro());
+        estabelecimento.setNumero(request.numero());
+        estabelecimento.setBairro(request.bairro());
         estabelecimento.setCidade(request.cidade());
         estabelecimento.setEstado(request.estado());
 
@@ -81,6 +89,10 @@ public class EstabelecimentoService {
                 e.getCodigo(),
                 e.getEmpresa().getId(),
                 e.getEmpresa().getRazaoSocial(),
+                e.getCep(),
+                e.getLogradouro(),
+                e.getNumero(),
+                e.getBairro(),
                 e.getCidade(),
                 e.getEstado(),
                 e.isAtivo()

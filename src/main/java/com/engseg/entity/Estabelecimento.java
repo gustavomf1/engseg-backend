@@ -26,6 +26,14 @@ public class Estabelecimento {
     @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;
 
+    private String cep;
+
+    private String logradouro;
+
+    private String numero;
+
+    private String bairro;
+
     private String cidade;
 
     private String estado;

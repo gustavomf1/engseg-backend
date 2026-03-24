@@ -8,6 +8,10 @@ public record EstabelecimentoRequest(
         @NotBlank String nome,
         @NotBlank String codigo,
         @NotNull UUID empresaId,
+        String cep,
+        String logradouro,
+        String numero,
+        String bairro,
         String cidade,
         String estado
 ) {}
