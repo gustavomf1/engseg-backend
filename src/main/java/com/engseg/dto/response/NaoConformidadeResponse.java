@@ -31,6 +31,6 @@ NivelSeveridade nivelSeveridade,
         StatusNaoConformidade status,
         List<DevolutivaResponse> devolutivas,
         List<ExecucaoAcaoResponse> execucoes,
-        ValidacaoResponse validacao,
+        List<ValidacaoResponse> validacoes,
         List<NormaResponse> normas
 ) {}

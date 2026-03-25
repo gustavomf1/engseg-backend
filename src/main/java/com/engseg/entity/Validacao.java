@@ -17,7 +17,7 @@ public class Validacao {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nao_conformidade_id", nullable = false)
     private NaoConformidade naoConformidade;
 

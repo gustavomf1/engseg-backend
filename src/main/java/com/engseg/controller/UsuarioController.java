@@ -21,13 +21,13 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<UsuarioResponse>> getAll() {
         return ResponseEntity.ok(usuarioService.findAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<UsuarioResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(usuarioService.findById(id));
     }

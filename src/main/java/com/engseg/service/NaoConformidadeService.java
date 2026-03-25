@@ -256,8 +256,10 @@ public class NaoConformidadeService {
 
         if (request.parecer() == ParecerValidacao.APROVADO) {
             nc.setStatus(StatusNaoConformidade.CONCLUIDO);
-            naoConformidadeRepository.save(nc);
+        } else {
+            nc.setStatus(StatusNaoConformidade.ABERTA);
         }
+        naoConformidadeRepository.save(nc);
 
         return toResponse(naoConformidadeRepository.findById(id).orElseThrow());
     }
@@ -290,17 +292,14 @@ public class NaoConformidadeService {
                         e.getEngenheiro() != null ? e.getEngenheiro().getNome() : null
                 )).toList();
 
-        ValidacaoResponse validacaoResponse = null;
-        if (nc.getValidacao() != null) {
-            var v = nc.getValidacao();
-            validacaoResponse = new ValidacaoResponse(
-                    v.getId(),
-                    v.getParecer(),
-                    v.getObservacao(),
-                    v.getDataValidacao(),
-                    v.getEngenheiro() != null ? v.getEngenheiro().getNome() : null
-            );
-        }
+        List<ValidacaoResponse> validacoes = nc.getValidacoes() == null ? List.of() :
+                nc.getValidacoes().stream().map(v -> new ValidacaoResponse(
+                        v.getId(),
+                        v.getParecer(),
+                        v.getObservacao(),
+                        v.getDataValidacao(),
+                        v.getEngenheiro() != null ? v.getEngenheiro().getNome() : null
+                )).toList();
 
         List<NormaResponse> normas = nc.getNormas() == null ? List.of() :
                 nc.getNormas().stream().map(n -> new NormaResponse(
@@ -331,7 +330,7 @@ public class NaoConformidadeService {
                 nc.getStatus(),
                 devolutivas,
                 execucoes,
-                validacaoResponse,
+                validacoes,
                 normas
         );
     }

@@ -57,6 +57,6 @@ public class NaoConformidade extends Ocorrencia {
     @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ExecucaoAcao> execucoes;
 
-    @OneToOne(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Validacao validacao;
+    @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Validacao> validacoes;
 }
