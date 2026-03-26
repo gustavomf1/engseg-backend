@@ -9,5 +9,7 @@ public record EmpresaResponse(
         String nomeFantasia,
         String email,
         String telefone,
+        UUID empresaMaeId,
+        String empresaMaeNome,
         boolean ativo
 ) {}

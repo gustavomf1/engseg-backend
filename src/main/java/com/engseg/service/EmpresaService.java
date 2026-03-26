@@ -27,6 +27,24 @@ public class EmpresaService {
                 .toList();
     }
 
+    public List<EmpresaResponse> findEmpresasMae(Boolean ativo) {
+        List<Empresa> empresas = (ativo != null)
+                ? empresaRepository.findAllByEmpresaMaeIsNullAndAtivo(ativo)
+                : empresaRepository.findAllByEmpresaMaeIsNull();
+        return empresas.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<EmpresaResponse> findEmpresasFilhas(UUID empresaMaeId, Boolean ativo) {
+        List<Empresa> empresas = (ativo != null)
+                ? empresaRepository.findAllByEmpresaMaeIdAndAtivo(empresaMaeId, ativo)
+                : empresaRepository.findAllByEmpresaMaeId(empresaMaeId);
+        return empresas.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     public EmpresaResponse findById(UUID id) {
         return empresaRepository.findById(id)
                 .map(this::toResponse)
@@ -35,12 +53,19 @@ public class EmpresaService {
 
     @Transactional
     public EmpresaResponse create(EmpresaRequest request) {
+        Empresa empresaMae = null;
+        if (request.empresaMaeId() != null) {
+            empresaMae = empresaRepository.findById(request.empresaMaeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Empresa mãe não encontrada: " + request.empresaMaeId()));
+        }
+
         Empresa empresa = Empresa.builder()
                 .razaoSocial(request.razaoSocial())
                 .cnpj(request.cnpj())
                 .nomeFantasia(request.nomeFantasia())
                 .email(request.email())
                 .telefone(request.telefone())
+                .empresaMae(empresaMae)
                 .ativo(true)
                 .build();
         return toResponse(empresaRepository.save(empresa));
@@ -51,11 +76,18 @@ public class EmpresaService {
         Empresa empresa = empresaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Empresa não encontrada: " + id));
 
+        Empresa empresaMae = null;
+        if (request.empresaMaeId() != null) {
+            empresaMae = empresaRepository.findById(request.empresaMaeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Empresa mãe não encontrada: " + request.empresaMaeId()));
+        }
+
         empresa.setRazaoSocial(request.razaoSocial());
         empresa.setCnpj(request.cnpj());
         empresa.setNomeFantasia(request.nomeFantasia());
         empresa.setEmail(request.email());
         empresa.setTelefone(request.telefone());
+        empresa.setEmpresaMae(empresaMae);
 
         return toResponse(empresaRepository.save(empresa));
     }
@@ -76,6 +108,8 @@ public class EmpresaService {
                 empresa.getNomeFantasia(),
                 empresa.getEmail(),
                 empresa.getTelefone(),
+                empresa.getEmpresaMae() != null ? empresa.getEmpresaMae().getId() : null,
+                empresa.getEmpresaMae() != null ? empresa.getEmpresaMae().getRazaoSocial() : null,
                 empresa.isAtivo()
         );
     }

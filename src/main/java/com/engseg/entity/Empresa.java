@@ -29,6 +29,10 @@ public class Empresa {
 
     private String telefone;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_mae_id")
+    private Empresa empresaMae;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean ativo = true;

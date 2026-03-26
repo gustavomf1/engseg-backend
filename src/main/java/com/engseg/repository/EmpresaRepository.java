@@ -10,4 +10,8 @@ import java.util.UUID;
 public interface EmpresaRepository extends JpaRepository<Empresa, UUID> {
     boolean existsByCnpj(String cnpj);
     List<Empresa> findAllByAtivo(boolean ativo);
+    List<Empresa> findAllByEmpresaMaeIsNullAndAtivo(boolean ativo);
+    List<Empresa> findAllByEmpresaMaeIsNull();
+    List<Empresa> findAllByEmpresaMaeIdAndAtivo(UUID empresaMaeId, boolean ativo);
+    List<Empresa> findAllByEmpresaMaeId(UUID empresaMaeId);
 }

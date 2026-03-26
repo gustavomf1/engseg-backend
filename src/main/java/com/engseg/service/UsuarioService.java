@@ -22,10 +22,17 @@ public class UsuarioService {
     private final EmpresaRepository empresaRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<UsuarioResponse> findAll(Boolean ativo) {
-        List<Usuario> items = (ativo != null)
-                ? usuarioRepository.findAllByAtivo(ativo)
-                : usuarioRepository.findAll();
+    public List<UsuarioResponse> findAll(Boolean ativo, UUID empresaId) {
+        List<Usuario> items;
+        if (empresaId != null && ativo != null) {
+            items = usuarioRepository.findAllByEmpresaIdAndAtivo(empresaId, ativo);
+        } else if (empresaId != null) {
+            items = usuarioRepository.findAllByEmpresaId(empresaId);
+        } else if (ativo != null) {
+            items = usuarioRepository.findAllByAtivo(ativo);
+        } else {
+            items = usuarioRepository.findAll();
+        }
         return items.stream()
                 .map(this::toResponse)
                 .toList();

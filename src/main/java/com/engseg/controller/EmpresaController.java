@@ -22,13 +22,24 @@ public class EmpresaController {
 
     @GetMapping
     public ResponseEntity<List<EmpresaResponse>> getAll(
-            @RequestParam(required = false) Boolean ativo) {
+            @RequestParam(required = false) Boolean ativo,
+            @RequestParam(required = false) Boolean empresaMae) {
+        if (Boolean.TRUE.equals(empresaMae)) {
+            return ResponseEntity.ok(empresaService.findEmpresasMae(ativo));
+        }
         return ResponseEntity.ok(empresaService.findAll(ativo));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EmpresaResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(empresaService.findById(id));
+    }
+
+    @GetMapping("/{id}/filhas")
+    public ResponseEntity<List<EmpresaResponse>> getFilhas(
+            @PathVariable UUID id,
+            @RequestParam(required = false) Boolean ativo) {
+        return ResponseEntity.ok(empresaService.findEmpresasFilhas(id, ativo));
     }
 
     @PostMapping
