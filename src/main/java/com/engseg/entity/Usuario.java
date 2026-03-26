@@ -35,7 +35,8 @@ public class Usuario {
 
     private String telefone;
 
-    @Column(nullable = false)
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(nullable = false, length = 1)
     @Builder.Default
     private boolean ativo = true;
 }

@@ -23,7 +23,8 @@ public class Localizacao {
     @JoinColumn(name = "estabelecimento_id", nullable = false)
     private Estabelecimento estabelecimento;
 
-    @Column(nullable = false)
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(nullable = false, length = 1)
     @Builder.Default
     private boolean ativo = true;
 }

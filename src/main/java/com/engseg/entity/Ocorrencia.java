@@ -39,6 +39,7 @@ public abstract class Ocorrencia {
     @JoinColumn(name = "tecnico_id")
     private Usuario tecnico;
 
-    @Column(name = "regra_de_ouro", nullable = false)
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(name = "regra_de_ouro", nullable = false, length = 1)
     private boolean regraDeOuro;
 }

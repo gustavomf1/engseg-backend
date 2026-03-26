@@ -13,6 +13,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/DesvioRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Validacao.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/EngSegApplication.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/BooleanToSNConverter.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/ExecucaoAcaoRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/OcorrenciaController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/NormaRepository.java
@@ -39,8 +40,8 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/ExecucaoAcaoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/DesvioResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Estabelecimento.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Ocorrencia.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Evidencia.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Ocorrencia.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/security/JwtFilter.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/DashboardController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/StatusDesvio.java

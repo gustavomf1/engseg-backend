@@ -24,7 +24,8 @@ public class EstabelecimentoEmpresa {
     @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;
 
-    @Column(nullable = false)
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(nullable = false, length = 1)
     @Builder.Default
     private boolean ativo = true;
 }

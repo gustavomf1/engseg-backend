@@ -33,7 +33,8 @@ public class Empresa {
     @JoinColumn(name = "empresa_mae_id")
     private Empresa empresaMae;
 
-    @Column(nullable = false)
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(nullable = false, length = 1)
     @Builder.Default
     private boolean ativo = true;
 }

@@ -30,6 +30,7 @@ com/engseg/repository/LocalizacaoRepository.class
 com/engseg/entity/NivelSeveridade.class
 com/engseg/controller/OcorrenciaController.class
 com/engseg/repository/EvidenciaRepository.class
+com/engseg/entity/BooleanToSNConverter.class
 com/engseg/exception/GlobalExceptionHandler.class
 com/engseg/config/S3Config.class
 com/engseg/entity/NaoConformidade.class

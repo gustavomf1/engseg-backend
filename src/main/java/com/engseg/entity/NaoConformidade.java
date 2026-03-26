@@ -42,6 +42,10 @@ public class NaoConformidade extends Ocorrencia {
     @Builder.Default
     private StatusNaoConformidade status = StatusNaoConformidade.ABERTA;
 
+    @Column(name = "vencida", length = 1, nullable = false)
+    @Builder.Default
+    private String vencida = "N";
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "nao_conformidade_norma",

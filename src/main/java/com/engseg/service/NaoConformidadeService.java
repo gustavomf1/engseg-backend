@@ -266,11 +266,11 @@ public class NaoConformidadeService {
 
     @Scheduled(cron = "0 0 0 * * *")
     @Transactional
-    public void atualizarStatusNaoResolvida() {
+    public void atualizarVencidas() {
         List<NaoConformidade> vencidas = naoConformidadeRepository.findVencidas(LocalDate.now());
-        log.info("Atualizando {} NCs vencidas para NAO_RESOLVIDA", vencidas.size());
+        log.info("Marcando {} NCs como vencidas", vencidas.size());
         for (NaoConformidade nc : vencidas) {
-            nc.setStatus(StatusNaoConformidade.NAO_RESOLVIDA);
+            nc.setVencida("S");
         }
         naoConformidadeRepository.saveAll(vencidas);
     }
@@ -328,6 +328,7 @@ public class NaoConformidadeService {
                 nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getNome() : null,
                 nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getEmail() : null,
                 nc.getStatus(),
+                "S".equals(nc.getVencida()),
                 devolutivas,
                 execucoes,
                 validacoes,

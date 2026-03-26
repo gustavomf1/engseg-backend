@@ -38,7 +38,8 @@ public class Estabelecimento {
 
     private String estado;
 
-    @Column(nullable = false)
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(nullable = false, length = 1)
     @Builder.Default
     private boolean ativo = true;
 }
