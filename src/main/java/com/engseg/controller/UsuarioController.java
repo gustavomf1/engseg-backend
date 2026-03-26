@@ -22,8 +22,9 @@ public class UsuarioController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ENGENHEIRO', 'TECNICO')")
-    public ResponseEntity<List<UsuarioResponse>> getAll() {
-        return ResponseEntity.ok(usuarioService.findAll());
+    public ResponseEntity<List<UsuarioResponse>> getAll(
+            @RequestParam(required = false) Boolean ativo) {
+        return ResponseEntity.ok(usuarioService.findAll(ativo));
     }
 
     @GetMapping("/{id}")

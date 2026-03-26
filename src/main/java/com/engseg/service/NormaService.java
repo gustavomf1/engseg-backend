@@ -18,8 +18,11 @@ public class NormaService {
 
     private final NormaRepository normaRepository;
 
-    public List<NormaResponse> findAll() {
-        return normaRepository.findAllByAtivo(true).stream()
+    public List<NormaResponse> findAll(Boolean ativo) {
+        List<Norma> items = (ativo != null)
+                ? normaRepository.findAllByAtivo(ativo)
+                : normaRepository.findAll();
+        return items.stream()
                 .map(this::toResponse)
                 .toList();
     }

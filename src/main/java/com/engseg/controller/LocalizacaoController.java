@@ -22,11 +22,12 @@ public class LocalizacaoController {
 
     @GetMapping
     public ResponseEntity<List<LocalizacaoResponse>> getAll(
-            @RequestParam(required = false) UUID estabelecimentoId) {
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) Boolean ativo) {
         if (estabelecimentoId != null) {
             return ResponseEntity.ok(localizacaoService.findByEstabelecimentoId(estabelecimentoId));
         }
-        return ResponseEntity.ok(localizacaoService.findAll());
+        return ResponseEntity.ok(localizacaoService.findAll(ativo));
     }
 
     @GetMapping("/{id}")

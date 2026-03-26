@@ -21,8 +21,9 @@ public class EmpresaController {
     private final EmpresaService empresaService;
 
     @GetMapping
-    public ResponseEntity<List<EmpresaResponse>> getAll() {
-        return ResponseEntity.ok(empresaService.findAll());
+    public ResponseEntity<List<EmpresaResponse>> getAll(
+            @RequestParam(required = false) Boolean ativo) {
+        return ResponseEntity.ok(empresaService.findAll(ativo));
     }
 
     @GetMapping("/{id}")

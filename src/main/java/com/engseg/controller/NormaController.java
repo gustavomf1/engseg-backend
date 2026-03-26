@@ -21,8 +21,9 @@ public class NormaController {
     private final NormaService normaService;
 
     @GetMapping
-    public ResponseEntity<List<NormaResponse>> getAll() {
-        return ResponseEntity.ok(normaService.findAll());
+    public ResponseEntity<List<NormaResponse>> getAll(
+            @RequestParam(required = false) Boolean ativo) {
+        return ResponseEntity.ok(normaService.findAll(ativo));
     }
 
     @GetMapping("/{id}")

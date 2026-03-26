@@ -22,8 +22,11 @@ public class UsuarioService {
     private final EmpresaRepository empresaRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<UsuarioResponse> findAll() {
-        return usuarioRepository.findAllByAtivo(true).stream()
+    public List<UsuarioResponse> findAll(Boolean ativo) {
+        List<Usuario> items = (ativo != null)
+                ? usuarioRepository.findAllByAtivo(ativo)
+                : usuarioRepository.findAll();
+        return items.stream()
                 .map(this::toResponse)
                 .toList();
     }

@@ -20,8 +20,11 @@ public class EstabelecimentoService {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final EmpresaRepository empresaRepository;
 
-    public List<EstabelecimentoResponse> findAll() {
-        return estabelecimentoRepository.findAllByAtivo(true).stream()
+    public List<EstabelecimentoResponse> findAll(Boolean ativo) {
+        List<Estabelecimento> items = (ativo != null)
+                ? estabelecimentoRepository.findAllByAtivo(ativo)
+                : estabelecimentoRepository.findAll();
+        return items.stream()
                 .map(this::toResponse)
                 .toList();
     }

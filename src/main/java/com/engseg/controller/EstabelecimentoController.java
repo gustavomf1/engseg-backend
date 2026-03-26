@@ -23,8 +23,9 @@ public class EstabelecimentoController {
     private EstabelecimentoService estabelecimentoService;
 
     @GetMapping
-    public ResponseEntity<List<EstabelecimentoResponse>> getAll() {
-        return ResponseEntity.ok(estabelecimentoService.findAll());
+    public ResponseEntity<List<EstabelecimentoResponse>> getAll(
+            @RequestParam(required = false) Boolean ativo) {
+        return ResponseEntity.ok(estabelecimentoService.findAll(ativo));
     }
 
     @GetMapping("/{id}")

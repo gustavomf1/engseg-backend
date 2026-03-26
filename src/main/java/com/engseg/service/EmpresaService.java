@@ -18,8 +18,11 @@ public class EmpresaService {
 
     private final EmpresaRepository empresaRepository;
 
-    public List<EmpresaResponse> findAll() {
-        return empresaRepository.findAllByAtivo(true).stream()
+    public List<EmpresaResponse> findAll(Boolean ativo) {
+        List<Empresa> empresas = (ativo != null)
+                ? empresaRepository.findAllByAtivo(ativo)
+                : empresaRepository.findAll();
+        return empresas.stream()
                 .map(this::toResponse)
                 .toList();
     }
