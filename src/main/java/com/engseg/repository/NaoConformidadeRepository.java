@@ -25,4 +25,6 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
     long countByStatus(StatusNaoConformidade status);
 
     long countByRegraDeOuro(boolean regraDeOuro);
+
+    List<NaoConformidade> findByNcAnteriorId(UUID ncAnteriorId);
 }

@@ -15,5 +15,7 @@ public record NaoConformidadeRequest(
         UUID engResponsavelConstrutoraId,
         UUID engResponsavelVerificacaoId,
         boolean regraDeOuro,
-        List<UUID> normaIds
+        List<UUID> normaIds,
+        boolean reincidencia,
+        UUID ncAnteriorId
 ) {}

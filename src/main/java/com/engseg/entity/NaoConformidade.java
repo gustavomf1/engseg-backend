@@ -55,6 +55,14 @@ public class NaoConformidade extends Ocorrencia {
     @Builder.Default
     private List<Norma> normas = new ArrayList<>();
 
+    @Column(name = "reincidencia", length = 1, nullable = false)
+    @Builder.Default
+    private String reincidencia = "N";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "nc_anterior_id")
+    private NaoConformidade ncAnterior;
+
     @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Devolutiva> devolutivas;
 

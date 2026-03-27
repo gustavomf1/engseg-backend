@@ -18,7 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -101,6 +104,16 @@ public class NaoConformidadeService {
             nc.setNormas(normaRepository.findAllById(request.normaIds()));
         }
 
+        nc.setReincidencia(request.reincidencia() ? "S" : "N");
+        if (request.reincidencia()) {
+            if (request.ncAnteriorId() == null) {
+                throw new BusinessException("NC anterior é obrigatória quando reincidência está marcada");
+            }
+            var ncAnterior = naoConformidadeRepository.findById(request.ncAnteriorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("NC anterior não encontrada: " + request.ncAnteriorId()));
+            nc.setNcAnterior(ncAnterior);
+        }
+
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -147,6 +160,21 @@ public class NaoConformidadeService {
 
         if (request.normaIds() != null) {
             nc.setNormas(request.normaIds().isEmpty() ? new java.util.ArrayList<>() : normaRepository.findAllById(request.normaIds()));
+        }
+
+        nc.setReincidencia(request.reincidencia() ? "S" : "N");
+        if (request.reincidencia()) {
+            if (request.ncAnteriorId() == null) {
+                throw new BusinessException("NC anterior é obrigatória quando reincidência está marcada");
+            }
+            if (request.ncAnteriorId().equals(id)) {
+                throw new BusinessException("Uma NC não pode ser reincidência de si mesma");
+            }
+            var ncAnterior = naoConformidadeRepository.findById(request.ncAnteriorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("NC anterior não encontrada: " + request.ncAnteriorId()));
+            nc.setNcAnterior(ncAnterior);
+        } else {
+            nc.setNcAnterior(null);
         }
 
         return toResponse(naoConformidadeRepository.save(nc));
@@ -329,10 +357,30 @@ public class NaoConformidadeService {
                 nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getEmail() : null,
                 nc.getStatus(),
                 "S".equals(nc.getVencida()),
+                "S".equals(nc.getReincidencia()),
+                nc.getNcAnterior() != null ? nc.getNcAnterior().getId() : null,
+                nc.getNcAnterior() != null ? nc.getNcAnterior().getTitulo() : null,
+                buildCadeiaReincidencias(nc),
+                naoConformidadeRepository.findByNcAnteriorId(nc.getId()).stream()
+                        .map(r -> new NcResumoResponse(r.getId(), r.getTitulo(), r.getDataRegistro(), r.getStatus()))
+                        .toList(),
                 devolutivas,
                 execucoes,
                 validacoes,
                 normas
         );
+    }
+
+    private List<NcResumoResponse> buildCadeiaReincidencias(NaoConformidade nc) {
+        List<NcResumoResponse> cadeia = new ArrayList<>();
+        Set<UUID> visited = new HashSet<>();
+        visited.add(nc.getId());
+        NaoConformidade atual = nc.getNcAnterior();
+        while (atual != null && !visited.contains(atual.getId())) {
+            visited.add(atual.getId());
+            cadeia.add(0, new NcResumoResponse(atual.getId(), atual.getTitulo(), atual.getDataRegistro(), atual.getStatus()));
+            atual = atual.getNcAnterior();
+        }
+        return cadeia;
     }
 }
