@@ -1,9 +1,9 @@
 package com.engseg.service;
 
-import com.engseg.dto.request.DevolutivaRequest;
-import com.engseg.dto.request.ExecucaoAcaoRequest;
+import com.engseg.dto.request.AprovarRejeitarRequest;
+import com.engseg.dto.request.InvestigacaoRequest;
 import com.engseg.dto.request.NaoConformidadeRequest;
-import com.engseg.dto.request.ValidacaoRequest;
+import com.engseg.dto.request.SubmeterEvidenciasRequest;
 import com.engseg.dto.response.*;
 import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
@@ -33,12 +33,12 @@ public class NaoConformidadeService {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final LocalizacaoRepository localizacaoRepository;
     private final UsuarioRepository usuarioRepository;
-    private final DevolutivaRepository devolutivaRepository;
-    private final ExecucaoAcaoRepository execucaoAcaoRepository;
-    private final ValidacaoRepository validacaoRepository;
     private final EvidenciaRepository evidenciaRepository;
     private final S3StorageService s3StorageService;
     private final NormaRepository normaRepository;
+    private final HistoricoNcRepository historicoNcRepository;
+    private final InvestigacaoSnapshotRepository investigacaoSnapshotRepository;
+    private final ExecucaoSnapshotRepository execucaoSnapshotRepository;
 
     public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId) {
         List<NaoConformidade> list;
@@ -99,6 +99,8 @@ public class NaoConformidadeService {
         if (engVerificacao != null) nc.setEngResponsavelVerificacao(engVerificacao);
         nc.setDataLimiteResolucao(now.toLocalDate().plusDays(30));
         nc.setStatus(StatusNaoConformidade.ABERTA);
+        nc.setAtividades(new ArrayList<>());
+        nc.setHistorico(new ArrayList<>());
 
         if (request.normaIds() != null && !request.normaIds().isEmpty()) {
             nc.setNormas(normaRepository.findAllById(request.normaIds()));
@@ -114,15 +116,16 @@ public class NaoConformidadeService {
             nc.setNcAnterior(ncAnterior);
         }
 
-        return toResponse(naoConformidadeRepository.save(nc));
+        NaoConformidade saved = naoConformidadeRepository.save(nc);
+        registrarHistorico(saved, tecnico, TipoAcaoHistorico.CRIACAO, null, null, StatusNaoConformidade.ABERTA);
+
+        return toResponse(naoConformidadeRepository.findById(saved.getId()).orElseThrow());
     }
 
     @Transactional
     public NaoConformidadeResponse update(UUID id, NaoConformidadeRequest request) {
-        NaoConformidade nc = naoConformidadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+        NaoConformidade nc = findNcOrThrow(id);
 
-        // Técnico só pode editar NC com status ABERTA
         if (nc.getStatus() != StatusNaoConformidade.ABERTA) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             var usuario = usuarioRepository.findByEmail(email).orElse(null);
@@ -159,7 +162,7 @@ public class NaoConformidadeService {
         nc.setEngResponsavelVerificacao(engVerificacao);
 
         if (request.normaIds() != null) {
-            nc.setNormas(request.normaIds().isEmpty() ? new java.util.ArrayList<>() : normaRepository.findAllById(request.normaIds()));
+            nc.setNormas(request.normaIds().isEmpty() ? new ArrayList<>() : normaRepository.findAllById(request.normaIds()));
         }
 
         nc.setReincidencia(request.reincidencia() ? "S" : "N");
@@ -182,24 +185,20 @@ public class NaoConformidadeService {
 
     @Transactional
     public void delete(UUID id) {
-        NaoConformidade nc = naoConformidadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+        NaoConformidade nc = findNcOrThrow(id);
 
-        // Técnico só pode excluir NC com status ABERTA
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var usuario = usuarioRepository.findByEmail(email).orElse(null);
         if (usuario != null && usuario.getPerfil() == PerfilUsuario.TECNICO && nc.getStatus() != StatusNaoConformidade.ABERTA) {
             throw new BusinessException("Técnico só pode excluir NC com status ABERTA");
         }
 
-        // Deletar evidências da NC
         List<Evidencia> evidenciasNc = evidenciaRepository.findByNaoConformidadeId(id);
         for (Evidencia ev : evidenciasNc) {
             s3StorageService.delete(ev.getUrlArquivo());
         }
         evidenciaRepository.deleteAll(evidenciasNc);
 
-        // Deletar evidências das execuções de ação (FK execucao_acao_id)
         if (nc.getExecucoes() != null) {
             for (ExecucaoAcao execucao : nc.getExecucoes()) {
                 List<Evidencia> evidenciasExec = evidenciaRepository.findByExecucaoAcaoId(execucao.getId());
@@ -210,87 +209,219 @@ public class NaoConformidadeService {
             }
         }
 
-        // Cascade deleta devolutivas, execuções e validação
         naoConformidadeRepository.delete(nc);
     }
 
-    @Transactional
-    public NaoConformidadeResponse registrarDevolutiva(UUID id, DevolutivaRequest request) {
-        NaoConformidade nc = naoConformidadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+    // -------------------------------------------------------------------------
+    // Novo fluxo: Investigação → Plano → Execução → Validação Final
+    // -------------------------------------------------------------------------
 
-        if (nc.getStatus() != StatusNaoConformidade.ABERTA) {
-            throw new BusinessException("Devolutiva só pode ser registrada em NCs com status ABERTA");
+    @Transactional
+    public NaoConformidadeResponse submeterInvestigacao(UUID id, InvestigacaoRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
+
+        if (nc.getStatus() != StatusNaoConformidade.ABERTA && nc.getStatus() != StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO) {
+            throw new BusinessException("Investigação só pode ser submetida quando NC está ABERTA ou EM_AJUSTE_PELO_EXTERNO");
+        }
+
+        nc.setPorqueUm(request.porqueUm());
+        nc.setPorqueUmResposta(request.porqueUmResposta());
+        nc.setPorqueDois(request.porqueDois());
+        nc.setPorqueDoisResposta(request.porqueDoisResposta());
+        nc.setPorqueTres(request.porqueTres());
+        nc.setPorqueTresResposta(request.porqueTresResposta());
+        nc.setPorqueQuatro(request.porqueQuatro());
+        nc.setPorqueQuatroResposta(request.porqueQuatroResposta());
+        nc.setPorqueCinco(request.porqueCinco());
+        nc.setPorqueCincoResposta(request.porqueCincoResposta());
+        nc.setCausaRaiz(request.causaRaiz());
+
+        // Substitui atividades existentes pelas novas
+        nc.getAtividades().clear();
+        for (int i = 0; i < request.atividades().size(); i++) {
+            AtividadePlanoAcao atividade = new AtividadePlanoAcao();
+            atividade.setNaoConformidade(nc);
+            atividade.setDescricao(request.atividades().get(i));
+            atividade.setOrdem(i + 1);
+            nc.getAtividades().add(atividade);
+        }
+
+        StatusNaoConformidade statusAnterior = nc.getStatus();
+        nc.setStatus(StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
+        naoConformidadeRepository.save(nc);
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        registrarHistorico(nc, usuario, TipoAcaoHistorico.SUBMISSAO_INVESTIGACAO, null, statusAnterior, StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
+
+        // Snapshot da investigação submetida
+        InvestigacaoSnapshot snapshot = new InvestigacaoSnapshot();
+        snapshot.setNaoConformidade(nc);
+        snapshot.setPorqueUm(request.porqueUm());
+        snapshot.setPorqueUmResposta(request.porqueUmResposta());
+        snapshot.setPorqueDois(request.porqueDois());
+        snapshot.setPorqueDoisResposta(request.porqueDoisResposta());
+        snapshot.setPorqueTres(request.porqueTres());
+        snapshot.setPorqueTresResposta(request.porqueTresResposta());
+        snapshot.setPorqueQuatro(request.porqueQuatro());
+        snapshot.setPorqueQuatroResposta(request.porqueQuatroResposta());
+        snapshot.setPorqueCinco(request.porqueCinco());
+        snapshot.setPorqueCincoResposta(request.porqueCincoResposta());
+        snapshot.setCausaRaiz(request.causaRaiz());
+        snapshot.setAtividades(new ArrayList<>(request.atividades()));
+        snapshot.setDataSubmissao(LocalDateTime.now());
+        snapshot.setStatus("PENDENTE");
+        investigacaoSnapshotRepository.save(snapshot);
+
+        return toResponse(naoConformidadeRepository.findById(id).orElseThrow());
+    }
+
+    @Transactional
+    public NaoConformidadeResponse aprovarPlano(UUID id, AprovarRejeitarRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
+
+        if (nc.getStatus() != StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO) {
+            throw new BusinessException("Plano só pode ser aprovado quando NC está AGUARDANDO_APROVACAO_PLANO");
         }
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var engenheiro = usuarioRepository.findByEmail(email).orElse(null);
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
 
-        Devolutiva devolutiva = new Devolutiva();
-        devolutiva.setNaoConformidade(nc);
-        devolutiva.setDescricaoPlanoAcao(request.descricaoPlanoAcao());
-        devolutiva.setDataDevolutiva(LocalDateTime.now());
-        devolutiva.setEngenheiro(engenheiro);
+        registrarHistorico(nc, usuario, TipoAcaoHistorico.APROVACAO_PLANO,
+                request != null ? request.comentario() : null,
+                StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO, StatusNaoConformidade.EM_EXECUCAO);
 
-        devolutivaRepository.save(devolutiva);
+        investigacaoSnapshotRepository
+                .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
+                .ifPresent(s -> { s.setStatus("APROVADO"); s.setComentarioRevisao(request != null ? request.comentario() : null); investigacaoSnapshotRepository.save(s); });
 
-        nc.setStatus(StatusNaoConformidade.EM_TRATAMENTO);
+        nc.setStatus(StatusNaoConformidade.EM_EXECUCAO);
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
     @Transactional
-    public NaoConformidadeResponse registrarExecucaoAcao(UUID id, ExecucaoAcaoRequest request) {
-        NaoConformidade nc = naoConformidadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+    public NaoConformidadeResponse rejeitarPlano(UUID id, AprovarRejeitarRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
 
-        if (nc.getStatus() != StatusNaoConformidade.EM_TRATAMENTO) {
-            throw new BusinessException("Execução de ação só pode ser registrada em NCs com status EM_TRATAMENTO");
+        if (nc.getStatus() != StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO) {
+            throw new BusinessException("Plano só pode ser rejeitado quando NC está AGUARDANDO_APROVACAO_PLANO");
+        }
+
+        if (request == null || request.comentario() == null || request.comentario().isBlank()) {
+            throw new BusinessException("Motivo da rejeição é obrigatório");
         }
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var engenheiro = usuarioRepository.findByEmail(email).orElse(null);
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
 
-        ExecucaoAcao execucao = new ExecucaoAcao();
-        execucao.setNaoConformidade(nc);
-        execucao.setDescricaoAcaoExecutada(request.descricaoAcaoExecutada());
-        execucao.setDataExecucao(LocalDateTime.now());
-        execucao.setEngenheiro(engenheiro);
+        registrarHistorico(nc, usuario, TipoAcaoHistorico.REJEICAO_PLANO, request.comentario(),
+                StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO, StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO);
 
-        execucaoAcaoRepository.save(execucao);
+        investigacaoSnapshotRepository
+                .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
+                .ifPresent(s -> { s.setStatus("REPROVADO"); s.setComentarioRevisao(request.comentario()); investigacaoSnapshotRepository.save(s); });
 
-        return toResponse(naoConformidadeRepository.findById(id).orElseThrow());
+        nc.setStatus(StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO);
+        return toResponse(naoConformidadeRepository.save(nc));
     }
 
     @Transactional
-    public NaoConformidadeResponse validar(UUID id, ValidacaoRequest request) {
-        NaoConformidade nc = naoConformidadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+    public NaoConformidadeResponse submeterEvidencias(UUID id, SubmeterEvidenciasRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
 
-        if (nc.getStatus() != StatusNaoConformidade.EM_TRATAMENTO) {
-            throw new BusinessException("Validação só pode ser feita em NCs com status EM_TRATAMENTO");
+        if (nc.getStatus() != StatusNaoConformidade.EM_EXECUCAO) {
+            throw new BusinessException("Evidências só podem ser submetidas para validação quando NC está EM_EXECUCAO");
+        }
+
+        nc.setDescricaoExecucao(request.descricaoExecucao());
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+
+        registrarHistorico(nc, usuario, TipoAcaoHistorico.SUBMISSAO_EVIDENCIAS, null,
+                StatusNaoConformidade.EM_EXECUCAO, StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+
+        ExecucaoSnapshot execSnapshot = new ExecucaoSnapshot();
+        execSnapshot.setNaoConformidade(nc);
+        execSnapshot.setDescricaoExecucao(request.descricaoExecucao());
+        execSnapshot.setDataSubmissao(LocalDateTime.now());
+        execSnapshot.setStatus("PENDENTE");
+        execucaoSnapshotRepository.save(execSnapshot);
+
+        nc.setStatus(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+        return toResponse(naoConformidadeRepository.save(nc));
+    }
+
+    @Transactional
+    public NaoConformidadeResponse aprovarEvidencias(UUID id, AprovarRejeitarRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
+
+        if (nc.getStatus() != StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL) {
+            throw new BusinessException("Evidências só podem ser aprovadas quando NC está AGUARDANDO_VALIDACAO_FINAL");
         }
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var engenheiro = usuarioRepository.findByEmail(email).orElse(null);
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
 
-        Validacao validacao = new Validacao();
-        validacao.setNaoConformidade(nc);
-        validacao.setParecer(request.parecer());
-        validacao.setObservacao(request.observacao());
-        validacao.setDataValidacao(LocalDateTime.now());
-        validacao.setEngenheiro(engenheiro);
+        registrarHistorico(nc, usuario, TipoAcaoHistorico.APROVACAO_EVIDENCIAS,
+                request != null ? request.comentario() : null,
+                StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL, StatusNaoConformidade.CONCLUIDO);
 
-        validacaoRepository.save(validacao);
+        execucaoSnapshotRepository
+                .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
+                .ifPresent(s -> { s.setStatus("APROVADO"); s.setComentarioRevisao(request != null ? request.comentario() : null); execucaoSnapshotRepository.save(s); });
 
-        if (request.parecer() == ParecerValidacao.APROVADO) {
-            nc.setStatus(StatusNaoConformidade.CONCLUIDO);
-        } else {
-            nc.setStatus(StatusNaoConformidade.ABERTA);
-        }
-        naoConformidadeRepository.save(nc);
-
-        return toResponse(naoConformidadeRepository.findById(id).orElseThrow());
+        nc.setStatus(StatusNaoConformidade.CONCLUIDO);
+        return toResponse(naoConformidadeRepository.save(nc));
     }
+
+    @Transactional
+    public NaoConformidadeResponse rejeitarEvidencias(UUID id, AprovarRejeitarRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
+
+        if (nc.getStatus() != StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL) {
+            throw new BusinessException("Evidências só podem ser rejeitadas quando NC está AGUARDANDO_VALIDACAO_FINAL");
+        }
+
+        if (request == null || request.comentario() == null || request.comentario().isBlank()) {
+            throw new BusinessException("Motivo da rejeição das evidências é obrigatório");
+        }
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+
+        registrarHistorico(nc, usuario, TipoAcaoHistorico.REJEICAO_EVIDENCIAS, request.comentario(),
+                StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL, StatusNaoConformidade.EM_EXECUCAO);
+
+        execucaoSnapshotRepository
+                .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
+                .ifPresent(s -> { s.setStatus("REPROVADO"); s.setComentarioRevisao(request.comentario()); execucaoSnapshotRepository.save(s); });
+
+        nc.setStatus(StatusNaoConformidade.EM_EXECUCAO);
+        return toResponse(naoConformidadeRepository.save(nc));
+    }
+
+    public List<HistoricoNcResponse> findHistorico(UUID id) {
+        if (!naoConformidadeRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Não conformidade não encontrada: " + id);
+        }
+        return historicoNcRepository.findByNaoConformidadeIdOrderByDataAcaoAsc(id)
+                .stream()
+                .map(h -> new HistoricoNcResponse(
+                        h.getId(),
+                        h.getAcao(),
+                        h.getUsuario() != null ? h.getUsuario().getNome() : null,
+                        h.getComentario(),
+                        h.getStatusAnterior(),
+                        h.getStatusAtual(),
+                        h.getDataAcao()
+                ))
+                .toList();
+    }
+
+    // -------------------------------------------------------------------------
+    // Scheduled
+    // -------------------------------------------------------------------------
 
     @Scheduled(cron = "0 0 0 * * *")
     @Transactional
@@ -303,36 +434,70 @@ public class NaoConformidadeService {
         naoConformidadeRepository.saveAll(vencidas);
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private NaoConformidade findNcOrThrow(UUID id) {
+        return naoConformidadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+    }
+
+    private void registrarHistorico(NaoConformidade nc, Usuario usuario, TipoAcaoHistorico acao,
+                                     String comentario, StatusNaoConformidade statusAnterior, StatusNaoConformidade statusAtual) {
+        HistoricoNc historico = new HistoricoNc();
+        historico.setNaoConformidade(nc);
+        historico.setUsuario(usuario);
+        historico.setAcao(acao);
+        historico.setComentario(comentario);
+        historico.setStatusAnterior(statusAnterior);
+        historico.setStatusAtual(statusAtual);
+        historico.setDataAcao(LocalDateTime.now());
+        historicoNcRepository.save(historico);
+    }
+
     private NaoConformidadeResponse toResponse(NaoConformidade nc) {
-        List<DevolutivaResponse> devolutivas = nc.getDevolutivas() == null ? List.of() :
-                nc.getDevolutivas().stream().map(d -> new DevolutivaResponse(
-                        d.getId(),
-                        d.getDescricaoPlanoAcao(),
-                        d.getDataDevolutiva(),
-                        d.getEngenheiro() != null ? d.getEngenheiro().getNome() : null
-                )).toList();
-
-        List<ExecucaoAcaoResponse> execucoes = nc.getExecucoes() == null ? List.of() :
-                nc.getExecucoes().stream().map(e -> new ExecucaoAcaoResponse(
-                        e.getId(),
-                        e.getDescricaoAcaoExecutada(),
-                        e.getDataExecucao(),
-                        e.getEngenheiro() != null ? e.getEngenheiro().getNome() : null
-                )).toList();
-
-        List<ValidacaoResponse> validacoes = nc.getValidacoes() == null ? List.of() :
-                nc.getValidacoes().stream().map(v -> new ValidacaoResponse(
-                        v.getId(),
-                        v.getParecer(),
-                        v.getObservacao(),
-                        v.getDataValidacao(),
-                        v.getEngenheiro() != null ? v.getEngenheiro().getNome() : null
-                )).toList();
-
         List<NormaResponse> normas = nc.getNormas() == null ? List.of() :
                 nc.getNormas().stream().map(n -> new NormaResponse(
                         n.getId(), n.getTitulo(), n.getDescricao(), n.isAtivo()
                 )).toList();
+
+        List<AtividadeResponse> atividades = nc.getAtividades() == null ? List.of() :
+                nc.getAtividades().stream().map(a -> new AtividadeResponse(
+                        a.getId(), a.getDescricao(), a.getOrdem()
+                )).toList();
+
+        List<HistoricoNcResponse> historico = nc.getHistorico() == null ? List.of() :
+                nc.getHistorico().stream()
+                        .sorted((a, b) -> a.getDataAcao().compareTo(b.getDataAcao()))
+                        .map(h -> new HistoricoNcResponse(
+                                h.getId(),
+                                h.getAcao(),
+                                h.getUsuario() != null ? h.getUsuario().getNome() : null,
+                                h.getComentario(),
+                                h.getStatusAnterior(),
+                                h.getStatusAtual(),
+                                h.getDataAcao()
+                        )).toList();
+
+        List<InvestigacaoSnapshotResponse> investigacaoSnapshots =
+                investigacaoSnapshotRepository.findByNaoConformidadeIdOrderByDataSubmissaoAsc(nc.getId())
+                        .stream().map(s -> new InvestigacaoSnapshotResponse(
+                                s.getId(), s.getPorqueUm(), s.getPorqueUmResposta(),
+                                s.getPorqueDois(), s.getPorqueDoisResposta(),
+                                s.getPorqueTres(), s.getPorqueTresResposta(),
+                                s.getPorqueQuatro(), s.getPorqueQuatroResposta(),
+                                s.getPorqueCinco(), s.getPorqueCincoResposta(),
+                                s.getCausaRaiz(), s.getAtividades(),
+                                s.getDataSubmissao(), s.getStatus(), s.getComentarioRevisao()
+                        )).toList();
+
+        List<ExecucaoSnapshotResponse> execucaoSnapshots =
+                execucaoSnapshotRepository.findByNaoConformidadeIdOrderByDataSubmissaoAsc(nc.getId())
+                        .stream().map(s -> new ExecucaoSnapshotResponse(
+                                s.getId(), s.getDescricaoExecucao(),
+                                s.getDataSubmissao(), s.getStatus(), s.getComentarioRevisao()
+                        )).toList();
 
         return new NaoConformidadeResponse(
                 nc.getId(),
@@ -364,9 +529,25 @@ public class NaoConformidadeService {
                 naoConformidadeRepository.findByNcAnteriorId(nc.getId()).stream()
                         .map(r -> new NcResumoResponse(r.getId(), r.getTitulo(), r.getDataRegistro(), r.getStatus()))
                         .toList(),
-                devolutivas,
-                execucoes,
-                validacoes,
+                nc.getPorqueUm(),
+                nc.getPorqueUmResposta(),
+                nc.getPorqueDois(),
+                nc.getPorqueDoisResposta(),
+                nc.getPorqueTres(),
+                nc.getPorqueTresResposta(),
+                nc.getPorqueQuatro(),
+                nc.getPorqueQuatroResposta(),
+                nc.getPorqueCinco(),
+                nc.getPorqueCincoResposta(),
+                nc.getCausaRaiz(),
+                nc.getDescricaoExecucao(),
+                atividades,
+                historico,
+                investigacaoSnapshots,
+                execucaoSnapshots,
+                List.of(),
+                List.of(),
+                List.of(),
                 normas
         );
     }

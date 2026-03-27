@@ -6,6 +6,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "nao_conformidade")
@@ -62,6 +63,60 @@ public class NaoConformidade extends Ocorrencia {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nc_anterior_id")
     private NaoConformidade ncAnterior;
+
+    // Campos de investigação — 5 Porquês e Causa Raiz (preenchidos pelo Externo)
+    @Column(name = "porque_um", columnDefinition = "TEXT")
+    private String porqueUm;
+
+    @Column(name = "porque_um_resposta", columnDefinition = "TEXT")
+    private String porqueUmResposta;
+
+    @Column(name = "porque_dois", columnDefinition = "TEXT")
+    private String porqueDois;
+
+    @Column(name = "porque_dois_resposta", columnDefinition = "TEXT")
+    private String porqueDoisResposta;
+
+    @Column(name = "porque_tres", columnDefinition = "TEXT")
+    private String porqueTres;
+
+    @Column(name = "porque_tres_resposta", columnDefinition = "TEXT")
+    private String porqueTresResposta;
+
+    @Column(name = "porque_quatro", columnDefinition = "TEXT")
+    private String porqueQuatro;
+
+    @Column(name = "porque_quatro_resposta", columnDefinition = "TEXT")
+    private String porqueQuatroResposta;
+
+    @Column(name = "porque_cinco", columnDefinition = "TEXT")
+    private String porqueCinco;
+
+    @Column(name = "porque_cinco_resposta", columnDefinition = "TEXT")
+    private String porqueCincoResposta;
+
+    @Column(name = "causa_raiz", columnDefinition = "TEXT")
+    private String causaRaiz;
+
+    // Descrição do que foi executado antes de enviar evidências para validação
+    @Column(name = "descricao_execucao", columnDefinition = "TEXT")
+    private String descricaoExecucao;
+
+    @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<AtividadePlanoAcao> atividades = new ArrayList<>();
+
+    @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<HistoricoNc> historico = new ArrayList<>();
+
+    @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<InvestigacaoSnapshot> investigacaoSnapshots = new ArrayList<>();
+
+    @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<ExecucaoSnapshot> execucaoSnapshots = new ArrayList<>();
 
     @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Devolutiva> devolutivas;

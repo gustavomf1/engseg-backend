@@ -1,9 +1,10 @@
 package com.engseg.controller;
 
-import com.engseg.dto.request.DevolutivaRequest;
-import com.engseg.dto.request.ExecucaoAcaoRequest;
+import com.engseg.dto.request.AprovarRejeitarRequest;
+import com.engseg.dto.request.InvestigacaoRequest;
 import com.engseg.dto.request.NaoConformidadeRequest;
-import com.engseg.dto.request.ValidacaoRequest;
+import com.engseg.dto.request.SubmeterEvidenciasRequest;
+import com.engseg.dto.response.HistoricoNcResponse;
 import com.engseg.dto.response.NaoConformidadeResponse;
 import com.engseg.entity.StatusNaoConformidade;
 import com.engseg.service.NaoConformidadeService;
@@ -55,24 +56,61 @@ public class NaoConformidadeController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/devolutiva")
-    public ResponseEntity<NaoConformidadeResponse> registrarDevolutiva(
+    // -------------------------------------------------------------------------
+    // Novo fluxo: Investigação → Plano → Execução → Validação Final
+    // -------------------------------------------------------------------------
+
+    @PostMapping("/{id}/investigacao")
+    @PreAuthorize("hasAnyRole('EXTERNO', 'TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> submeterInvestigacao(
             @PathVariable UUID id,
-            @Valid @RequestBody DevolutivaRequest request) {
-        return ResponseEntity.ok(naoConformidadeService.registrarDevolutiva(id, request));
+            @Valid @RequestBody InvestigacaoRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.submeterInvestigacao(id, request));
     }
 
-    @PostMapping("/{id}/execucao-acao")
-    public ResponseEntity<NaoConformidadeResponse> registrarExecucaoAcao(
+    @PostMapping("/{id}/aprovar-plano")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> aprovarPlano(
             @PathVariable UUID id,
-            @Valid @RequestBody ExecucaoAcaoRequest request) {
-        return ResponseEntity.ok(naoConformidadeService.registrarExecucaoAcao(id, request));
+            @RequestBody(required = false) AprovarRejeitarRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.aprovarPlano(id, request));
     }
 
-    @PostMapping("/{id}/validacao")
-    public ResponseEntity<NaoConformidadeResponse> validar(
+    @PostMapping("/{id}/rejeitar-plano")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> rejeitarPlano(
             @PathVariable UUID id,
-            @Valid @RequestBody ValidacaoRequest request) {
-        return ResponseEntity.ok(naoConformidadeService.validar(id, request));
+            @Valid @RequestBody AprovarRejeitarRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.rejeitarPlano(id, request));
     }
+
+    @PostMapping("/{id}/submeter-evidencias")
+    @PreAuthorize("hasAnyRole('EXTERNO', 'TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> submeterEvidencias(
+            @PathVariable UUID id,
+            @Valid @RequestBody SubmeterEvidenciasRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.submeterEvidencias(id, request));
+    }
+
+    @PostMapping("/{id}/aprovar-evidencias")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> aprovarEvidencias(
+            @PathVariable UUID id,
+            @RequestBody(required = false) AprovarRejeitarRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.aprovarEvidencias(id, request));
+    }
+
+    @PostMapping("/{id}/rejeitar-evidencias")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> rejeitarEvidencias(
+            @PathVariable UUID id,
+            @Valid @RequestBody AprovarRejeitarRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.rejeitarEvidencias(id, request));
+    }
+
+    @GetMapping("/{id}/historico")
+    public ResponseEntity<List<HistoricoNcResponse>> getHistorico(@PathVariable UUID id) {
+        return ResponseEntity.ok(naoConformidadeService.findHistorico(id));
+    }
+
 }

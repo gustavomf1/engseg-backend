@@ -1,0 +1,1 @@
+ALTER TABLE nao_conformidade ALTER COLUMN status TYPE VARCHAR(50);

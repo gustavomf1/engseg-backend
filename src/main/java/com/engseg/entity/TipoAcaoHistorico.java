@@ -1,0 +1,11 @@
+package com.engseg.entity;
+
+public enum TipoAcaoHistorico {
+    CRIACAO,
+    SUBMISSAO_INVESTIGACAO,
+    APROVACAO_PLANO,
+    REJEICAO_PLANO,
+    SUBMISSAO_EVIDENCIAS,
+    APROVACAO_EVIDENCIAS,
+    REJEICAO_EVIDENCIAS
+}
