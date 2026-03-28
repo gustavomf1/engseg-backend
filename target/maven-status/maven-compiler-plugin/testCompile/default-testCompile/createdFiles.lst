@@ -1,1 +1,4 @@
 com/engseg/EngSegApplicationTests.class
+com/engseg/controller/NaoConformidadeControllerTest.class
+com/engseg/service/UsuarioServiceTest.class
+com/engseg/service/NaoConformidadeServiceTest.class
