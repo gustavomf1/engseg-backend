@@ -25,7 +25,7 @@ public class AuthService {
         var usuario = usuarioRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        String token = jwtService.generateToken(usuario.getEmail());
+        String token = jwtService.generateToken(usuario.getEmail(), usuario.getPerfil().name());
 
         return new LoginResponse(usuario.getId(), token, usuario.getNome(), usuario.getEmail(), usuario.getPerfil());
     }

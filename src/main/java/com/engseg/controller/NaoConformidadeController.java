@@ -26,6 +26,7 @@ public class NaoConformidadeController {
     private final NaoConformidadeService naoConformidadeService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<List<NaoConformidadeResponse>> getAll(
             @RequestParam(required = false) StatusNaoConformidade status,
             @RequestParam(required = false) UUID estabelecimentoId) {
@@ -33,6 +34,7 @@ public class NaoConformidadeController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<NaoConformidadeResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(naoConformidadeService.findById(id));
     }
@@ -109,6 +111,7 @@ public class NaoConformidadeController {
     }
 
     @GetMapping("/{id}/historico")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<List<HistoricoNcResponse>> getHistorico(@PathVariable UUID id) {
         return ResponseEntity.ok(naoConformidadeService.findHistorico(id));
     }

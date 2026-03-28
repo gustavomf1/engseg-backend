@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,10 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
     List<NaoConformidade> findByEstabelecimentoId(UUID estabelecimentoId);
 
     List<NaoConformidade> findByStatusAndEstabelecimentoId(StatusNaoConformidade status, UUID estabelecimentoId);
+
+    List<NaoConformidade> findByEstabelecimentoIdIn(Collection<UUID> estabelecimentoIds);
+
+    List<NaoConformidade> findByStatusAndEstabelecimentoIdIn(StatusNaoConformidade status, Collection<UUID> estabelecimentoIds);
 
     @Query("SELECT nc FROM NaoConformidade nc WHERE nc.vencida = 'N' AND nc.status != 'CONCLUIDO' AND nc.dataLimiteResolucao < :today")
     List<NaoConformidade> findVencidas(@Param("today") LocalDate today);

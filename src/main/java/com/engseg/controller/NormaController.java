@@ -21,12 +21,14 @@ public class NormaController {
     private final NormaService normaService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<List<NormaResponse>> getAll(
             @RequestParam(required = false) Boolean ativo) {
         return ResponseEntity.ok(normaService.findAll(ativo));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<NormaResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(normaService.findById(id));
     }

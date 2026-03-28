@@ -2,11 +2,14 @@ package com.engseg.service;
 
 import com.engseg.dto.request.UsuarioRequest;
 import com.engseg.dto.response.UsuarioResponse;
+import com.engseg.entity.PerfilUsuario;
 import com.engseg.entity.Usuario;
+import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.EmpresaRepository;
 import com.engseg.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,12 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final EmpresaRepository empresaRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private boolean callerIsEngenheiro() {
+        return SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ENGENHEIRO"));
+    }
 
     public List<UsuarioResponse> findAll(Boolean ativo, UUID empresaId) {
         List<Usuario> items;
@@ -53,6 +62,10 @@ public class UsuarioService {
             throw new IllegalArgumentException("Senha é obrigatória ao criar usuário");
         }
 
+        if (callerIsEngenheiro() && request.perfil() == PerfilUsuario.ENGENHEIRO) {
+            throw new BusinessException("Engenheiro não pode criar outro usuário com perfil ENGENHEIRO");
+        }
+
         Usuario usuario = Usuario.builder()
                 .nome(request.nome())
                 .email(request.email())
@@ -73,6 +86,11 @@ public class UsuarioService {
 
         var empresa = empresaRepository.findById(request.empresaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Empresa não encontrada: " + request.empresaId()));
+
+        if (callerIsEngenheiro() && request.perfil() == PerfilUsuario.ENGENHEIRO
+                && usuario.getPerfil() != PerfilUsuario.ENGENHEIRO) {
+            throw new BusinessException("Engenheiro não pode promover usuário para perfil ENGENHEIRO");
+        }
 
         usuario.setNome(request.nome());
         usuario.setEmail(request.email());

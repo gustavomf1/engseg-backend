@@ -21,6 +21,7 @@ public class EmpresaController {
     private final EmpresaService empresaService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<List<EmpresaResponse>> getAll(
             @RequestParam(required = false) Boolean ativo,
             @RequestParam(required = false) Boolean empresaMae) {
@@ -31,11 +32,13 @@ public class EmpresaController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<EmpresaResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(empresaService.findById(id));
     }
 
     @GetMapping("/{id}/filhas")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<List<EmpresaResponse>> getFilhas(
             @PathVariable UUID id,
             @RequestParam(required = false) Boolean ativo) {

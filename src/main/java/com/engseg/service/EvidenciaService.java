@@ -65,7 +65,7 @@ public class EvidenciaService {
         Desvio desvio = desvioRepository.findById(desvioId)
                 .orElseThrow(() -> new EntityNotFoundException("Desvio não encontrado"));
 
-        if (isTecnico()) {
+        if (isTecnico() && desvio.getStatus() == StatusDesvio.CONCLUIDO) {
             throw new BusinessException("Técnico não pode adicionar evidências em desvio concluído");
         }
 

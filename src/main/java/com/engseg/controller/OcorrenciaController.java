@@ -6,6 +6,7 @@ import com.engseg.service.DesvioService;
 import com.engseg.service.NaoConformidadeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -19,6 +20,7 @@ public class OcorrenciaController {
     private final NaoConformidadeService naoConformidadeService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<List<Map<String, Object>>> listarTodas() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 

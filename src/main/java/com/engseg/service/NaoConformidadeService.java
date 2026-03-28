@@ -39,8 +39,27 @@ public class NaoConformidadeService {
     private final HistoricoNcRepository historicoNcRepository;
     private final InvestigacaoSnapshotRepository investigacaoSnapshotRepository;
     private final ExecucaoSnapshotRepository execucaoSnapshotRepository;
+    private final SecurityHelper securityHelper;
 
     public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId) {
+        // EXTERNO: restrito aos estabelecimentos vinculados à sua empresa
+        if (securityHelper.isExterno()) {
+            List<UUID> permitidos = securityHelper.getEstabelecimentosDoExterno();
+            if (permitidos.isEmpty()) return List.of();
+            if (estabelecimentoId != null) {
+                if (!permitidos.contains(estabelecimentoId)) return List.of();
+                return (status != null
+                        ? naoConformidadeRepository.findByStatusAndEstabelecimentoId(status, estabelecimentoId)
+                        : naoConformidadeRepository.findByEstabelecimentoId(estabelecimentoId))
+                        .stream().map(this::toResponse).toList();
+            }
+            return (status != null
+                    ? naoConformidadeRepository.findByStatusAndEstabelecimentoIdIn(status, permitidos)
+                    : naoConformidadeRepository.findByEstabelecimentoIdIn(permitidos))
+                    .stream().map(this::toResponse).toList();
+        }
+
+        // ENGENHEIRO / TECNICO: sem restrição de empresa, filtra por estabelecimento se informado
         List<NaoConformidade> list;
         if (status != null && estabelecimentoId != null) {
             list = naoConformidadeRepository.findByStatusAndEstabelecimentoId(status, estabelecimentoId);

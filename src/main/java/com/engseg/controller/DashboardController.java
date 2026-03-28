@@ -11,6 +11,7 @@ import com.engseg.service.DesvioService;
 import com.engseg.service.NaoConformidadeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -26,6 +27,7 @@ public class DashboardController {
     private final NaoConformidadeService naoConformidadeService;
 
     @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<DashboardStatsResponse> getStats() {
         long totalDesvios = desvioRepository.count();
         long totalNCs = naoConformidadeRepository.count();
@@ -51,6 +53,7 @@ public class DashboardController {
     }
 
     @GetMapping("/recentes")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<List<Map<String, Object>>> getRecentes() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 

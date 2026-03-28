@@ -21,6 +21,7 @@ public class LocalizacaoController {
     private final LocalizacaoService localizacaoService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<List<LocalizacaoResponse>> getAll(
             @RequestParam(required = false) UUID estabelecimentoId,
             @RequestParam(required = false) Boolean ativo) {
@@ -31,6 +32,7 @@ public class LocalizacaoController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<LocalizacaoResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(localizacaoService.findById(id));
     }

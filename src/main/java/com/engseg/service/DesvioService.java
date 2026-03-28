@@ -30,8 +30,18 @@ public class DesvioService {
     private final UsuarioRepository usuarioRepository;
     private final EvidenciaRepository evidenciaRepository;
     private final S3StorageService s3StorageService;
+    private final SecurityHelper securityHelper;
 
     public List<DesvioResponse> findAll() {
+        // EXTERNO: restrito aos estabelecimentos vinculados à sua empresa
+        if (securityHelper.isExterno()) {
+            List<UUID> permitidos = securityHelper.getEstabelecimentosDoExterno();
+            if (permitidos.isEmpty()) return List.of();
+            return desvioRepository.findByEstabelecimentoIdIn(permitidos).stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
+        // ENGENHEIRO / TECNICO: sem restrição
         return desvioRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();

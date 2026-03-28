@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,7 @@ public class EvidenciaController {
     private final EvidenciaService evidenciaService;
 
     @PostMapping("/nao-conformidade/{ncId}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<EvidenciaResponse> upload(
             @PathVariable UUID ncId,
             @RequestParam("file") MultipartFile file,
@@ -31,6 +33,7 @@ public class EvidenciaController {
     }
 
     @GetMapping("/nao-conformidade/{ncId}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<List<EvidenciaResponse>> listar(
             @PathVariable UUID ncId,
             @RequestParam(value = "tipo", required = false) TipoEvidencia tipo) {
@@ -42,6 +45,7 @@ public class EvidenciaController {
     }
 
     @PostMapping("/desvio/{desvioId}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<EvidenciaResponse> uploadDesvio(
             @PathVariable UUID desvioId,
             @RequestParam("file") MultipartFile file,
@@ -51,6 +55,7 @@ public class EvidenciaController {
     }
 
     @GetMapping("/desvio/{desvioId}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<List<EvidenciaResponse>> listarDesvio(
             @PathVariable UUID desvioId,
             @RequestParam(value = "tipo", required = false) TipoEvidencia tipo) {
@@ -62,6 +67,7 @@ public class EvidenciaController {
     }
 
     @GetMapping("/{id}/download")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<byte[]> download(@PathVariable UUID id) {
         Evidencia evidencia = evidenciaService.buscarPorId(id);
         byte[] data = evidenciaService.download(id);
@@ -72,6 +78,7 @@ public class EvidenciaController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         evidenciaService.deletar(id);
         return ResponseEntity.noContent().build();
