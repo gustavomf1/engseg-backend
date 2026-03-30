@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: engseg
       POSTGRES_USER: engseg
-      POSTGRES_PASSWORD: engseg123
+      POSTGRES_PASSWORD: F
     ports:
       - "5432:5432"
     volumes:

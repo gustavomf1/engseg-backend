@@ -365,12 +365,20 @@ public class NaoConformidadeService {
         execSnapshot.setDescricaoExecucao(request.descricaoExecucao());
         execSnapshot.setDataSubmissao(LocalDateTime.now());
         execSnapshot.setStatus("PENDENTE");
-        execucaoSnapshotRepository.save(execSnapshot);
 
-        List<Evidencia> unassigned = evidenciaRepository
+        // Carry-forward: inclui evidências da última submissão reprovada
+        execucaoSnapshotRepository
+                .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "REPROVADO")
+                .ifPresent(anterior -> execSnapshot.getEvidencias().addAll(anterior.getEvidencias()));
+
+        // Evidências novas (ainda sem snapshot vinculado)
+        List<Evidencia> novas = evidenciaRepository
                 .findByNaoConformidadeIdAndTipoEvidenciaAndExecucaoSnapshotIsNull(id, TipoEvidencia.TRATATIVA);
-        unassigned.forEach(e -> e.setExecucaoSnapshot(execSnapshot));
-        evidenciaRepository.saveAll(unassigned);
+        novas.forEach(e -> e.setExecucaoSnapshot(execSnapshot));
+        execSnapshot.getEvidencias().addAll(novas);
+
+        execucaoSnapshotRepository.save(execSnapshot);
+        evidenciaRepository.saveAll(novas);
 
         nc.setStatus(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
         return toResponse(naoConformidadeRepository.save(nc));
@@ -521,7 +529,7 @@ public class NaoConformidadeService {
                         .stream().map(s -> new ExecucaoSnapshotResponse(
                                 s.getId(), s.getDescricaoExecucao(),
                                 s.getDataSubmissao(), s.getStatus(), s.getComentarioRevisao(),
-                                evidenciaRepository.findByExecucaoSnapshotId(s.getId()).stream()
+                                s.getEvidencias().stream()
                                         .map(e -> new EvidenciaResponse(e.getId(), e.getNomeArquivo(), e.getUrlArquivo(), e.getDataUpload()))
                                         .toList()
                         )).toList();
