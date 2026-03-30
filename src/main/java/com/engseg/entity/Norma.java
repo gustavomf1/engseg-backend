@@ -22,6 +22,9 @@ public class Norma {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
+    @Column(columnDefinition = "TEXT")
+    private String conteudo;
+
     @Convert(converter = BooleanToSNConverter.class)
     @Column(nullable = false, length = 1)
     @Builder.Default

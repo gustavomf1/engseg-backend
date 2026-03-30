@@ -1,0 +1,1 @@
+ALTER TABLE norma ADD COLUMN conteudo TEXT;

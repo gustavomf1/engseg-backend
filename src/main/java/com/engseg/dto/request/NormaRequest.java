@@ -4,5 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public record NormaRequest(
         @NotBlank String titulo,
-        String descricao
+        String descricao,
+        String conteudo
 ) {}

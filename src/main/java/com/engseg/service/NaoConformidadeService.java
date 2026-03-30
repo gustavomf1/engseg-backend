@@ -523,7 +523,7 @@ public class NaoConformidadeService {
     private NaoConformidadeResponse toResponse(NaoConformidade nc) {
         List<NormaResponse> normas = nc.getNormas() == null ? List.of() :
                 nc.getNormas().stream().map(n -> new NormaResponse(
-                        n.getId(), n.getTitulo(), n.getDescricao(), n.isAtivo()
+                        n.getId(), n.getTitulo(), n.getDescricao(), n.getConteudo(), n.isAtivo()
                 )).toList();
 
         List<AtividadeResponse> atividades = nc.getAtividades() == null ? List.of() :
