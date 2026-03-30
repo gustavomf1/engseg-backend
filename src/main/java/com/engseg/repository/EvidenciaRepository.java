@@ -14,4 +14,6 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, UUID> {
     List<Evidencia> findByDesvioId(UUID desvioId);
     List<Evidencia> findByDesvioIdAndTipoEvidencia(UUID desvioId, TipoEvidencia tipoEvidencia);
     List<Evidencia> findByExecucaoAcaoId(UUID execucaoAcaoId);
+    List<Evidencia> findByExecucaoSnapshotId(UUID execucaoSnapshotId);
+    List<Evidencia> findByNaoConformidadeIdAndTipoEvidenciaAndExecucaoSnapshotIsNull(UUID naoConformidadeId, TipoEvidencia tipoEvidencia);
 }

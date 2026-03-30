@@ -367,6 +367,11 @@ public class NaoConformidadeService {
         execSnapshot.setStatus("PENDENTE");
         execucaoSnapshotRepository.save(execSnapshot);
 
+        List<Evidencia> unassigned = evidenciaRepository
+                .findByNaoConformidadeIdAndTipoEvidenciaAndExecucaoSnapshotIsNull(id, TipoEvidencia.TRATATIVA);
+        unassigned.forEach(e -> e.setExecucaoSnapshot(execSnapshot));
+        evidenciaRepository.saveAll(unassigned);
+
         nc.setStatus(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
         return toResponse(naoConformidadeRepository.save(nc));
     }
@@ -515,7 +520,10 @@ public class NaoConformidadeService {
                 execucaoSnapshotRepository.findByNaoConformidadeIdOrderByDataSubmissaoAsc(nc.getId())
                         .stream().map(s -> new ExecucaoSnapshotResponse(
                                 s.getId(), s.getDescricaoExecucao(),
-                                s.getDataSubmissao(), s.getStatus(), s.getComentarioRevisao()
+                                s.getDataSubmissao(), s.getStatus(), s.getComentarioRevisao(),
+                                evidenciaRepository.findByExecucaoSnapshotId(s.getId()).stream()
+                                        .map(e -> new EvidenciaResponse(e.getId(), e.getNomeArquivo(), e.getUrlArquivo(), e.getDataUpload()))
+                                        .toList()
                         )).toList();
 
         return new NaoConformidadeResponse(
