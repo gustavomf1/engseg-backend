@@ -132,6 +132,7 @@ public class NaoConformidadeService {
             }
             var ncAnterior = naoConformidadeRepository.findById(request.ncAnteriorId())
                     .orElseThrow(() -> new ResourceNotFoundException("NC anterior não encontrada: " + request.ncAnteriorId()));
+            validarFimDaCadeia(ncAnterior, null);
             nc.setNcAnterior(ncAnterior);
         }
 
@@ -194,6 +195,7 @@ public class NaoConformidadeService {
             }
             var ncAnterior = naoConformidadeRepository.findById(request.ncAnteriorId())
                     .orElseThrow(() -> new ResourceNotFoundException("NC anterior não encontrada: " + request.ncAnteriorId()));
+            validarFimDaCadeia(ncAnterior, id);
             nc.setNcAnterior(ncAnterior);
         } else {
             nc.setNcAnterior(null);
@@ -469,6 +471,36 @@ public class NaoConformidadeService {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Valida que a NC selecionada como anterior é de fato o fim da cadeia.
+     * Se já existe outra NC apontando para ela, encontra o fim real e informa o usuário.
+     * O parâmetro excludeId é usado no update para ignorar a própria NC sendo editada.
+     */
+    private void validarFimDaCadeia(NaoConformidade ncAnterior, UUID excludeId) {
+        List<NaoConformidade> sucessoras = naoConformidadeRepository.findByNcAnteriorId(ncAnterior.getId())
+                .stream()
+                .filter(s -> excludeId == null || !s.getId().equals(excludeId))
+                .toList();
+
+        if (sucessoras.isEmpty()) return;
+
+        // Percorre a cadeia até o fim real
+        NaoConformidade fim = sucessoras.get(0);
+        while (true) {
+            List<NaoConformidade> prox = naoConformidadeRepository.findByNcAnteriorId(fim.getId())
+                    .stream()
+                    .filter(s -> excludeId == null || !s.getId().equals(excludeId))
+                    .toList();
+            if (prox.isEmpty()) break;
+            fim = prox.get(0);
+        }
+
+        throw new BusinessException(
+                "A NC selecionada já possui uma reincidência registrada. " +
+                "Para manter o rastro linear, selecione a última NC da cadeia: \"" + fim.getTitulo() + "\" (ID: " + fim.getId() + ")"
+        );
+    }
 
     private NaoConformidade findNcOrThrow(UUID id) {
         return naoConformidadeRepository.findById(id)
