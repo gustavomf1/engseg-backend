@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -110,7 +111,17 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + id));
         usuario.setAtivo(false);
+        usuario.setDtInativacao(LocalDate.now());
         usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public UsuarioResponse reativar(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + id));
+        usuario.setAtivo(true);
+        usuario.setDtInativacao(null);
+        return toResponse(usuarioRepository.save(usuario));
     }
 
     private UsuarioResponse toResponse(Usuario u) {
@@ -122,7 +133,8 @@ public class UsuarioService {
                 u.getEmpresa().getId(),
                 u.getEmpresa().getRazaoSocial(),
                 u.getTelefone(),
-                u.isAtivo()
+                u.isAtivo(),
+                u.getDtInativacao()
         );
     }
 }

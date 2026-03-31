@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -82,7 +83,17 @@ public class EstabelecimentoService {
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + id));
         estabelecimento.setAtivo(false);
+        estabelecimento.setDtInativacao(LocalDate.now());
         estabelecimentoRepository.save(estabelecimento);
+    }
+
+    @Transactional
+    public EstabelecimentoResponse reativar(UUID id) {
+        Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + id));
+        estabelecimento.setAtivo(true);
+        estabelecimento.setDtInativacao(null);
+        return toResponse(estabelecimentoRepository.save(estabelecimento));
     }
 
     private EstabelecimentoResponse toResponse(Estabelecimento e) {
@@ -98,7 +109,8 @@ public class EstabelecimentoService {
                 e.getBairro(),
                 e.getCidade(),
                 e.getEstado(),
-                e.isAtivo()
+                e.isAtivo(),
+                e.getDtInativacao()
         );
     }
 }

@@ -1,5 +1,6 @@
 package com.engseg.dto.response;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record LocalizacaoResponse(
@@ -7,5 +8,6 @@ public record LocalizacaoResponse(
         String nome,
         UUID estabelecimentoId,
         String estabelecimentoNome,
-        boolean ativo
+        boolean ativo,
+        LocalDate dtInativacao
 ) {}

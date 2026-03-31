@@ -57,6 +57,12 @@ public class EstabelecimentoController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}/reativar")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<EstabelecimentoResponse> reativar(@PathVariable UUID id) {
+        return ResponseEntity.ok(estabelecimentoService.reativar(id));
+    }
+
     // -- Empresas vinculadas ao estabelecimento --
 
     @GetMapping("/{id}/empresas")

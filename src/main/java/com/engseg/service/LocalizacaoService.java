@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,7 +75,17 @@ public class LocalizacaoService {
         Localizacao localizacao = localizacaoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + id));
         localizacao.setAtivo(false);
+        localizacao.setDtInativacao(LocalDate.now());
         localizacaoRepository.save(localizacao);
+    }
+
+    @Transactional
+    public LocalizacaoResponse reativar(UUID id) {
+        Localizacao localizacao = localizacaoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + id));
+        localizacao.setAtivo(true);
+        localizacao.setDtInativacao(null);
+        return toResponse(localizacaoRepository.save(localizacao));
     }
 
     private LocalizacaoResponse toResponse(Localizacao l) {
@@ -83,7 +94,8 @@ public class LocalizacaoService {
                 l.getNome(),
                 l.getEstabelecimento().getId(),
                 l.getEstabelecimento().getNome(),
-                l.isAtivo()
+                l.isAtivo(),
+                l.getDtInativacao()
         );
     }
 }

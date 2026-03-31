@@ -2,6 +2,7 @@ package com.engseg.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -37,4 +38,7 @@ public class Empresa {
     @Column(nullable = false, length = 1)
     @Builder.Default
     private boolean ativo = true;
+
+    @Column(name = "dt_inativacao")
+    private LocalDate dtInativacao;
 }

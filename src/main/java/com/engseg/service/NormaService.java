@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -82,10 +83,20 @@ public class NormaService {
         Norma norma = normaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Norma não encontrada: " + id));
         norma.setAtivo(false);
+        norma.setDtInativacao(LocalDate.now());
         normaRepository.save(norma);
     }
 
+    @Transactional
+    public NormaResponse reativar(UUID id) {
+        Norma norma = normaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Norma não encontrada: " + id));
+        norma.setAtivo(true);
+        norma.setDtInativacao(null);
+        return toResponse(normaRepository.save(norma));
+    }
+
     public NormaResponse toResponse(Norma n) {
-        return new NormaResponse(n.getId(), n.getTitulo(), n.getDescricao(), n.getConteudo(), n.isAtivo());
+        return new NormaResponse(n.getId(), n.getTitulo(), n.getDescricao(), n.getConteudo(), n.isAtivo(), n.getDtInativacao());
     }
 }

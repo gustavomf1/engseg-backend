@@ -52,4 +52,10 @@ public class UsuarioController {
         usuarioService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/reativar")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<UsuarioResponse> reativar(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.reativar(id));
+    }
 }

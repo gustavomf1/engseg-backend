@@ -70,4 +70,10 @@ public class NormaController {
         normaService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/reativar")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<NormaResponse> reativar(@PathVariable UUID id) {
+        return ResponseEntity.ok(normaService.reativar(id));
+    }
 }

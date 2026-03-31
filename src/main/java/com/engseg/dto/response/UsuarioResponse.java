@@ -1,6 +1,7 @@
 package com.engseg.dto.response;
 
 import com.engseg.entity.PerfilUsuario;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record UsuarioResponse(
@@ -11,5 +12,6 @@ public record UsuarioResponse(
         UUID empresaId,
         String empresaNome,
         String telefone,
-        boolean ativo
+        boolean ativo,
+        LocalDate dtInativacao
 ) {}

@@ -55,4 +55,10 @@ public class LocalizacaoController {
         localizacaoService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/reativar")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<LocalizacaoResponse> reativar(@PathVariable UUID id) {
+        return ResponseEntity.ok(localizacaoService.reativar(id));
+    }
 }

@@ -1,5 +1,6 @@
 package com.engseg.dto.response;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record NormaResponse(
@@ -7,5 +8,6 @@ public record NormaResponse(
         String titulo,
         String descricao,
         String conteudo,
-        boolean ativo
+        boolean ativo,
+        LocalDate dtInativacao
 ) {}

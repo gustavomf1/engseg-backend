@@ -37,7 +37,8 @@ public class EstabelecimentoEmpresaService {
                             e.getTelefone(),
                             e.getEmpresaMae() != null ? e.getEmpresaMae().getId() : null,
                             e.getEmpresaMae() != null ? e.getEmpresaMae().getRazaoSocial() : null,
-                            e.isAtivo()
+                            e.isAtivo(),
+                            e.getDtInativacao()
                     );
                 })
                 .toList();

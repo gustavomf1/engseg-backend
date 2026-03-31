@@ -63,4 +63,10 @@ public class EmpresaController {
         empresaService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/reativar")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<EmpresaResponse> reativar(@PathVariable UUID id) {
+        return ResponseEntity.ok(empresaService.reativar(id));
+    }
 }
