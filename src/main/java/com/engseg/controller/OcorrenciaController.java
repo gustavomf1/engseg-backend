@@ -2,6 +2,9 @@ package com.engseg.controller;
 
 import com.engseg.dto.response.DesvioResponse;
 import com.engseg.dto.response.NaoConformidadeResponse;
+import com.engseg.entity.Evidencia;
+import com.engseg.entity.TipoEvidencia;
+import com.engseg.repository.EvidenciaRepository;
 import com.engseg.service.DesvioService;
 import com.engseg.service.NaoConformidadeService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,14 @@ public class OcorrenciaController {
 
     private final DesvioService desvioService;
     private final NaoConformidadeService naoConformidadeService;
+    private final EvidenciaRepository evidenciaRepository;
+
+    private void putPrimeiraEvidencia(Map<String, Object> item, List<Evidencia> evidencias) {
+        evidencias.stream().findFirst().ifPresent(e -> {
+            item.put("primeiraEvidenciaId", e.getId().toString());
+            item.put("primeiraEvidenciaNome", e.getNomeArquivo());
+        });
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
@@ -34,6 +45,7 @@ public class OcorrenciaController {
             item.put("dataRegistro", d.dataRegistro());
             item.put("status", d.status());
             item.put("estabelecimentoNome", d.estabelecimentoNome());
+            putPrimeiraEvidencia(item, evidenciaRepository.findByDesvioId(d.id()));
             resultado.add(item);
         }
 
@@ -53,6 +65,9 @@ public class OcorrenciaController {
             item.put("engResponsavelConstrutoraId", nc.engResponsavelConstrutoraId());
             item.put("engResponsavelVerificacaoId", nc.engResponsavelVerificacaoId());
             item.put("vencida", nc.vencida());
+            putPrimeiraEvidencia(item,
+                    evidenciaRepository.findByNaoConformidadeIdAndTipoEvidencia(
+                            nc.id(), TipoEvidencia.OCORRENCIA));
             resultado.add(item);
         }
 
