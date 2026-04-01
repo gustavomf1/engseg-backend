@@ -11,7 +11,9 @@ public record UsuarioResponse(
         PerfilUsuario perfil,
         UUID empresaId,
         String empresaNome,
+        String empresaCnpj,
         String telefone,
         boolean ativo,
+        LocalDate dtCriacao,
         LocalDate dtInativacao
 ) {}

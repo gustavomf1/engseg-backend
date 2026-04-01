@@ -41,6 +41,9 @@ public class Usuario {
     @Builder.Default
     private boolean ativo = true;
 
+    @Column(name = "dt_criacao")
+    private LocalDate dtCriacao;
+
     @Column(name = "dt_inativacao")
     private LocalDate dtInativacao;
 }

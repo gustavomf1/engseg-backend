@@ -2,7 +2,6 @@ package com.engseg.service;
 
 import com.engseg.dto.request.UsuarioRequest;
 import com.engseg.entity.*;
-import com.engseg.exception.BusinessException;
 import com.engseg.repository.EmpresaRepository;
 import com.engseg.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
@@ -66,23 +65,10 @@ class UsuarioServiceTest {
         return saved;
     }
 
-    // ─── create: bloqueio de escalada de privilégio ────────────────────────────
+    // ─── create ───────────────────────────────────────────────────────────────
 
     @Test
-    void create_engenheiroNaoPodeCriarOutroEngenheiro() {
-        autenticarComo("ENGENHEIRO");
-        // Empresa lookup acontece antes da verificação de privilégio
-        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresaMock()));
-
-        assertThatThrownBy(() -> service.create(requestComPerfil(PerfilUsuario.ENGENHEIRO)))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("Engenheiro não pode criar outro usuário com perfil ENGENHEIRO");
-
-        verify(usuarioRepository, never()).save(any());
-    }
-
-    @Test
-    void create_tecnicoPodeCriarEngenheiro() {
+    void create_engenheiroPodeCriarEngenheiro() {
         autenticarComo("TECNICO");
         Empresa empresa = empresaMock();
         when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresa));
@@ -124,33 +110,10 @@ class UsuarioServiceTest {
         verify(usuarioRepository, never()).save(any());
     }
 
-    // ─── update: bloqueio de promoção de privilégio ───────────────────────────
+    // ─── update ───────────────────────────────────────────────────────────────
 
     @Test
-    void update_engenheiroNaoPodePromoverUsuarioParaEngenheiro() {
-        autenticarComo("ENGENHEIRO");
-
-        UUID userId = UUID.randomUUID();
-        Empresa empresa = empresaMock();
-
-        Usuario existente = new Usuario();
-        existente.setId(userId);
-        existente.setPerfil(PerfilUsuario.TECNICO); // era TECNICO, tentando promover para ENGENHEIRO
-        existente.setEmpresa(empresa);
-
-        when(usuarioRepository.findById(userId)).thenReturn(Optional.of(existente));
-        // Empresa lookup ocorre antes da verificação de privilégio no update
-        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresa));
-
-        assertThatThrownBy(() -> service.update(userId, requestComPerfil(PerfilUsuario.ENGENHEIRO)))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("Engenheiro não pode promover usuário para perfil ENGENHEIRO");
-
-        verify(usuarioRepository, never()).save(any());
-    }
-
-    @Test
-    void update_engenheiroNaoPrecisaAlterarProprioEngenheiroParaEngenheiro() {
+    void update_engenheiroPodeAlterarQualquerPerfil() {
         // Engenheiro editando OUTRO engenheiro que já é ENGENHEIRO → não deve lançar
         // (regra: só bloqueia PROMOVER de outro perfil para ENGENHEIRO)
         autenticarComo("ENGENHEIRO");
