@@ -45,6 +45,7 @@ public class OcorrenciaController {
             item.put("dataRegistro", d.dataRegistro());
             item.put("status", d.status());
             item.put("estabelecimentoNome", d.estabelecimentoNome());
+            item.put("usuarioCriacaoEmail", d.usuarioCriacaoEmail());
             putPrimeiraEvidencia(item, evidenciaRepository.findByDesvioId(d.id()));
             resultado.add(item);
         }
@@ -64,6 +65,7 @@ public class OcorrenciaController {
             item.put("estabelecimentoNome", nc.estabelecimentoNome());
             item.put("engResponsavelConstrutoraId", nc.engResponsavelConstrutoraId());
             item.put("engResponsavelVerificacaoId", nc.engResponsavelVerificacaoId());
+            item.put("usuarioCriacaoEmail", nc.usuarioCriacaoEmail());
             item.put("vencida", nc.vencida());
             putPrimeiraEvidencia(item,
                     evidenciaRepository.findByNaoConformidadeIdAndTipoEvidencia(
