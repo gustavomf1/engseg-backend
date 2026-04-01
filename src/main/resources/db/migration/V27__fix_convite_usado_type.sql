@@ -1,0 +1,1 @@
+ALTER TABLE convite_usuario ALTER COLUMN usado TYPE VARCHAR(1);
