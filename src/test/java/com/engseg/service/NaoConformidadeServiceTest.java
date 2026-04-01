@@ -92,11 +92,11 @@ class NaoConformidadeServiceTest {
 
     private InvestigacaoRequest buildInvestigacaoRequest() {
         return new InvestigacaoRequest(
-                "Por que 1?", "Resposta 1",
-                "Por que 2?", "Resposta 2",
-                "Por que 3?", "Resposta 3",
-                "Por que 4?", "Resposta 4",
-                "Por que 5?", "Resposta 5",
+                List.of(
+                        new InvestigacaoRequest.PorqueItem("Por que 1?", "Resposta 1"),
+                        new InvestigacaoRequest.PorqueItem("Por que 2?", "Resposta 2"),
+                        new InvestigacaoRequest.PorqueItem("Por que 3?", "Resposta 3")
+                ),
                 "Causa raiz identificada",
                 List.of("Atividade A", "Atividade B")
         );

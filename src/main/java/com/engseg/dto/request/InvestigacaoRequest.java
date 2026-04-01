@@ -1,20 +1,18 @@
 package com.engseg.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record InvestigacaoRequest(
-        @NotBlank String porqueUm,
-        @NotBlank String porqueUmResposta,
-        @NotBlank String porqueDois,
-        @NotBlank String porqueDoisResposta,
-        @NotBlank String porqueTres,
-        @NotBlank String porqueTresResposta,
-        @NotBlank String porqueQuatro,
-        @NotBlank String porqueQuatroResposta,
-        @NotBlank String porqueCinco,
-        @NotBlank String porqueCincoResposta,
+        @NotEmpty @Size(min = 1, max = 5) List<@Valid PorqueItem> porques,
         @NotBlank String causaRaiz,
         @NotEmpty List<@NotBlank String> atividades
-) {}
+) {
+    public record PorqueItem(
+            @NotBlank String pergunta,
+            @NotBlank String resposta
+    ) {}
+}

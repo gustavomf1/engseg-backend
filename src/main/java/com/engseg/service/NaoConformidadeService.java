@@ -245,16 +245,17 @@ public class NaoConformidadeService {
             throw new BusinessException("Investigação só pode ser submetida quando NC está ABERTA ou EM_AJUSTE_PELO_EXTERNO");
         }
 
-        nc.setPorqueUm(request.porqueUm());
-        nc.setPorqueUmResposta(request.porqueUmResposta());
-        nc.setPorqueDois(request.porqueDois());
-        nc.setPorqueDoisResposta(request.porqueDoisResposta());
-        nc.setPorqueTres(request.porqueTres());
-        nc.setPorqueTresResposta(request.porqueTresResposta());
-        nc.setPorqueQuatro(request.porqueQuatro());
-        nc.setPorqueQuatroResposta(request.porqueQuatroResposta());
-        nc.setPorqueCinco(request.porqueCinco());
-        nc.setPorqueCincoResposta(request.porqueCincoResposta());
+        List<InvestigacaoRequest.PorqueItem> porques = request.porques();
+        nc.setPorqueUm(porques.get(0).pergunta());
+        nc.setPorqueUmResposta(porques.get(0).resposta());
+        nc.setPorqueDois(porques.size() > 1 ? porques.get(1).pergunta() : null);
+        nc.setPorqueDoisResposta(porques.size() > 1 ? porques.get(1).resposta() : null);
+        nc.setPorqueTres(porques.size() > 2 ? porques.get(2).pergunta() : null);
+        nc.setPorqueTresResposta(porques.size() > 2 ? porques.get(2).resposta() : null);
+        nc.setPorqueQuatro(porques.size() > 3 ? porques.get(3).pergunta() : null);
+        nc.setPorqueQuatroResposta(porques.size() > 3 ? porques.get(3).resposta() : null);
+        nc.setPorqueCinco(porques.size() > 4 ? porques.get(4).pergunta() : null);
+        nc.setPorqueCincoResposta(porques.size() > 4 ? porques.get(4).resposta() : null);
         nc.setCausaRaiz(request.causaRaiz());
 
         // Substitui atividades existentes pelas novas
@@ -278,16 +279,16 @@ public class NaoConformidadeService {
         // Snapshot da investigação submetida
         InvestigacaoSnapshot snapshot = new InvestigacaoSnapshot();
         snapshot.setNaoConformidade(nc);
-        snapshot.setPorqueUm(request.porqueUm());
-        snapshot.setPorqueUmResposta(request.porqueUmResposta());
-        snapshot.setPorqueDois(request.porqueDois());
-        snapshot.setPorqueDoisResposta(request.porqueDoisResposta());
-        snapshot.setPorqueTres(request.porqueTres());
-        snapshot.setPorqueTresResposta(request.porqueTresResposta());
-        snapshot.setPorqueQuatro(request.porqueQuatro());
-        snapshot.setPorqueQuatroResposta(request.porqueQuatroResposta());
-        snapshot.setPorqueCinco(request.porqueCinco());
-        snapshot.setPorqueCincoResposta(request.porqueCincoResposta());
+        snapshot.setPorqueUm(porques.get(0).pergunta());
+        snapshot.setPorqueUmResposta(porques.get(0).resposta());
+        snapshot.setPorqueDois(porques.size() > 1 ? porques.get(1).pergunta() : null);
+        snapshot.setPorqueDoisResposta(porques.size() > 1 ? porques.get(1).resposta() : null);
+        snapshot.setPorqueTres(porques.size() > 2 ? porques.get(2).pergunta() : null);
+        snapshot.setPorqueTresResposta(porques.size() > 2 ? porques.get(2).resposta() : null);
+        snapshot.setPorqueQuatro(porques.size() > 3 ? porques.get(3).pergunta() : null);
+        snapshot.setPorqueQuatroResposta(porques.size() > 3 ? porques.get(3).resposta() : null);
+        snapshot.setPorqueCinco(porques.size() > 4 ? porques.get(4).pergunta() : null);
+        snapshot.setPorqueCincoResposta(porques.size() > 4 ? porques.get(4).resposta() : null);
         snapshot.setCausaRaiz(request.causaRaiz());
         snapshot.setAtividades(new ArrayList<>(request.atividades()));
         snapshot.setDataSubmissao(LocalDateTime.now());

@@ -87,7 +87,7 @@ class NaoConformidadeControllerTest {
     void submeterInvestigacao_externoAutenticado_retorna200() throws Exception {
         when(naoConformidadeService.submeterInvestigacao(any(), any())).thenReturn(mockNcResponse());
         String body = objectMapper.writeValueAsString(new com.engseg.dto.request.InvestigacaoRequest(
-                "P1", "R1", "P2", "R2", "P3", "R3", "P4", "R4", "P5", "R5",
+                List.of(new com.engseg.dto.request.InvestigacaoRequest.PorqueItem("P1", "R1")),
                 "Causa raiz", List.of("Atividade 1")
         ));
 
