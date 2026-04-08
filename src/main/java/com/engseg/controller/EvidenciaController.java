@@ -66,6 +66,26 @@ public class EvidenciaController {
         return ResponseEntity.ok(list);
     }
 
+    @PostMapping("/atividade/{atividadeId}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    public ResponseEntity<EvidenciaResponse> uploadAtividade(
+            @PathVariable UUID atividadeId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "tipo", defaultValue = "TRATATIVA") TipoEvidencia tipo) throws IOException {
+        Evidencia evidencia = evidenciaService.uploadParaAtividade(atividadeId, file, tipo);
+        return ResponseEntity.ok(toResponse(evidencia));
+    }
+
+    @GetMapping("/atividade/{atividadeId}")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    public ResponseEntity<List<EvidenciaResponse>> listarAtividade(@PathVariable UUID atividadeId) {
+        List<EvidenciaResponse> list = evidenciaService.listarPorAtividade(atividadeId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping("/{id}/download")
     @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<byte[]> download(@PathVariable UUID id) {

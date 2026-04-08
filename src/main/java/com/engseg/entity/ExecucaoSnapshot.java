@@ -45,4 +45,11 @@ public class ExecucaoSnapshot {
     )
     @Builder.Default
     private List<Evidencia> evidencias = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "execucao_snapshot_atividade", joinColumns = @JoinColumn(name = "snapshot_id"))
+    @Column(name = "descricao", columnDefinition = "TEXT")
+    @OrderColumn(name = "ordem")
+    @Builder.Default
+    private List<String> atividades = new ArrayList<>();
 }

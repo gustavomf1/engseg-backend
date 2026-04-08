@@ -2,6 +2,7 @@ package com.engseg.service;
 
 import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
+import com.engseg.repository.AtividadePlanoAcaoRepository;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EvidenciaRepository;
 import com.engseg.repository.NaoConformidadeRepository;
@@ -26,6 +27,7 @@ public class EvidenciaService {
     private final DesvioRepository desvioRepository;
     private final UsuarioRepository usuarioRepository;
     private final S3StorageService s3StorageService;
+    private final AtividadePlanoAcaoRepository atividadePlanoAcaoRepository;
 
     private boolean isTecnico() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -80,6 +82,27 @@ public class EvidenciaService {
                 .build();
 
         return evidenciaRepository.save(evidencia);
+    }
+
+    public Evidencia uploadParaAtividade(UUID atividadeId, MultipartFile file, TipoEvidencia tipo) throws IOException {
+        AtividadePlanoAcao atividade = atividadePlanoAcaoRepository.findById(atividadeId)
+                .orElseThrow(() -> new EntityNotFoundException("Atividade não encontrada"));
+
+        String key = s3StorageService.upload(file, "atividades/" + atividadeId);
+
+        Evidencia evidencia = Evidencia.builder()
+                .nomeArquivo(file.getOriginalFilename())
+                .urlArquivo(key)
+                .dataUpload(LocalDateTime.now())
+                .tipoEvidencia(tipo)
+                .atividadePlanoAcao(atividade)
+                .build();
+
+        return evidenciaRepository.save(evidencia);
+    }
+
+    public List<Evidencia> listarPorAtividade(UUID atividadeId) {
+        return evidenciaRepository.findByAtividadePlanoAcaoId(atividadeId);
     }
 
     public List<Evidencia> listarPorDesvio(UUID desvioId, TipoEvidencia tipo) {

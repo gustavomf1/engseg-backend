@@ -88,7 +88,7 @@ class NaoConformidadeControllerTest {
         when(naoConformidadeService.submeterInvestigacao(any(), any())).thenReturn(mockNcResponse());
         String body = objectMapper.writeValueAsString(new com.engseg.dto.request.InvestigacaoRequest(
                 List.of(new com.engseg.dto.request.InvestigacaoRequest.PorqueItem("P1", "R1")),
-                "Causa raiz", List.of("Atividade 1")
+                "Causa raiz", List.of(new com.engseg.dto.request.InvestigacaoRequest.AtividadeItem("Título 1", "Atividade 1"))
         ));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/investigacao", ncId)

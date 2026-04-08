@@ -98,7 +98,10 @@ class NaoConformidadeServiceTest {
                         new InvestigacaoRequest.PorqueItem("Por que 3?", "Resposta 3")
                 ),
                 "Causa raiz identificada",
-                List.of("Atividade A", "Atividade B")
+                List.of(
+                        new InvestigacaoRequest.AtividadeItem("Título A", "Atividade A"),
+                        new InvestigacaoRequest.AtividadeItem("Título B", "Atividade B")
+                )
         );
     }
 

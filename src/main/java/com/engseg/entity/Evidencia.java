@@ -45,4 +45,8 @@ public class Evidencia {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "execucao_snapshot_id")
     private ExecucaoSnapshot execucaoSnapshot;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "atividade_plano_acao_id")
+    private AtividadePlanoAcao atividadePlanoAcao;
 }

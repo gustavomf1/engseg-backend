@@ -10,5 +10,6 @@ public record ExecucaoSnapshotResponse(
         LocalDateTime dataSubmissao,
         String status,
         String comentarioRevisao,
-        List<EvidenciaResponse> evidencias
+        List<EvidenciaResponse> evidencias,
+        List<String> atividades
 ) {}

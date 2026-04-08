@@ -3,7 +3,10 @@ package com.engseg.service;
 import com.engseg.dto.request.AprovarRejeitarRequest;
 import com.engseg.dto.request.InvestigacaoRequest;
 import com.engseg.dto.request.NaoConformidadeRequest;
+import com.engseg.dto.request.RevisarAtividadesRequest;
+import com.engseg.dto.request.RevisarExecucaoRequest;
 import com.engseg.dto.request.SubmeterEvidenciasRequest;
+import com.engseg.dto.request.SubmeterExecucaoRequest;
 import com.engseg.dto.response.*;
 import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
@@ -39,6 +42,7 @@ public class NaoConformidadeService {
     private final HistoricoNcRepository historicoNcRepository;
     private final InvestigacaoSnapshotRepository investigacaoSnapshotRepository;
     private final ExecucaoSnapshotRepository execucaoSnapshotRepository;
+    private final AtividadePlanoAcaoRepository atividadePlanoAcaoRepository;
     private final SecurityHelper securityHelper;
 
     public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId) {
@@ -258,14 +262,38 @@ public class NaoConformidadeService {
         nc.setPorqueCincoResposta(porques.size() > 4 ? porques.get(4).resposta() : null);
         nc.setCausaRaiz(request.causaRaiz());
 
-        // Substitui atividades existentes pelas novas
-        nc.getAtividades().clear();
-        for (int i = 0; i < request.atividades().size(); i++) {
-            AtividadePlanoAcao atividade = new AtividadePlanoAcao();
-            atividade.setNaoConformidade(nc);
-            atividade.setDescricao(request.atividades().get(i));
-            atividade.setOrdem(i + 1);
-            nc.getAtividades().add(atividade);
+        if (nc.getStatus() == StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO) {
+            // Mantém atividades APROVADA; remove REJEITADA e adiciona as corrigidas
+            List<AtividadePlanoAcao> rejeitadas = nc.getAtividades().stream()
+                    .filter(a -> "REJEITADA".equals(a.getStatus()))
+                    .collect(java.util.stream.Collectors.toList());
+            nc.getAtividades().removeAll(rejeitadas);
+
+            int nextOrdem = nc.getAtividades().stream()
+                    .mapToInt(AtividadePlanoAcao::getOrdem).max().orElse(0);
+            for (int i = 0; i < request.atividades().size(); i++) {
+                var item = request.atividades().get(i);
+                AtividadePlanoAcao atividade = new AtividadePlanoAcao();
+                atividade.setNaoConformidade(nc);
+                atividade.setTitulo(item.titulo());
+                atividade.setDescricao(item.descricao());
+                atividade.setOrdem(nextOrdem + i + 1);
+                atividade.setStatus("PENDENTE");
+                nc.getAtividades().add(atividade);
+            }
+        } else {
+            // ABERTA: substitui tudo
+            nc.getAtividades().clear();
+            for (int i = 0; i < request.atividades().size(); i++) {
+                var item = request.atividades().get(i);
+                AtividadePlanoAcao atividade = new AtividadePlanoAcao();
+                atividade.setNaoConformidade(nc);
+                atividade.setTitulo(item.titulo());
+                atividade.setDescricao(item.descricao());
+                atividade.setOrdem(i + 1);
+                atividade.setStatus("PENDENTE");
+                nc.getAtividades().add(atividade);
+            }
         }
 
         StatusNaoConformidade statusAnterior = nc.getStatus();
@@ -290,7 +318,9 @@ public class NaoConformidadeService {
         snapshot.setPorqueCinco(porques.size() > 4 ? porques.get(4).pergunta() : null);
         snapshot.setPorqueCincoResposta(porques.size() > 4 ? porques.get(4).resposta() : null);
         snapshot.setCausaRaiz(request.causaRaiz());
-        snapshot.setAtividades(new ArrayList<>(request.atividades()));
+        snapshot.setAtividades(request.atividades().stream()
+                .map(a -> a.titulo() + " — " + a.descricao())
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new)));
         snapshot.setDataSubmissao(LocalDateTime.now());
         snapshot.setStatus("PENDENTE");
         investigacaoSnapshotRepository.save(snapshot);
@@ -344,6 +374,196 @@ public class NaoConformidadeService {
                 .ifPresent(s -> { s.setStatus("REPROVADO"); s.setComentarioRevisao(request.comentario()); investigacaoSnapshotRepository.save(s); });
 
         nc.setStatus(StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO);
+        return toResponse(naoConformidadeRepository.save(nc));
+    }
+
+    @Transactional
+    public NaoConformidadeResponse revisarAtividades(UUID id, RevisarAtividadesRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
+
+        if (nc.getStatus() != StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO) {
+            throw new BusinessException("Revisão só pode ser feita quando NC está AGUARDANDO_APROVACAO_PLANO");
+        }
+
+        for (var decisao : request.decisoes()) {
+            if ("REJEITADA".equals(decisao.status()) && (decisao.motivo() == null || decisao.motivo().isBlank())) {
+                throw new BusinessException("Motivo é obrigatório ao rejeitar uma atividade");
+            }
+            AtividadePlanoAcao atividade = atividadePlanoAcaoRepository.findById(decisao.atividadeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada: " + decisao.atividadeId()));
+            if (!atividade.getNaoConformidade().getId().equals(id)) {
+                throw new BusinessException("Atividade não pertence a esta NC");
+            }
+            atividade.setStatus(decisao.status());
+            atividade.setMotivoRejeicao("REJEITADA".equals(decisao.status()) ? decisao.motivo() : null);
+            atividadePlanoAcaoRepository.save(atividade);
+        }
+
+        // Determina novo status: se TODAS as atividades da NC são APROVADA → EM_EXECUCAO
+        boolean todasAprovadas = nc.getAtividades().stream()
+                .allMatch(a -> "APROVADA".equals(a.getStatus()));
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+
+        StatusNaoConformidade novoStatus;
+        TipoAcaoHistorico tipoAcao;
+        String snapshotStatus;
+
+        if (todasAprovadas) {
+            novoStatus = StatusNaoConformidade.EM_EXECUCAO;
+            tipoAcao = TipoAcaoHistorico.APROVACAO_PLANO;
+            snapshotStatus = "APROVADO";
+        } else {
+            novoStatus = StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO;
+            tipoAcao = TipoAcaoHistorico.REJEICAO_PLANO;
+            snapshotStatus = "REPROVADO";
+        }
+
+        String comentario = request.comentario();
+        registrarHistorico(nc, usuario, tipoAcao, comentario,
+                StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO, novoStatus);
+
+        final String finalSnapshotStatus = snapshotStatus;
+        final List<AtividadePlanoAcao> atividadesRevisadas = new ArrayList<>(nc.getAtividades());
+        investigacaoSnapshotRepository
+                .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
+                .ifPresent(s -> {
+                    // Encode per-activity status into snapshot atividades using "||" delimiter
+                    s.setAtividades(atividadesRevisadas.stream()
+                            .map(a -> {
+                                String suffix = "REJEITADA".equals(a.getStatus())
+                                        ? " || REJEITADA" + (a.getMotivoRejeicao() != null ? ": " + a.getMotivoRejeicao() : "")
+                                        : " || APROVADA";
+                                return a.getTitulo() + " — " + a.getDescricao() + suffix;
+                            })
+                            .collect(java.util.stream.Collectors.toCollection(ArrayList::new)));
+                    s.setStatus(finalSnapshotStatus);
+                    s.setComentarioRevisao(comentario);
+                    investigacaoSnapshotRepository.save(s);
+                });
+
+        nc.setStatus(novoStatus);
+        return toResponse(naoConformidadeRepository.save(nc));
+    }
+
+    @Transactional
+    public NaoConformidadeResponse submeterExecucao(UUID id, SubmeterExecucaoRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
+
+        if (nc.getStatus() != StatusNaoConformidade.EM_EXECUCAO) {
+            throw new BusinessException("Execução só pode ser submetida quando NC está EM_EXECUCAO");
+        }
+
+        for (var item : request.atividades()) {
+            AtividadePlanoAcao atividade = atividadePlanoAcaoRepository.findById(item.atividadeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada: " + item.atividadeId()));
+            if (!atividade.getNaoConformidade().getId().equals(id)) {
+                throw new BusinessException("Atividade não pertence a esta NC");
+            }
+            // Only update activities not yet approved in execution
+            if (!"APROVADA".equals(atividade.getStatusExecucao())) {
+                atividade.setDescricaoExecucao(item.descricaoExecucao());
+                atividade.setStatusExecucao("PENDENTE");
+                atividadePlanoAcaoRepository.save(atividade);
+            }
+        }
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+
+        registrarHistorico(nc, usuario, TipoAcaoHistorico.SUBMISSAO_EVIDENCIAS, null,
+                StatusNaoConformidade.EM_EXECUCAO, StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+
+        ExecucaoSnapshot execSnapshot = new ExecucaoSnapshot();
+        execSnapshot.setNaoConformidade(nc);
+        execSnapshot.setDescricaoExecucao("");
+        execSnapshot.setDataSubmissao(LocalDateTime.now());
+        execSnapshot.setStatus("PENDENTE");
+        // Store per-activity execution data with evidence IDs
+        execSnapshot.setAtividades(nc.getAtividades().stream()
+                .map(a -> {
+                    String desc = a.getDescricaoExecucao() != null ? a.getDescricaoExecucao() : "";
+                    List<Evidencia> evs = evidenciaRepository.findByAtividadePlanoAcaoId(a.getId());
+                    String evIds = evs.stream().map(e -> e.getId().toString()).collect(java.util.stream.Collectors.joining(","));
+                    return a.getTitulo() + " — " + desc + (evIds.isEmpty() ? "" : " §§ " + evIds);
+                })
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new)));
+        execucaoSnapshotRepository.save(execSnapshot);
+
+        nc.setStatus(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+        return toResponse(naoConformidadeRepository.save(nc));
+    }
+
+    @Transactional
+    public NaoConformidadeResponse revisarExecucao(UUID id, RevisarExecucaoRequest request) {
+        NaoConformidade nc = findNcOrThrow(id);
+
+        if (nc.getStatus() != StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL) {
+            throw new BusinessException("Revisão da execução só pode ser feita quando NC está AGUARDANDO_VALIDACAO_FINAL");
+        }
+
+        for (var decisao : request.decisoes()) {
+            if ("REJEITADA".equals(decisao.status()) && (decisao.motivo() == null || decisao.motivo().isBlank())) {
+                throw new BusinessException("Motivo é obrigatório ao rejeitar uma atividade");
+            }
+            AtividadePlanoAcao atividade = atividadePlanoAcaoRepository.findById(decisao.atividadeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada: " + decisao.atividadeId()));
+            if (!atividade.getNaoConformidade().getId().equals(id)) {
+                throw new BusinessException("Atividade não pertence a esta NC");
+            }
+            atividade.setStatusExecucao(decisao.status());
+            atividade.setMotivoRejeicaoExecucao("REJEITADA".equals(decisao.status()) ? decisao.motivo() : null);
+            atividadePlanoAcaoRepository.save(atividade);
+        }
+
+        boolean todasAprovadas = nc.getAtividades().stream()
+                .allMatch(a -> "APROVADA".equals(a.getStatusExecucao()));
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+
+        StatusNaoConformidade novoStatus;
+        TipoAcaoHistorico tipoAcao;
+        String snapshotStatus;
+
+        if (todasAprovadas) {
+            novoStatus = StatusNaoConformidade.CONCLUIDO;
+            tipoAcao = TipoAcaoHistorico.APROVACAO_EVIDENCIAS;
+            snapshotStatus = "APROVADO";
+        } else {
+            novoStatus = StatusNaoConformidade.EM_EXECUCAO;
+            tipoAcao = TipoAcaoHistorico.REJEICAO_EVIDENCIAS;
+            snapshotStatus = "REPROVADO";
+        }
+
+        String comentario = request.comentario();
+        registrarHistorico(nc, usuario, tipoAcao, comentario,
+                StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL, novoStatus);
+
+        final String finalSnapshotStatus = snapshotStatus;
+        final List<AtividadePlanoAcao> atividadesRevisadasExec = new ArrayList<>(nc.getAtividades());
+        execucaoSnapshotRepository
+                .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
+                .ifPresent(s -> {
+                    // Encode per-activity execution status + evidence IDs into snapshot
+                    s.setAtividades(atividadesRevisadasExec.stream()
+                            .map(a -> {
+                                String desc = a.getDescricaoExecucao() != null ? a.getDescricaoExecucao() : "";
+                                String suffix = "REJEITADA".equals(a.getStatusExecucao())
+                                        ? " || REJEITADA" + (a.getMotivoRejeicaoExecucao() != null ? ": " + a.getMotivoRejeicaoExecucao() : "")
+                                        : " || APROVADA";
+                                List<Evidencia> evs = evidenciaRepository.findByAtividadePlanoAcaoId(a.getId());
+                                String evIds = evs.stream().map(e -> e.getId().toString()).collect(java.util.stream.Collectors.joining(","));
+                                return a.getTitulo() + " — " + desc + suffix + (evIds.isEmpty() ? "" : " §§ " + evIds);
+                            })
+                            .collect(java.util.stream.Collectors.toCollection(ArrayList::new)));
+                    s.setStatus(finalSnapshotStatus);
+                    s.setComentarioRevisao(comentario);
+                    execucaoSnapshotRepository.save(s);
+                });
+
+        nc.setStatus(novoStatus);
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -528,9 +748,18 @@ public class NaoConformidadeService {
                 )).toList();
 
         List<AtividadeResponse> atividades = nc.getAtividades() == null ? List.of() :
-                nc.getAtividades().stream().map(a -> new AtividadeResponse(
-                        a.getId(), a.getDescricao(), a.getOrdem()
-                )).toList();
+                nc.getAtividades().stream().map(a -> {
+                    List<EvidenciaResponse> evs = evidenciaRepository.findByAtividadePlanoAcaoId(a.getId())
+                            .stream()
+                            .map(e -> new EvidenciaResponse(e.getId(), e.getNomeArquivo(), e.getUrlArquivo(), e.getDataUpload()))
+                            .toList();
+                    return new AtividadeResponse(
+                            a.getId(), a.getTitulo(), a.getDescricao(), a.getOrdem(),
+                            a.getStatus(), a.getMotivoRejeicao(),
+                            a.getDescricaoExecucao(), a.getStatusExecucao(), a.getMotivoRejeicaoExecucao(),
+                            evs
+                    );
+                }).toList();
 
         List<HistoricoNcResponse> historico = nc.getHistorico() == null ? List.of() :
                 nc.getHistorico().stream()
@@ -564,7 +793,8 @@ public class NaoConformidadeService {
                                 s.getDataSubmissao(), s.getStatus(), s.getComentarioRevisao(),
                                 s.getEvidencias().stream()
                                         .map(e -> new EvidenciaResponse(e.getId(), e.getNomeArquivo(), e.getUrlArquivo(), e.getDataUpload()))
-                                        .toList()
+                                        .toList(),
+                                s.getAtividades()
                         )).toList();
 
         return new NaoConformidadeResponse(

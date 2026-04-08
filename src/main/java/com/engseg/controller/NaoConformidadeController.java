@@ -3,7 +3,10 @@ package com.engseg.controller;
 import com.engseg.dto.request.AprovarRejeitarRequest;
 import com.engseg.dto.request.InvestigacaoRequest;
 import com.engseg.dto.request.NaoConformidadeRequest;
+import com.engseg.dto.request.RevisarAtividadesRequest;
+import com.engseg.dto.request.RevisarExecucaoRequest;
 import com.engseg.dto.request.SubmeterEvidenciasRequest;
+import com.engseg.dto.request.SubmeterExecucaoRequest;
 import com.engseg.dto.response.HistoricoNcResponse;
 import com.engseg.dto.response.NaoConformidadeResponse;
 import com.engseg.entity.StatusNaoConformidade;
@@ -84,6 +87,30 @@ public class NaoConformidadeController {
             @PathVariable UUID id,
             @Valid @RequestBody AprovarRejeitarRequest request) {
         return ResponseEntity.ok(naoConformidadeService.rejeitarPlano(id, request));
+    }
+
+    @PostMapping("/{id}/revisar-atividades")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> revisarAtividades(
+            @PathVariable UUID id,
+            @Valid @RequestBody RevisarAtividadesRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.revisarAtividades(id, request));
+    }
+
+    @PostMapping("/{id}/submeter-execucao")
+    @PreAuthorize("hasAnyRole('EXTERNO', 'TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> submeterExecucao(
+            @PathVariable UUID id,
+            @Valid @RequestBody SubmeterExecucaoRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.submeterExecucao(id, request));
+    }
+
+    @PostMapping("/{id}/revisar-execucao")
+    @PreAuthorize("hasRole('ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> revisarExecucao(
+            @PathVariable UUID id,
+            @Valid @RequestBody RevisarExecucaoRequest request) {
+        return ResponseEntity.ok(naoConformidadeService.revisarExecucao(id, request));
     }
 
     @PostMapping("/{id}/submeter-evidencias")
