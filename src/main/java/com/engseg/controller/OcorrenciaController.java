@@ -67,6 +67,8 @@ public class OcorrenciaController {
             item.put("engResponsavelVerificacaoId", nc.engResponsavelVerificacaoId());
             item.put("usuarioCriacaoEmail", nc.usuarioCriacaoEmail());
             item.put("vencida", nc.vencida());
+            item.put("quantidadeAtividades", nc.atividades() != null ? nc.atividades().size() : 0);
+            item.put("quantidadeHistorico", nc.historico() != null ? nc.historico().size() : 0);
             putPrimeiraEvidencia(item,
                     evidenciaRepository.findByNaoConformidadeIdAndTipoEvidencia(
                             nc.id(), TipoEvidencia.OCORRENCIA));

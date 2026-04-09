@@ -126,4 +126,8 @@ public class NaoConformidade extends Ocorrencia {
 
     @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Validacao> validacoes;
+
+    @OneToMany(mappedBy = "naoConformidade", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<NcTrechoNorma> trechosNorma = new ArrayList<>();
 }

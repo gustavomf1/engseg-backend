@@ -5,6 +5,7 @@ import com.engseg.exception.BusinessException;
 import com.engseg.repository.AtividadePlanoAcaoRepository;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EvidenciaRepository;
+import com.engseg.repository.ExecucaoSnapshotRepository;
 import com.engseg.repository.NaoConformidadeRepository;
 import com.engseg.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,6 +29,7 @@ public class EvidenciaService {
     private final UsuarioRepository usuarioRepository;
     private final S3StorageService s3StorageService;
     private final AtividadePlanoAcaoRepository atividadePlanoAcaoRepository;
+    private final ExecucaoSnapshotRepository execucaoSnapshotRepository;
 
     private boolean isTecnico() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -132,6 +134,13 @@ public class EvidenciaService {
             if (evidencia.getNaoConformidade() != null && evidencia.getNaoConformidade().getStatus() != StatusNaoConformidade.ABERTA) {
                 throw new BusinessException("Técnico não pode excluir evidências de NC que não está com status ABERTA");
             }
+        }
+
+        // Remove referência da tabela junction execucao_snapshot_evidencia antes de deletar
+        List<ExecucaoSnapshot> snapshots = execucaoSnapshotRepository.findByEvidenciasId(evidencia.getId());
+        for (ExecucaoSnapshot snapshot : snapshots) {
+            snapshot.getEvidencias().remove(evidencia);
+            execucaoSnapshotRepository.save(snapshot);
         }
 
         s3StorageService.delete(evidencia.getUrlArquivo());
