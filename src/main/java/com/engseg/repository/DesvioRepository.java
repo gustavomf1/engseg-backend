@@ -14,4 +14,6 @@ public interface DesvioRepository extends JpaRepository<Desvio, UUID> {
     long countByStatus(StatusDesvio status);
 
     List<Desvio> findByEstabelecimentoIdIn(Collection<UUID> estabelecimentoIds);
+
+    List<Desvio> findByEstabelecimentoId(UUID estabelecimentoId);
 }

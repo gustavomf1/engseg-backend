@@ -57,7 +57,7 @@ public class DashboardController {
     public ResponseEntity<List<Map<String, Object>>> getRecentes() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
-        for (DesvioResponse d : desvioService.findAll()) {
+        for (DesvioResponse d : desvioService.findAll(null)) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "DESVIO");
             item.put("id", d.id());

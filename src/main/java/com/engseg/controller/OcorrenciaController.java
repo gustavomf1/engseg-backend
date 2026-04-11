@@ -32,10 +32,11 @@ public class OcorrenciaController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
-    public ResponseEntity<List<Map<String, Object>>> listarTodas() {
+    public ResponseEntity<List<Map<String, Object>>> listarTodas(
+            @RequestParam(required = false) UUID estabelecimentoId) {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
-        for (DesvioResponse d : desvioService.findAll()) {
+        for (DesvioResponse d : desvioService.findAll(estabelecimentoId)) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "DESVIO");
             item.put("id", d.id());
@@ -50,7 +51,7 @@ public class OcorrenciaController {
             resultado.add(item);
         }
 
-        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, null)) {
+        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, estabelecimentoId)) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "NAO_CONFORMIDADE");
             item.put("id", nc.id());

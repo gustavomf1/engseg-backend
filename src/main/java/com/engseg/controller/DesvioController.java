@@ -23,7 +23,7 @@ public class DesvioController {
     @GetMapping
     @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<List<DesvioResponse>> getAll() {
-        return ResponseEntity.ok(desvioService.findAll());
+        return ResponseEntity.ok(desvioService.findAll(null));
     }
 
     @GetMapping("/{id}")
