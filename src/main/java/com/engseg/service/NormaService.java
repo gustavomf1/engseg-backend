@@ -9,6 +9,7 @@ import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.NormaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NormaService {
@@ -75,7 +77,18 @@ public class NormaService {
         }
 
         String trecho = claudeService.buscarTrecho(norma.getConteudo(), request.prompt());
-        return new BuscarTrechoResponse(trecho, null);
+
+        // Remove caracteres de controle (< 0x20) que quebram a serialização JSON,
+        // preservando apenas \t (0x09), \n (0x0A) e \r (0x0D)
+        String trechoSanitizado = trecho.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]", "");
+
+        log.info("[NormaService] buscarTrecho → normaId={} trechoLen={} sanitizadoLen={} preview={}",
+                id,
+                trecho.length(),
+                trechoSanitizado.length(),
+                trechoSanitizado.substring(0, Math.min(120, trechoSanitizado.length())).replace("\n", "↵"));
+
+        return new BuscarTrechoResponse(trechoSanitizado, null);
     }
 
     @Transactional
