@@ -1,4 +1,6 @@
-com/engseg/EngSegApplicationTests.class
 com/engseg/controller/NaoConformidadeControllerTest.class
-com/engseg/service/UsuarioServiceTest.class
+com/engseg/scheduler/NcSchedulerTest.class
 com/engseg/service/NaoConformidadeServiceTest.class
+com/engseg/EngSegApplicationTests.class
+com/engseg/service/DashboardServiceTest.class
+com/engseg/service/UsuarioServiceTest.class

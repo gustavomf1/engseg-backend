@@ -3,10 +3,12 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/InvestigacaoSnapshotRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/NcTrechoNormaRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/NaoConformidadeService.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/scheduler/NcScheduler.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/EstabelecimentoEmpresaService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/LocalizacaoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/DesvioRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Validacao.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/DashboardService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/EngSegApplication.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/NcTrechoNormaController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/OcorrenciaController.java
@@ -56,6 +58,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/NivelSeveridade.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/NcTrechoNormaResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/AuthService.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RejeitarRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/LocalizacaoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/ExecucaoSnapshot.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/ConviteRequest.java
@@ -89,8 +92,8 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/ConviteController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/S3StorageService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/HistoricoNcRepository.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/ClaudeService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/NcTrechoNormaService.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/ClaudeService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Ocorrencia.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/security/JwtFilter.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/StatusDesvio.java

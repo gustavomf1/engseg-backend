@@ -1,7 +1,7 @@
 package com.engseg.controller;
 
 import com.engseg.config.SecurityConfig;
-import com.engseg.dto.request.AprovarRejeitarRequest;
+import com.engseg.dto.request.RejeitarRequest;
 import com.engseg.dto.response.NaoConformidadeResponse;
 import com.engseg.security.JwtFilter;
 import com.engseg.security.JwtService;
@@ -113,7 +113,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "EXTERNO")
     void rejeitarPlano_externoAutenticado_retorna403() throws Exception {
-        String body = objectMapper.writeValueAsString(new AprovarRejeitarRequest("motivo"));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo"));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-plano", ncId)
                         .with(csrf())
@@ -135,7 +135,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "EXTERNO")
     void rejeitarEvidencias_externoAutenticado_retorna403() throws Exception {
-        String body = objectMapper.writeValueAsString(new AprovarRejeitarRequest("motivo"));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo"));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-evidencias", ncId)
                         .with(csrf())
@@ -198,7 +198,7 @@ class NaoConformidadeControllerTest {
     @WithMockUser(roles = "ENGENHEIRO")
     void rejeitarPlano_engenheiroAutenticado_retorna200() throws Exception {
         when(naoConformidadeService.rejeitarPlano(any(), any())).thenReturn(mockNcResponse());
-        String body = objectMapper.writeValueAsString(new AprovarRejeitarRequest("motivo válido"));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo válido"));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-plano", ncId)
                         .with(csrf())
@@ -223,13 +223,39 @@ class NaoConformidadeControllerTest {
     @WithMockUser(roles = "ENGENHEIRO")
     void rejeitarEvidencias_engenheiroAutenticado_retorna200() throws Exception {
         when(naoConformidadeService.rejeitarEvidencias(any(), any())).thenReturn(mockNcResponse());
-        String body = objectMapper.writeValueAsString(new AprovarRejeitarRequest("motivo válido"));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo válido"));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-evidencias", ncId)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk());
+    }
+
+    // ─── Validação HTTP (@Valid) ───────────────────────────────────────────────
+
+    @Test
+    @WithMockUser(roles = "ENGENHEIRO")
+    void rejeitarPlano_motivoVazio_retorna400() throws Exception {
+        String body = objectMapper.writeValueAsString(new RejeitarRequest(""));
+
+        mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-plano", ncId)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "ENGENHEIRO")
+    void rejeitarEvidencias_motivoVazio_retorna400() throws Exception {
+        String body = objectMapper.writeValueAsString(new RejeitarRequest(""));
+
+        mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-evidencias", ncId)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
     }
 
     // ─── helper ───────────────────────────────────────────────────────────────

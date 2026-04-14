@@ -4,6 +4,7 @@ import com.engseg.entity.Evidencia;
 import com.engseg.entity.TipoEvidencia;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,4 +18,5 @@ public interface EvidenciaRepository extends JpaRepository<Evidencia, UUID> {
     List<Evidencia> findByExecucaoSnapshotId(UUID execucaoSnapshotId);
     List<Evidencia> findByNaoConformidadeIdAndTipoEvidenciaAndExecucaoSnapshotIsNull(UUID naoConformidadeId, TipoEvidencia tipoEvidencia);
     List<Evidencia> findByAtividadePlanoAcaoId(UUID atividadePlanoAcaoId);
+    List<Evidencia> findByAtividadePlanoAcaoIdIn(Collection<UUID> atividadeIds);
 }

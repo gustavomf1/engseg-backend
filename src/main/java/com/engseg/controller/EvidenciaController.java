@@ -1,5 +1,6 @@
 package com.engseg.controller;
 
+import com.engseg.dto.response.EvidenciaResponse;
 import com.engseg.entity.Evidencia;
 import com.engseg.entity.TipoEvidencia;
 import com.engseg.service.EvidenciaService;
@@ -106,13 +107,11 @@ public class EvidenciaController {
 
     private EvidenciaResponse toResponse(Evidencia e) {
         return new EvidenciaResponse(
-                e.getId().toString(),
+                e.getId(),
                 e.getNomeArquivo(),
                 e.getUrlArquivo(),
-                e.getDataUpload().toString(),
-                e.getTipoEvidencia().name()
+                e.getDataUpload(),
+                e.getTipoEvidencia() != null ? e.getTipoEvidencia().name() : null
         );
     }
-
-    public record EvidenciaResponse(String id, String nomeArquivo, String urlArquivo, String dataUpload, String tipoEvidencia) {}
 }

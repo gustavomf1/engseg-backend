@@ -2,6 +2,7 @@ package com.engseg.controller;
 
 import com.engseg.dto.request.AprovarRejeitarRequest;
 import com.engseg.dto.request.InvestigacaoRequest;
+import com.engseg.dto.request.RejeitarRequest;
 import com.engseg.dto.request.NaoConformidadeRequest;
 import com.engseg.dto.request.RevisarAtividadesRequest;
 import com.engseg.dto.request.RevisarExecucaoRequest;
@@ -85,7 +86,7 @@ public class NaoConformidadeController {
     @PreAuthorize("hasRole('ENGENHEIRO')")
     public ResponseEntity<NaoConformidadeResponse> rejeitarPlano(
             @PathVariable UUID id,
-            @Valid @RequestBody AprovarRejeitarRequest request) {
+            @Valid @RequestBody RejeitarRequest request) {
         return ResponseEntity.ok(naoConformidadeService.rejeitarPlano(id, request));
     }
 
@@ -133,7 +134,7 @@ public class NaoConformidadeController {
     @PreAuthorize("hasRole('ENGENHEIRO')")
     public ResponseEntity<NaoConformidadeResponse> rejeitarEvidencias(
             @PathVariable UUID id,
-            @Valid @RequestBody AprovarRejeitarRequest request) {
+            @Valid @RequestBody RejeitarRequest request) {
         return ResponseEntity.ok(naoConformidadeService.rejeitarEvidencias(id, request));
     }
 

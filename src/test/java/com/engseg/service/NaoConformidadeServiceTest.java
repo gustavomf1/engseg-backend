@@ -2,6 +2,7 @@ package com.engseg.service;
 
 import com.engseg.dto.request.AprovarRejeitarRequest;
 import com.engseg.dto.request.InvestigacaoRequest;
+import com.engseg.dto.request.RejeitarRequest;
 import com.engseg.dto.request.SubmeterEvidenciasRequest;
 import com.engseg.dto.response.NaoConformidadeResponse;
 import com.engseg.entity.*;
@@ -200,7 +201,7 @@ class NaoConformidadeServiceTest {
         when(investigacaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.rejeitarPlano(ncId, new AprovarRejeitarRequest("Motivo da rejeição"));
+        service.rejeitarPlano(ncId, new RejeitarRequest("Motivo da rejeição"));
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -208,26 +209,11 @@ class NaoConformidadeServiceTest {
     }
 
     @Test
-    void rejeitarPlano_semMotivo_lancaBusinessException() {
-        NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
-        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
-
-        assertThatThrownBy(() -> service.rejeitarPlano(ncId, new AprovarRejeitarRequest("")))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("obrigatório");
-
-        assertThatThrownBy(() -> service.rejeitarPlano(ncId, null))
-                .isInstanceOf(BusinessException.class);
-
-        verify(naoConformidadeRepository, never()).save(any());
-    }
-
-    @Test
     void rejeitarPlano_quandoStatusInvalido_lancaBusinessException() {
         NaoConformidade nc = buildNc(StatusNaoConformidade.EM_EXECUCAO);
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
 
-        assertThatThrownBy(() -> service.rejeitarPlano(ncId, new AprovarRejeitarRequest("motivo")))
+        assertThatThrownBy(() -> service.rejeitarPlano(ncId, new RejeitarRequest("motivo")))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("AGUARDANDO_APROVACAO_PLANO");
     }
@@ -269,7 +255,7 @@ class NaoConformidadeServiceTest {
         when(execucaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Aprovado"));
+        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Aprovado")); // atividades null → allMatch=true
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -296,7 +282,7 @@ class NaoConformidadeServiceTest {
         when(execucaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.rejeitarEvidencias(ncId, new AprovarRejeitarRequest("Evidências insuficientes"));
+        service.rejeitarEvidencias(ncId, new RejeitarRequest("Evidências insuficientes"));
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -304,24 +290,50 @@ class NaoConformidadeServiceTest {
     }
 
     @Test
-    void rejeitarEvidencias_semMotivo_lancaBusinessException() {
-        NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+    void rejeitarEvidencias_quandoStatusInvalido_lancaBusinessException() {
+        NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
 
-        assertThatThrownBy(() -> service.rejeitarEvidencias(ncId, new AprovarRejeitarRequest("  ")))
+        assertThatThrownBy(() -> service.rejeitarEvidencias(ncId, new RejeitarRequest("motivo")))
                 .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("obrigatório");
+                .hasMessageContaining("AGUARDANDO_VALIDACAO_FINAL");
+    }
+
+    // ─── aprovarEvidencias: allMatch APROVADA ──────────────────────────────────
+
+    @Test
+    void aprovarEvidencias_quandoAtividadeNaoAprovada_lancaBusinessException() {
+        NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+        AtividadePlanoAcao atividade = new AtividadePlanoAcao();
+        atividade.setId(UUID.randomUUID());
+        atividade.setStatusExecucao("PENDENTE");
+        nc.setAtividades(List.of(atividade));
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+
+        assertThatThrownBy(() -> service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("ok")))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("execução aprovada");
 
         verify(naoConformidadeRepository, never()).save(any());
     }
 
     @Test
-    void rejeitarEvidencias_quandoStatusInvalido_lancaBusinessException() {
-        NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
+    void aprovarEvidencias_quandoTodasAtividadesAprovadas_transicionaParaConcluido() {
+        NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+        AtividadePlanoAcao atividade = new AtividadePlanoAcao();
+        atividade.setId(UUID.randomUUID());
+        atividade.setStatusExecucao("APROVADA");
+        nc.setAtividades(List.of(atividade));
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+        mockToResponseDeps(nc);
+        when(evidenciaRepository.findByAtividadePlanoAcaoIdIn(any())).thenReturn(List.of());
+        when(execucaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
+                .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.rejeitarEvidencias(ncId, new AprovarRejeitarRequest("motivo")))
-                .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("AGUARDANDO_VALIDACAO_FINAL");
+        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Tudo certo"));
+
+        ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
+        verify(naoConformidadeRepository).save(captor.capture());
+        assertThat(captor.getValue().getStatus()).isEqualTo(StatusNaoConformidade.CONCLUIDO);
     }
 }

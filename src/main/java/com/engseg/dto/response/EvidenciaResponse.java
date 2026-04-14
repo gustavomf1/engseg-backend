@@ -7,5 +7,6 @@ public record EvidenciaResponse(
         UUID id,
         String nomeArquivo,
         String urlArquivo,
-        LocalDateTime dataUpload
+        LocalDateTime dataUpload,
+        String tipoEvidencia
 ) {}

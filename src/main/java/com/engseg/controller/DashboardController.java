@@ -1,14 +1,11 @@
 package com.engseg.controller;
 
 import com.engseg.dto.response.DashboardStatsResponse;
-import com.engseg.dto.response.DesvioResponse;
-import com.engseg.dto.response.NaoConformidadeResponse;
 import com.engseg.entity.StatusDesvio;
 import com.engseg.entity.StatusNaoConformidade;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.NaoConformidadeRepository;
-import com.engseg.service.DesvioService;
-import com.engseg.service.NaoConformidadeService;
+import com.engseg.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,8 +20,7 @@ public class DashboardController {
 
     private final NaoConformidadeRepository naoConformidadeRepository;
     private final DesvioRepository desvioRepository;
-    private final DesvioService desvioService;
-    private final NaoConformidadeService naoConformidadeService;
+    private final DashboardService dashboardService;
 
     @GetMapping("/stats")
     @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
@@ -55,43 +51,6 @@ public class DashboardController {
     @GetMapping("/recentes")
     @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<List<Map<String, Object>>> getRecentes() {
-        List<Map<String, Object>> resultado = new ArrayList<>();
-
-        for (DesvioResponse d : desvioService.findAll(null)) {
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("tipo", "DESVIO");
-            item.put("id", d.id());
-            item.put("titulo", d.titulo());
-            item.put("localizacao", d.localizacaoNome());
-            item.put("descricao", d.descricao());
-            item.put("dataRegistro", d.dataRegistro());
-            item.put("status", d.status());
-            item.put("estabelecimentoNome", d.estabelecimentoNome());
-            resultado.add(item);
-        }
-
-        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, null)) {
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("tipo", "NAO_CONFORMIDADE");
-            item.put("id", nc.id());
-            item.put("titulo", nc.titulo());
-            item.put("localizacao", nc.localizacaoNome());
-            item.put("descricao", nc.descricao());
-            item.put("dataRegistro", nc.dataRegistro());
-            item.put("regraDeOuro", nc.regraDeOuro());
-            item.put("status", nc.status());
-            item.put("dataLimiteResolucao", nc.dataLimiteResolucao());
-            item.put("nivelSeveridade", nc.nivelSeveridade());
-            item.put("estabelecimentoNome", nc.estabelecimentoNome());
-            resultado.add(item);
-        }
-
-        resultado.sort((a, b) -> {
-            String da = String.valueOf(a.get("dataRegistro"));
-            String db = String.valueOf(b.get("dataRegistro"));
-            return db.compareTo(da);
-        });
-
-        return ResponseEntity.ok(resultado.stream().limit(5).toList());
+        return ResponseEntity.ok(dashboardService.getRecentes());
     }
 }
