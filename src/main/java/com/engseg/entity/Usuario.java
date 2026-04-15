@@ -41,6 +41,11 @@ public class Usuario {
     @Builder.Default
     private boolean ativo = true;
 
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(name = "is_admin", nullable = false, length = 1)
+    @Builder.Default
+    private boolean admin = false;
+
     @Column(name = "dt_criacao")
     private LocalDate dtCriacao;
 
