@@ -1,5 +1,6 @@
 package com.engseg.controller;
 
+import com.engseg.dto.request.CriarUsuarioDiretoRequest;
 import com.engseg.dto.request.UsuarioRequest;
 import com.engseg.dto.response.UsuarioResponse;
 import com.engseg.service.UsuarioService;
@@ -57,5 +58,11 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponse> reativar(@PathVariable UUID id) {
         return ResponseEntity.ok(usuarioService.reativar(id));
+    }
+
+    @PostMapping("/direto")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioResponse> criarDireto(@Valid @RequestBody CriarUsuarioDiretoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.criarDireto(request));
     }
 }
