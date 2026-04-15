@@ -9,5 +9,6 @@ public record LoginResponse(
         String token,
         String nome,
         String email,
-        PerfilUsuario perfil
+        PerfilUsuario perfil,
+        boolean isAdmin
 ) {}
