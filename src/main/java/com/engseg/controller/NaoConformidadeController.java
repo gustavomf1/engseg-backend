@@ -30,11 +30,12 @@ public class NaoConformidadeController {
     private final NaoConformidadeService naoConformidadeService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<List<NaoConformidadeResponse>> getAll(
             @RequestParam(required = false) StatusNaoConformidade status,
-            @RequestParam(required = false) UUID estabelecimentoId) {
-        return ResponseEntity.ok(naoConformidadeService.findAll(status, estabelecimentoId));
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID empresaId) {
+        return ResponseEntity.ok(naoConformidadeService.findAll(status, estabelecimentoId, empresaId));
     }
 
     @GetMapping("/{id}")

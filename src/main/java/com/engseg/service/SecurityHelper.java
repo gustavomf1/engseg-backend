@@ -28,6 +28,10 @@ public class SecurityHelper {
         return getUsuarioLogado().getPerfil() == PerfilUsuario.EXTERNO;
     }
 
+    public boolean isAdmin() {
+        return getUsuarioLogado().isAdmin();
+    }
+
     /**
      * Retorna os estabelecimentos da empresa EXTERNO (via junction table).
      * Apenas deve ser chamado quando isExterno() == true.

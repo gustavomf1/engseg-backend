@@ -24,11 +24,9 @@ public class LocalizacaoController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<LocalizacaoResponse>> getAll(
             @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID empresaId,
             @RequestParam(required = false) Boolean ativo) {
-        if (estabelecimentoId != null) {
-            return ResponseEntity.ok(localizacaoService.findByEstabelecimentoId(estabelecimentoId));
-        }
-        return ResponseEntity.ok(localizacaoService.findAll(ativo));
+        return ResponseEntity.ok(localizacaoService.findAll(estabelecimentoId, empresaId, ativo));
     }
 
     @GetMapping("/{id}")

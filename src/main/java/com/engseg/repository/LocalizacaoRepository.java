@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface LocalizacaoRepository extends JpaRepository<Localizacao, UUID> {
     List<Localizacao> findByEstabelecimentoId(UUID estabelecimentoId);
     List<Localizacao> findAllByAtivo(boolean ativo);
+    List<Localizacao> findByEstabelecimento_EmpresaId(UUID empresaId);
 }

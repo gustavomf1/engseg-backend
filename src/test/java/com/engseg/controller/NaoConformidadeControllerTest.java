@@ -67,7 +67,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "EXTERNO")
     void getAll_externoAutenticado_retorna200() throws Exception {
-        when(naoConformidadeService.findAll(any(), any())).thenReturn(List.of());
+        when(naoConformidadeService.findAll(any(), any(), any())).thenReturn(List.of());
 
         mockMvc.perform(get("/api/nao-conformidades"))
                 .andExpect(status().isOk());
@@ -164,7 +164,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "TECNICO")
     void getAll_tecnicoAutenticado_retorna200() throws Exception {
-        when(naoConformidadeService.findAll(any(), any())).thenReturn(List.of());
+        when(naoConformidadeService.findAll(any(), any(), any())).thenReturn(List.of());
 
         mockMvc.perform(get("/api/nao-conformidades"))
                 .andExpect(status().isOk());

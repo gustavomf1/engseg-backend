@@ -24,6 +24,10 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
 
     List<NaoConformidade> findByStatusAndEstabelecimentoIdIn(StatusNaoConformidade status, Collection<UUID> estabelecimentoIds);
 
+    List<NaoConformidade> findByEstabelecimento_EmpresaId(UUID empresaId);
+
+    List<NaoConformidade> findByStatusAndEstabelecimento_EmpresaId(StatusNaoConformidade status, UUID empresaId);
+
     @Query("SELECT nc FROM NaoConformidade nc WHERE nc.vencida = 'N' AND nc.status != 'CONCLUIDO' AND nc.dataLimiteResolucao < :today")
     List<NaoConformidade> findVencidas(@Param("today") LocalDate today);
 

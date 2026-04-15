@@ -28,8 +28,9 @@ public class EstabelecimentoController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<EstabelecimentoResponse>> getAll(
-            @RequestParam(required = false) Boolean ativo) {
-        return ResponseEntity.ok(estabelecimentoService.findAll(ativo));
+            @RequestParam(required = false) Boolean ativo,
+            @RequestParam(required = false) UUID empresaId) {
+        return ResponseEntity.ok(estabelecimentoService.findAll(ativo, empresaId));
     }
 
     @GetMapping("/{id}")

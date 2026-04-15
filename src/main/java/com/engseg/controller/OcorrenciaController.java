@@ -36,7 +36,7 @@ public class OcorrenciaController {
             @RequestParam(required = false) UUID estabelecimentoId) {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
-        for (DesvioResponse d : desvioService.findAll(estabelecimentoId)) {
+        for (DesvioResponse d : desvioService.findAll(estabelecimentoId, null)) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "DESVIO");
             item.put("id", d.id());
@@ -51,7 +51,7 @@ public class OcorrenciaController {
             resultado.add(item);
         }
 
-        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, estabelecimentoId)) {
+        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, estabelecimentoId, null)) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "NAO_CONFORMIDADE");
             item.put("id", nc.id());

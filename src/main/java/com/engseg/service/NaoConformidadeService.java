@@ -47,7 +47,7 @@ public class NaoConformidadeService {
     private final AtividadePlanoAcaoRepository atividadePlanoAcaoRepository;
     private final SecurityHelper securityHelper;
 
-    public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId) {
+    public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId, UUID empresaId) {
         // EXTERNO: restrito aos estabelecimentos vinculados à sua empresa
         if (securityHelper.isExterno()) {
             List<UUID> permitidos = securityHelper.getEstabelecimentosDoExterno();
@@ -65,14 +65,18 @@ public class NaoConformidadeService {
                     .stream().map(this::toResponse).toList();
         }
 
-        // ENGENHEIRO / TECNICO: sem restrição de empresa, filtra por estabelecimento se informado
+        // ENGENHEIRO / TECNICO / ADMIN: filtra por empresa e/ou estabelecimento se informado
         List<NaoConformidade> list;
-        if (status != null && estabelecimentoId != null) {
-            list = naoConformidadeRepository.findByStatusAndEstabelecimentoId(status, estabelecimentoId);
+        if (estabelecimentoId != null) {
+            list = status != null
+                    ? naoConformidadeRepository.findByStatusAndEstabelecimentoId(status, estabelecimentoId)
+                    : naoConformidadeRepository.findByEstabelecimentoId(estabelecimentoId);
+        } else if (empresaId != null) {
+            list = status != null
+                    ? naoConformidadeRepository.findByStatusAndEstabelecimento_EmpresaId(status, empresaId)
+                    : naoConformidadeRepository.findByEstabelecimento_EmpresaId(empresaId);
         } else if (status != null) {
             list = naoConformidadeRepository.findByStatus(status);
-        } else if (estabelecimentoId != null) {
-            list = naoConformidadeRepository.findByEstabelecimentoId(estabelecimentoId);
         } else {
             list = naoConformidadeRepository.findAll();
         }

@@ -23,8 +23,10 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/stats")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
-    public ResponseEntity<DashboardStatsResponse> getStats() {
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
+    public ResponseEntity<DashboardStatsResponse> getStats(
+            @RequestParam(required = false) UUID empresaId,
+            @RequestParam(required = false) UUID estabelecimentoId) {
         long totalDesvios = desvioRepository.count();
         long totalNCs = naoConformidadeRepository.count();
         long totalOcorrencias = totalDesvios + totalNCs;
@@ -49,7 +51,7 @@ public class DashboardController {
     }
 
     @GetMapping("/recentes")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<Map<String, Object>>> getRecentes() {
         return ResponseEntity.ok(dashboardService.getRecentes());
     }

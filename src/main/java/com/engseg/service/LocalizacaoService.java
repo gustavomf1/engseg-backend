@@ -21,7 +21,17 @@ public class LocalizacaoService {
     private final LocalizacaoRepository localizacaoRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
 
-    public List<LocalizacaoResponse> findAll(Boolean ativo) {
+    public List<LocalizacaoResponse> findAll(UUID estabelecimentoId, UUID empresaId, Boolean ativo) {
+        if (estabelecimentoId != null) {
+            return localizacaoRepository.findByEstabelecimentoId(estabelecimentoId).stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
+        if (empresaId != null) {
+            return localizacaoRepository.findByEstabelecimento_EmpresaId(empresaId).stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
         List<Localizacao> items = (ativo != null)
                 ? localizacaoRepository.findAllByAtivo(ativo)
                 : localizacaoRepository.findAll();

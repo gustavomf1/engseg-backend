@@ -21,10 +21,18 @@ public class EstabelecimentoService {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final EmpresaRepository empresaRepository;
 
-    public List<EstabelecimentoResponse> findAll(Boolean ativo) {
-        List<Estabelecimento> items = (ativo != null)
-                ? estabelecimentoRepository.findAllByAtivo(ativo)
-                : estabelecimentoRepository.findAll();
+    public List<EstabelecimentoResponse> findAll(Boolean ativo, UUID empresaId) {
+        List<Estabelecimento> items;
+        if (empresaId != null) {
+            items = estabelecimentoRepository.findByEmpresaId(empresaId);
+            if (ativo != null) {
+                items = items.stream().filter(e -> e.isAtivo() == ativo).toList();
+            }
+        } else if (ativo != null) {
+            items = estabelecimentoRepository.findAllByAtivo(ativo);
+        } else {
+            items = estabelecimentoRepository.findAll();
+        }
         return items.stream()
                 .map(this::toResponse)
                 .toList();

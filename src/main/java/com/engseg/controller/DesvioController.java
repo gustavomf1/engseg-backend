@@ -21,9 +21,11 @@ public class DesvioController {
     private final DesvioService desvioService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
-    public ResponseEntity<List<DesvioResponse>> getAll() {
-        return ResponseEntity.ok(desvioService.findAll(null));
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<List<DesvioResponse>> getAll(
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID empresaId) {
+        return ResponseEntity.ok(desvioService.findAll(estabelecimentoId, empresaId));
     }
 
     @GetMapping("/{id}")

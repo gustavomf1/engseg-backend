@@ -17,5 +17,7 @@ public interface DesvioRepository extends JpaRepository<Desvio, UUID> {
 
     List<Desvio> findByEstabelecimentoId(UUID estabelecimentoId);
 
+    List<Desvio> findByEstabelecimento_EmpresaId(UUID empresaId);
+
     List<Desvio> findTop10ByOrderByDataRegistroDesc();
 }
