@@ -20,7 +20,7 @@ public class ConviteController {
     private final ConviteService conviteService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ConviteResponse> criar(@Valid @RequestBody ConviteRequest request) {
         return ResponseEntity.ok(conviteService.criar(request));
     }

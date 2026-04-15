@@ -24,32 +24,32 @@ public class NormaController {
     private final NormaService normaService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<NormaResponse>> getAll(
             @RequestParam(required = false) Boolean ativo) {
         return ResponseEntity.ok(normaService.findAll(ativo));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<NormaResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(normaService.findById(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NormaResponse> create(@Valid @RequestBody NormaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(normaService.create(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NormaResponse> update(@PathVariable UUID id, @Valid @RequestBody NormaRequest request) {
         return ResponseEntity.ok(normaService.update(id, request));
     }
 
     @PutMapping("/{id}/conteudo")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NormaResponse> salvarConteudo(
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
@@ -65,14 +65,14 @@ public class NormaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         normaService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/reativar")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NormaResponse> reativar(@PathVariable UUID id) {
         return ResponseEntity.ok(normaService.reativar(id));
     }

@@ -26,39 +26,39 @@ public class EstabelecimentoController {
     private final EstabelecimentoEmpresaService estabelecimentoEmpresaService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<EstabelecimentoResponse>> getAll(
             @RequestParam(required = false) Boolean ativo) {
         return ResponseEntity.ok(estabelecimentoService.findAll(ativo));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<EstabelecimentoResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(estabelecimentoService.findById(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EstabelecimentoResponse> create(@Valid @RequestBody EstabelecimentoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(estabelecimentoService.create(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EstabelecimentoResponse> update(@PathVariable UUID id, @Valid @RequestBody EstabelecimentoRequest request) {
         return ResponseEntity.ok(estabelecimentoService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         estabelecimentoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/reativar")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EstabelecimentoResponse> reativar(@PathVariable UUID id) {
         return ResponseEntity.ok(estabelecimentoService.reativar(id));
     }
@@ -66,13 +66,13 @@ public class EstabelecimentoController {
     // -- Empresas vinculadas ao estabelecimento --
 
     @GetMapping("/{id}/empresas")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<EmpresaResponse>> getEmpresas(@PathVariable UUID id) {
         return ResponseEntity.ok(estabelecimentoEmpresaService.findEmpresasByEstabelecimento(id));
     }
 
     @PostMapping("/{id}/empresas")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EstabelecimentoEmpresaResponse> vincularEmpresa(
             @PathVariable UUID id,
             @Valid @RequestBody EstabelecimentoEmpresaRequest request) {
@@ -81,7 +81,7 @@ public class EstabelecimentoController {
     }
 
     @DeleteMapping("/{estId}/empresas/{empId}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> desvincularEmpresa(
             @PathVariable UUID estId,
             @PathVariable UUID empId) {

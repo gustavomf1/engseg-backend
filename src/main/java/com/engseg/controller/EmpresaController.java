@@ -21,7 +21,7 @@ public class EmpresaController {
     private final EmpresaService empresaService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<EmpresaResponse>> getAll(
             @RequestParam(required = false) Boolean ativo,
             @RequestParam(required = false) Boolean empresaMae) {
@@ -32,13 +32,13 @@ public class EmpresaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<EmpresaResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(empresaService.findById(id));
     }
 
     @GetMapping("/{id}/filhas")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<EmpresaResponse>> getFilhas(
             @PathVariable UUID id,
             @RequestParam(required = false) Boolean ativo) {
@@ -46,26 +46,26 @@ public class EmpresaController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EmpresaResponse> create(@Valid @RequestBody EmpresaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(empresaService.create(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EmpresaResponse> update(@PathVariable UUID id, @Valid @RequestBody EmpresaRequest request) {
         return ResponseEntity.ok(empresaService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         empresaService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/reativar")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EmpresaResponse> reativar(@PathVariable UUID id) {
         return ResponseEntity.ok(empresaService.reativar(id));
     }
