@@ -1,0 +1,1 @@
+ALTER TABLE usuario ALTER COLUMN is_admin TYPE VARCHAR(1);
