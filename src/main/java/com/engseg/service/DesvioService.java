@@ -5,6 +5,7 @@ import com.engseg.dto.response.DesvioResponse;
 import com.engseg.entity.Desvio;
 import com.engseg.entity.Evidencia;
 import com.engseg.entity.StatusDesvio;
+import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EstabelecimentoRepository;
@@ -102,6 +103,10 @@ public class DesvioService {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
 
+        if (desvio.getStatus() == StatusDesvio.CONCLUIDO) {
+            throw new BusinessException("Não é permitido editar um desvio concluído");
+        }
+
         var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + request.estabelecimentoId()));
 
@@ -123,6 +128,12 @@ public class DesvioService {
     public void delete(UUID id) {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (desvio.getStatus() == StatusDesvio.CONCLUIDO && (usuario == null || !usuario.isAdmin())) {
+            throw new BusinessException("Apenas administradores podem excluir desvios concluídos");
+        }
 
         List<Evidencia> evidencias = evidenciaRepository.findByDesvioId(id);
         for (Evidencia ev : evidencias) {

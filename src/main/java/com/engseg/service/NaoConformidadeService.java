@@ -156,6 +156,10 @@ public class NaoConformidadeService {
     public NaoConformidadeResponse update(UUID id, NaoConformidadeRequest request) {
         NaoConformidade nc = findNcOrThrow(id);
 
+        if (nc.getStatus() == StatusNaoConformidade.CONCLUIDO) {
+            throw new BusinessException("Não é permitido editar uma NC concluída");
+        }
+
         if (nc.getStatus() != StatusNaoConformidade.ABERTA) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             var usuario = usuarioRepository.findByEmail(email).orElse(null);
@@ -220,6 +224,9 @@ public class NaoConformidadeService {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (nc.getStatus() == StatusNaoConformidade.CONCLUIDO && (usuario == null || !usuario.isAdmin())) {
+            throw new BusinessException("Apenas administradores podem excluir NCs concluídas");
+        }
         if (usuario != null && usuario.getPerfil() == PerfilUsuario.TECNICO && nc.getStatus() != StatusNaoConformidade.ABERTA) {
             throw new BusinessException("Técnico só pode excluir NC com status ABERTA");
         }
