@@ -39,7 +39,7 @@ public class NaoConformidadeController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<NaoConformidadeResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(naoConformidadeService.findById(id));
     }
