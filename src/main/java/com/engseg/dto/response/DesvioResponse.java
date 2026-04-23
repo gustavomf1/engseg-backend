@@ -2,6 +2,7 @@ package com.engseg.dto.response;
 
 import com.engseg.entity.StatusDesvio;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record DesvioResponse(
@@ -17,5 +18,15 @@ public record DesvioResponse(
         String usuarioCriacaoNome,
         String usuarioCriacaoEmail,
         String orientacaoRealizada,
-        StatusDesvio status
+        boolean regraDeOuro,
+        StatusDesvio status,
+        UUID responsavelDesvioId,
+        String responsavelDesvioNome,
+        UUID responsavelTratativaId,
+        String responsavelTrativaNome,
+        String observacaoTratativa,
+        UUID evidenciaTratativaId,
+        String evidenciaTrativaNome,
+        String evidenciaTrativaUrl,
+        List<HistoricoDesvioResponse> historico
 ) {}

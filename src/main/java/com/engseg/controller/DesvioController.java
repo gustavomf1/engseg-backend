@@ -1,6 +1,6 @@
 package com.engseg.controller;
 
-import com.engseg.dto.request.DesvioRequest;
+import com.engseg.dto.request.*;
 import com.engseg.dto.response.DesvioResponse;
 import com.engseg.service.DesvioService;
 import jakarta.validation.Valid;
@@ -21,7 +21,7 @@ public class DesvioController {
     private final DesvioService desvioService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<List<DesvioResponse>> getAll(
             @RequestParam(required = false) UUID estabelecimentoId,
             @RequestParam(required = false) UUID empresaId) {
@@ -29,27 +29,51 @@ public class DesvioController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<DesvioResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(desvioService.findById(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<DesvioResponse> create(@Valid @RequestBody DesvioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(desvioService.create(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<DesvioResponse> update(@PathVariable UUID id, @Valid @RequestBody DesvioRequest request) {
         return ResponseEntity.ok(desvioService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         desvioService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/submeter-tratativa")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    public ResponseEntity<DesvioResponse> submeterTratativa(
+            @PathVariable UUID id,
+            @Valid @RequestBody SubmeterTrativaRequest request) {
+        return ResponseEntity.ok(desvioService.submeterTratativa(id, request));
+    }
+
+    @PostMapping("/{id}/aprovar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<DesvioResponse> aprovar(
+            @PathVariable UUID id,
+            @Valid @RequestBody AprovarDesvioRequest request) {
+        return ResponseEntity.ok(desvioService.aprovar(id, request));
+    }
+
+    @PostMapping("/{id}/reprovar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<DesvioResponse> reprovar(
+            @PathVariable UUID id,
+            @Valid @RequestBody ReprovarDesvioRequest request) {
+        return ResponseEntity.ok(desvioService.reprovar(id, request));
     }
 }
