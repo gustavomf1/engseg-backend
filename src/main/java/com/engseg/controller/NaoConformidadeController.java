@@ -45,13 +45,13 @@ public class NaoConformidadeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<NaoConformidadeResponse> create(@Valid @RequestBody NaoConformidadeRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(naoConformidadeService.create(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<NaoConformidadeResponse> update(@PathVariable UUID id, @Valid @RequestBody NaoConformidadeRequest request) {
         return ResponseEntity.ok(naoConformidadeService.update(id, request));
     }
