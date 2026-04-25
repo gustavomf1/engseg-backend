@@ -45,4 +45,20 @@ class MatrizRiscoTest {
     void severidade3_probabilidade3_deveSerAlto() {
         assertThat(MatrizRisco.calcular(3, 3)).isEqualTo(NivelRisco.ALTO);
     }
+
+    @Test
+    void severidadeInvalida_deveLancarExcecao() {
+        org.junit.jupiter.api.Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> MatrizRisco.calcular(0, 1)
+        );
+    }
+
+    @Test
+    void probabilidadeInvalida_deveLancarExcecao() {
+        org.junit.jupiter.api.Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> MatrizRisco.calcular(1, 5)
+        );
+    }
 }
