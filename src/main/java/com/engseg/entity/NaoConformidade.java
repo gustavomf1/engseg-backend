@@ -19,9 +19,15 @@ import java.util.UUID;
 @ToString(callSuper = true)
 public class NaoConformidade extends Ocorrencia {
 
-@Enumerated(EnumType.STRING)
-    @Column(name = "nivel_severidade", nullable = false)
-    private NivelSeveridade nivelSeveridade;
+@Column(name = "severidade", nullable = false)
+    private int severidade;
+
+    @Column(name = "probabilidade", nullable = false)
+    private int probabilidade;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nivel_risco", nullable = false)
+    private NivelRisco nivelRisco;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "eng_responsavel_construtora_id")
