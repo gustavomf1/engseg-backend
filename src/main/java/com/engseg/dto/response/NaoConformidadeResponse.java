@@ -1,6 +1,6 @@
 package com.engseg.dto.response;
 
-import com.engseg.entity.NivelSeveridade;
+import com.engseg.entity.NivelRisco;
 import com.engseg.entity.StatusNaoConformidade;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +18,9 @@ public record NaoConformidadeResponse(
         LocalDateTime dataRegistro,
         String tecnicoNome,
         boolean regraDeOuro,
-        NivelSeveridade nivelSeveridade,
+        int severidade,
+        int probabilidade,
+        NivelRisco nivelRisco,
         UUID engResponsavelConstrutoraId,
         String engConstruturaNome,
         String engConstrutoraEmail,
@@ -35,7 +37,6 @@ public record NaoConformidadeResponse(
         String ncAnteriorTitulo,
         List<NcResumoResponse> cadeiaReincidencias,
         List<NcResumoResponse> reincidencias,
-        // Investigação — 5 Porquês (pergunta + resposta) e Causa Raiz
         String porqueUm,
         String porqueUmResposta,
         String porqueDois,
@@ -47,16 +48,11 @@ public record NaoConformidadeResponse(
         String porqueCinco,
         String porqueCincoResposta,
         String causaRaiz,
-        // Execução
         String descricaoExecucao,
-        // Plano de ação
         List<AtividadeResponse> atividades,
-        // Histórico de decisões
         List<HistoricoNcResponse> historico,
-        // Snapshots de submissões
         List<InvestigacaoSnapshotResponse> investigacaoSnapshots,
         List<ExecucaoSnapshotResponse> execucaoSnapshots,
-        // Legado
         List<DevolutivaResponse> devolutivas,
         List<ExecucaoAcaoResponse> execucoes,
         List<ValidacaoResponse> validacoes,

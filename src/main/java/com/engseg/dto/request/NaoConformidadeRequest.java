@@ -1,6 +1,7 @@
 package com.engseg.dto.request;
 
-import com.engseg.entity.NivelSeveridade;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -11,7 +12,8 @@ public record NaoConformidadeRequest(
         @NotBlank String titulo,
         UUID localizacaoId,
         @NotBlank String descricao,
-@NotNull NivelSeveridade nivelSeveridade,
+        @Min(1) @Max(5) int severidade,
+        @Min(1) @Max(4) int probabilidade,
         UUID engResponsavelConstrutoraId,
         UUID engResponsavelVerificacaoId,
         boolean regraDeOuro,
