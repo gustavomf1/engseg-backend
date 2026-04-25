@@ -66,6 +66,8 @@ public class OcorrenciaController {
             item.put("status", nc.status());
             item.put("dataLimiteResolucao", nc.dataLimiteResolucao());
             item.put("nivelRisco", nc.nivelRisco());
+            item.put("severidade", nc.severidade());
+            item.put("probabilidade", nc.probabilidade());
             item.put("estabelecimentoNome", nc.estabelecimentoNome());
             item.put("engResponsavelConstrutoraId", nc.engResponsavelConstrutoraId());
             item.put("engResponsavelVerificacaoId", nc.engResponsavelVerificacaoId());
