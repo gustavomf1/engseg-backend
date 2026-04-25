@@ -14,6 +14,7 @@ com/engseg/repository/AtividadePlanoAcaoRepository.class
 com/engseg/dto/request/ExecucaoAcaoRequest.class
 com/engseg/entity/Norma.class
 com/engseg/dto/request/ValidacaoRequest.class
+com/engseg/util/MatrizRisco.class
 com/engseg/repository/EmpresaRepository.class
 com/engseg/entity/TrativaDesvio$TrativaDesvioBuilder.class
 com/engseg/controller/DashboardController.class
@@ -107,7 +108,6 @@ com/engseg/entity/StatusDesvio.class
 com/engseg/entity/Usuario.class
 com/engseg/dto/request/CriarUsuarioDiretoRequest.class
 com/engseg/entity/Estabelecimento.class
-com/engseg/entity/NivelSeveridade.class
 com/engseg/entity/InvestigacaoSnapshot.class
 com/engseg/entity/HistoricoNc$HistoricoNcBuilder.class
 com/engseg/repository/EvidenciaRepository.class
@@ -159,6 +159,7 @@ com/engseg/dto/request/SubmeterExecucaoRequest.class
 com/engseg/dto/response/UsuarioResponse.class
 com/engseg/repository/DesvioRepository.class
 com/engseg/dto/request/ReprovarTrativasDesvioRequest.class
+com/engseg/entity/NivelRisco.class
 com/engseg/controller/ConviteController.class
 com/engseg/dto/request/NaoConformidadeRequest.class
 com/engseg/dto/request/InvestigacaoRequest$AtividadeItem.class

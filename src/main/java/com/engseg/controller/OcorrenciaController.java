@@ -65,7 +65,7 @@ public class OcorrenciaController {
             item.put("regraDeOuro", nc.regraDeOuro());
             item.put("status", nc.status());
             item.put("dataLimiteResolucao", nc.dataLimiteResolucao());
-            item.put("nivelSeveridade", nc.nivelSeveridade());
+            item.put("nivelRisco", nc.nivelRisco());
             item.put("estabelecimentoNome", nc.estabelecimentoNome());
             item.put("engResponsavelConstrutoraId", nc.engResponsavelConstrutoraId());
             item.put("engResponsavelVerificacaoId", nc.engResponsavelVerificacaoId());

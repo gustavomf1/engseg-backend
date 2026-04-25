@@ -149,7 +149,7 @@ class NaoConformidadeControllerTest {
     void criarNc_externoAutenticado_retorna403() throws Exception {
         // Corpo válido para passar @Valid — a autorização é verificada depois
         String body = String.format(
-                "{\"estabelecimentoId\":\"%s\",\"titulo\":\"Teste\",\"descricao\":\"Desc\",\"nivelSeveridade\":\"MEDIO\",\"regraDeOuro\":false,\"reincidencia\":false}",
+                "{\"estabelecimentoId\":\"%s\",\"titulo\":\"Teste\",\"descricao\":\"Desc\",\"severidade\":2,\"probabilidade\":2,\"regraDeOuro\":false,\"reincidencia\":false}",
                 UUID.randomUUID()
         );
         mockMvc.perform(post("/api/nao-conformidades")
@@ -271,7 +271,9 @@ class NaoConformidadeControllerTest {
                 null,                                                    // dataRegistro
                 null,                                                    // tecnicoNome
                 false,                                                   // regraDeOuro
-                com.engseg.entity.NivelSeveridade.MEDIO,                // nivelSeveridade
+                2,                                                       // severidade
+                2,                                                       // probabilidade
+                com.engseg.entity.NivelRisco.BAIXO,                     // nivelRisco
                 null, null, null,                                        // engConstrutora id/nome/email
                 null, null, null,                                        // engVerificacao id/nome/email
                 java.time.LocalDate.now().plusDays(30),                  // dataLimiteResolucao

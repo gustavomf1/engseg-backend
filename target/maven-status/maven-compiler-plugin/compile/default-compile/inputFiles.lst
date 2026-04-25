@@ -34,6 +34,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Estabelecimento.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Evidencia.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/DashboardController.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/util/MatrizRisco.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/TrativaDesvioResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/security/UserDetailsServiceImpl.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/NormaRequest.java
@@ -62,7 +63,6 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/ConviteUsuario.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/AtividadePlanoAcao.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/security/JwtService.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/NivelSeveridade.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/NcTrechoNormaResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/AuthService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RejeitarRequest.java
@@ -118,6 +118,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/EmpresaService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/UsuarioResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/exception/ResourceNotFoundException.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/NivelRisco.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/SubmeterExecucaoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/ExecucaoSnapshotResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EvidenciaResponse.java
