@@ -48,6 +48,8 @@ public class OcorrenciaController {
             item.put("status", d.status());
             item.put("estabelecimentoNome", d.estabelecimentoNome());
             item.put("usuarioCriacaoEmail", d.usuarioCriacaoEmail());
+            item.put("responsavelDesvioId", d.responsavelDesvioId());
+            item.put("responsavelTratativaId", d.responsavelTratativaId());
             putPrimeiraEvidencia(item, evidenciaRepository.findByDesvioId(d.id()));
             resultado.add(item);
         }

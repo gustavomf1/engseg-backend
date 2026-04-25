@@ -15,6 +15,7 @@ com/engseg/dto/request/ExecucaoAcaoRequest.class
 com/engseg/entity/Norma.class
 com/engseg/dto/request/ValidacaoRequest.class
 com/engseg/repository/EmpresaRepository.class
+com/engseg/entity/TrativaDesvio$TrativaDesvioBuilder.class
 com/engseg/controller/DashboardController.class
 com/engseg/repository/LocalizacaoRepository.class
 com/engseg/entity/HistoricoDesvio.class
@@ -61,11 +62,13 @@ com/engseg/scheduler/NcScheduler.class
 com/engseg/dto/response/ExecucaoSnapshotResponse.class
 com/engseg/dto/response/LoginResponse.class
 com/engseg/entity/Ocorrencia$OcorrenciaBuilder.class
+com/engseg/entity/StatusTratativaDesvio.class
 com/engseg/dto/request/ReprovarDesvioRequest.class
 com/engseg/dto/response/ExecucaoAcaoResponse.class
 com/engseg/dto/request/UsuarioRequest.class
 com/engseg/dto/request/BuscarTrechoRequest.class
 com/engseg/entity/Localizacao$LocalizacaoBuilder.class
+com/engseg/dto/response/TrativaDesvioResponse$EvidenciaInfo.class
 com/engseg/entity/Devolutiva$DevolutivaBuilder.class
 com/engseg/dto/request/RejeitarAtividadesRequest$ItemRejeicao.class
 com/engseg/entity/NaoConformidade$NaoConformidadeBuilder.class
@@ -76,6 +79,7 @@ com/engseg/dto/response/NaoConformidadeResponse.class
 com/engseg/entity/Desvio$DesvioBuilder.class
 com/engseg/controller/UsuarioController.class
 com/engseg/entity/ExecucaoSnapshot$ExecucaoSnapshotBuilder.class
+com/engseg/dto/response/TrativaDesvioResponse.class
 com/engseg/dto/response/EstabelecimentoResponse.class
 com/engseg/dto/request/AprovarDesvioRequest.class
 com/engseg/repository/EstabelecimentoRepository.class
@@ -108,6 +112,7 @@ com/engseg/entity/InvestigacaoSnapshot.class
 com/engseg/entity/HistoricoNc$HistoricoNcBuilder.class
 com/engseg/repository/EvidenciaRepository.class
 com/engseg/config/S3Config.class
+com/engseg/entity/TrativaDesvio.class
 com/engseg/service/DashboardService.class
 com/engseg/service/EmpresaService.class
 com/engseg/dto/response/BuscarTrechoResponse.class
@@ -137,6 +142,7 @@ com/engseg/controller/EvidenciaController.class
 com/engseg/service/EstabelecimentoEmpresaService.class
 com/engseg/repository/ExecucaoAcaoRepository.class
 com/engseg/controller/EmpresaController.class
+com/engseg/repository/TrativaDesvioRepository.class
 com/engseg/EngSegApplication.class
 com/engseg/dto/response/NcTrechoNormaResponse.class
 com/engseg/dto/request/InvestigacaoRequest$PorqueItem.class
@@ -145,12 +151,14 @@ com/engseg/repository/HistoricoNcRepository.class
 com/engseg/dto/response/ValidacaoResponse.class
 com/engseg/dto/request/SubmeterExecucaoRequest$AtividadeExecucao.class
 com/engseg/controller/NaoConformidadeController.class
+com/engseg/dto/request/ReprovarTrativasDesvioRequest$ItemReprovacao.class
 com/engseg/entity/AtividadePlanoAcao$AtividadePlanoAcaoBuilder.class
 com/engseg/repository/NormaRepository.class
 com/engseg/config/SecurityConfig.class
 com/engseg/dto/request/SubmeterExecucaoRequest.class
 com/engseg/dto/response/UsuarioResponse.class
 com/engseg/repository/DesvioRepository.class
+com/engseg/dto/request/ReprovarTrativasDesvioRequest.class
 com/engseg/controller/ConviteController.class
 com/engseg/dto/request/NaoConformidadeRequest.class
 com/engseg/dto/request/InvestigacaoRequest$AtividadeItem.class
@@ -160,6 +168,7 @@ com/engseg/entity/TipoEvidencia.class
 com/engseg/entity/Localizacao.class
 com/engseg/service/ClaudeService.class
 com/engseg/entity/Estabelecimento$EstabelecimentoBuilder.class
+com/engseg/dto/request/AdicionarTrativaRequest.class
 com/engseg/entity/Norma$NormaBuilder.class
 com/engseg/dto/response/DashboardStatsResponse.class
 com/engseg/entity/PerfilUsuario.class

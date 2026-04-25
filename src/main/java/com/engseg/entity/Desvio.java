@@ -48,4 +48,9 @@ public class Desvio extends Ocorrencia {
     @OrderBy("dataAcao ASC")
     @Builder.Default
     private List<HistoricoDesvio> historico = new ArrayList<>();
+
+    @OneToMany(mappedBy = "desvio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("numero ASC")
+    @Builder.Default
+    private List<TrativaDesvio> tratativas = new ArrayList<>();
 }

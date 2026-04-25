@@ -3,6 +3,7 @@ package com.engseg.service;
 import com.engseg.dto.request.*;
 import com.engseg.dto.response.DesvioResponse;
 import com.engseg.dto.response.HistoricoDesvioResponse;
+import com.engseg.dto.response.TrativaDesvioResponse;
 import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ public class DesvioService {
     private final UsuarioRepository usuarioRepository;
     private final EvidenciaRepository evidenciaRepository;
     private final HistoricoDesvioRepository historicoDesvioRepository;
+    private final TrativaDesvioRepository trativaDesvioRepository;
     private final S3StorageService s3StorageService;
     private final SecurityHelper securityHelper;
 
@@ -42,19 +45,27 @@ public class DesvioService {
                     .map(this::toResponse)
                     .toList();
         }
+        List<Desvio> list;
         if (estabelecimentoId != null) {
-            return desvioRepository.findByEstabelecimentoId(estabelecimentoId).stream()
-                    .map(this::toResponse)
+            list = desvioRepository.findByEstabelecimentoId(estabelecimentoId);
+        } else if (empresaId != null) {
+            list = desvioRepository.findByEstabelecimento_EmpresaId(empresaId);
+        } else {
+            list = desvioRepository.findAll();
+        }
+
+        if (securityHelper.isTecnico()) {
+            var usuarioLogado = securityHelper.getUsuarioLogado();
+            UUID uid = usuarioLogado.getId();
+            list = list.stream()
+                    .filter(d ->
+                        (d.getUsuarioCriacao() != null && d.getUsuarioCriacao().getId().equals(uid)) ||
+                        (d.getResponsavelTratativa() != null && d.getResponsavelTratativa().getId().equals(uid)) ||
+                        (d.getResponsavelDesvio() != null && d.getResponsavelDesvio().getId().equals(uid)))
                     .toList();
         }
-        if (empresaId != null) {
-            return desvioRepository.findByEstabelecimento_EmpresaId(empresaId).stream()
-                    .map(this::toResponse)
-                    .toList();
-        }
-        return desvioRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+
+        return list.stream().map(this::toResponse).toList();
     }
 
     public DesvioResponse findById(UUID id) {
@@ -85,8 +96,8 @@ public class DesvioService {
         var responsavelDesvio = usuarioRepository.findById(request.responsavelDesvioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Responsável pelo desvio não encontrado: " + request.responsavelDesvioId()));
 
-        if (responsavelDesvio.getPerfil() == PerfilUsuario.EXTERNO) {
-            throw new BusinessException("Responsável pelo desvio não pode ter perfil EXTERNO");
+        if (responsavelDesvio.getPerfil() == PerfilUsuario.EXTERNO || responsavelDesvio.getPerfil() == PerfilUsuario.TECNICO) {
+            throw new BusinessException("Responsável pelo desvio deve ter perfil ENGENHEIRO ou ser administrador");
         }
 
         var responsavelTratativa = usuarioRepository.findById(request.responsavelTratativaId())
@@ -141,8 +152,8 @@ public class DesvioService {
         var responsavelDesvio = usuarioRepository.findById(request.responsavelDesvioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Responsável pelo desvio não encontrado: " + request.responsavelDesvioId()));
 
-        if (responsavelDesvio.getPerfil() == PerfilUsuario.EXTERNO) {
-            throw new BusinessException("Responsável pelo desvio não pode ter perfil EXTERNO");
+        if (responsavelDesvio.getPerfil() == PerfilUsuario.EXTERNO || responsavelDesvio.getPerfil() == PerfilUsuario.TECNICO) {
+            throw new BusinessException("Responsável pelo desvio deve ter perfil ENGENHEIRO ou ser administrador");
         }
 
         var responsavelTratativa = usuarioRepository.findById(request.responsavelTratativaId())
@@ -161,7 +172,66 @@ public class DesvioService {
     }
 
     @Transactional
-    public DesvioResponse submeterTratativa(UUID id, SubmeterTrativaRequest request) {
+    public DesvioResponse adicionarTratativa(UUID id, AdicionarTrativaRequest request) {
+        Desvio desvio = desvioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
+
+        if (desvio.getStatus() != StatusDesvio.AGUARDANDO_TRATATIVA) {
+            throw new BusinessException("Só é possível adicionar tratativas quando o desvio está aguardando tratativa");
+        }
+
+        var usuarioLogado = securityHelper.getUsuarioLogado();
+        boolean isResponsavel = desvio.getResponsavelTratativa() != null &&
+                desvio.getResponsavelTratativa().getId().equals(usuarioLogado.getId());
+        if (!isResponsavel && !usuarioLogado.isAdmin()) {
+            throw new BusinessException("Apenas o responsável pela tratativa pode adicionar tratativas");
+        }
+
+        List<Evidencia> evidencias = request.evidenciaIds().stream()
+                .map(eid -> evidenciaRepository.findById(eid)
+                        .orElseThrow(() -> new ResourceNotFoundException("Evidência não encontrada: " + eid)))
+                .toList();
+
+        int numero = (int) trativaDesvioRepository.countByDesvioId(id) + 1;
+
+        trativaDesvioRepository.save(TrativaDesvio.builder()
+                .desvio(desvio)
+                .titulo(request.titulo())
+                .descricao(request.descricao())
+                .evidencias(new ArrayList<>(evidencias))
+                .status(StatusTratativaDesvio.PENDENTE)
+                .numero(numero)
+                .dtCriacao(LocalDateTime.now())
+                .build());
+
+        return toResponse(desvioRepository.findById(id).orElseThrow());
+    }
+
+    @Transactional
+    public void removerTratativa(UUID id, UUID trativaId) {
+        Desvio desvio = desvioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
+
+        if (desvio.getStatus() != StatusDesvio.AGUARDANDO_TRATATIVA) {
+            throw new BusinessException("Só é possível remover tratativas quando o desvio está aguardando tratativa");
+        }
+
+        TrativaDesvio tratativa = trativaDesvioRepository.findById(trativaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tratativa não encontrada: " + trativaId));
+
+        if (!tratativa.getDesvio().getId().equals(id)) {
+            throw new BusinessException("Tratativa não pertence a este desvio");
+        }
+
+        if (tratativa.getStatus() != StatusTratativaDesvio.PENDENTE) {
+            throw new BusinessException("Só é possível remover tratativas com status PENDENTE");
+        }
+
+        trativaDesvioRepository.delete(tratativa);
+    }
+
+    @Transactional
+    public DesvioResponse submeterTratativa(UUID id) {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
 
@@ -176,14 +246,18 @@ public class DesvioService {
             throw new BusinessException("Apenas o responsável pela tratativa pode submeter");
         }
 
-        var evidencia = evidenciaRepository.findById(request.evidenciaId())
-                .orElseThrow(() -> new ResourceNotFoundException("Evidência não encontrada: " + request.evidenciaId()));
+        List<TrativaDesvio> pendentes = trativaDesvioRepository
+                .findByDesvioIdAndStatus(id, StatusTratativaDesvio.PENDENTE);
+        if (pendentes.isEmpty()) {
+            throw new BusinessException("É necessário adicionar pelo menos uma tratativa antes de submeter");
+        }
+
+        int rodada = trativaDesvioRepository.findMaxRodadaByDesvioId(id).orElse(0) + 1;
+        pendentes.forEach(t -> t.setRodada(rodada));
+        trativaDesvioRepository.saveAll(pendentes);
 
         StatusDesvio anterior = desvio.getStatus();
-        desvio.setObservacaoTratativa(request.observacao());
-        desvio.setEvidenciaTratativa(evidencia);
         desvio.setStatus(StatusDesvio.AGUARDANDO_APROVACAO);
-
         Desvio saved = desvioRepository.save(desvio);
 
         historicoDesvioRepository.save(HistoricoDesvio.builder()
@@ -214,9 +288,13 @@ public class DesvioService {
             throw new BusinessException("Apenas o responsável pelo desvio pode aprovar");
         }
 
+        List<TrativaDesvio> pendentes = trativaDesvioRepository
+                .findByDesvioIdAndStatus(id, StatusTratativaDesvio.PENDENTE);
+        pendentes.forEach(t -> t.setStatus(StatusTratativaDesvio.APROVADO));
+        trativaDesvioRepository.saveAll(pendentes);
+
         StatusDesvio anterior = desvio.getStatus();
         desvio.setStatus(StatusDesvio.CONCLUIDO);
-
         Desvio saved = desvioRepository.save(desvio);
 
         historicoDesvioRepository.save(HistoricoDesvio.builder()
@@ -233,7 +311,7 @@ public class DesvioService {
     }
 
     @Transactional
-    public DesvioResponse reprovar(UUID id, ReprovarDesvioRequest request) {
+    public DesvioResponse reprovar(UUID id, ReprovarTrativasDesvioRequest request) {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
 
@@ -248,26 +326,38 @@ public class DesvioService {
             throw new BusinessException("Apenas o responsável pelo desvio pode reprovar");
         }
 
+        List<UUID> reprovadaIds = request.itens().stream()
+                .map(ReprovarTrativasDesvioRequest.ItemReprovacao::trativaId).toList();
+
+        List<String> motivosSummary = new ArrayList<>();
+        for (var item : request.itens()) {
+            TrativaDesvio tratativa = trativaDesvioRepository.findById(item.trativaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Tratativa não encontrada: " + item.trativaId()));
+            if (!tratativa.getDesvio().getId().equals(id)) {
+                throw new BusinessException("Tratativa não pertence a este desvio");
+            }
+            tratativa.setStatus(StatusTratativaDesvio.REPROVADO);
+            tratativa.setMotivoReprovacao(item.motivo());
+            trativaDesvioRepository.save(tratativa);
+            motivosSummary.add("Tratativa " + tratativa.getNumero() + ": " + item.motivo());
+        }
+
+        // Não-reprovadas desta rodada são implicitamente aceitas
+        trativaDesvioRepository.findByDesvioIdAndStatus(id, StatusTratativaDesvio.PENDENTE).stream()
+                .filter(t -> !reprovadaIds.contains(t.getId()))
+                .forEach(t -> { t.setStatus(StatusTratativaDesvio.APROVADO); trativaDesvioRepository.save(t); });
+
         StatusDesvio anterior = desvio.getStatus();
-        UUID snapshotEvidId = desvio.getEvidenciaTratativa() != null
-                ? desvio.getEvidenciaTratativa().getId() : null;
-        String snapshotObs = desvio.getObservacaoTratativa();
-
-        desvio.setObservacaoTratativa(null);
-        desvio.setEvidenciaTratativa(null);
         desvio.setStatus(StatusDesvio.AGUARDANDO_TRATATIVA);
-
         Desvio saved = desvioRepository.save(desvio);
 
         historicoDesvioRepository.save(HistoricoDesvio.builder()
                 .desvio(saved)
                 .usuario(usuarioLogado)
                 .tipo(TipoAcaoHistoricoDesvio.REPROVADO)
-                .comentario(request.motivo())
+                .comentario(String.join("; ", motivosSummary))
                 .statusAnterior(anterior)
                 .statusAtual(StatusDesvio.AGUARDANDO_TRATATIVA)
-                .snapshotObservacao(snapshotObs)
-                .snapshotEvidenciaId(snapshotEvidId)
                 .dataAcao(LocalDateTime.now())
                 .build());
 
@@ -297,6 +387,10 @@ public class DesvioService {
                 ? d.getHistorico().stream().map(this::toHistoricoResponse).toList()
                 : List.of();
 
+        List<TrativaDesvioResponse> tratativas = trativaDesvioRepository
+                .findByDesvioIdOrderByNumeroAsc(d.getId())
+                .stream().map(this::toTrativaResponse).toList();
+
         return new DesvioResponse(
                 d.getId(),
                 d.getEstabelecimento().getId(),
@@ -320,7 +414,27 @@ public class DesvioService {
                 d.getEvidenciaTratativa() != null ? d.getEvidenciaTratativa().getId() : null,
                 d.getEvidenciaTratativa() != null ? d.getEvidenciaTratativa().getNomeArquivo() : null,
                 d.getEvidenciaTratativa() != null ? d.getEvidenciaTratativa().getUrlArquivo() : null,
-                historico
+                historico,
+                tratativas
+        );
+    }
+
+    private TrativaDesvioResponse toTrativaResponse(TrativaDesvio t) {
+        List<TrativaDesvioResponse.EvidenciaInfo> evidencias = t.getEvidencias() != null
+                ? t.getEvidencias().stream()
+                        .map(e -> new TrativaDesvioResponse.EvidenciaInfo(e.getId(), e.getNomeArquivo(), e.getUrlArquivo()))
+                        .toList()
+                : List.of();
+        return new TrativaDesvioResponse(
+                t.getId(),
+                t.getTitulo(),
+                t.getDescricao(),
+                evidencias,
+                t.getStatus(),
+                t.getMotivoReprovacao(),
+                t.getNumero(),
+                t.getRodada(),
+                t.getDtCriacao()
         );
     }
 

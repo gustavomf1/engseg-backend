@@ -53,12 +53,27 @@ public class DesvioController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/tratativas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    public ResponseEntity<DesvioResponse> adicionarTratativa(
+            @PathVariable UUID id,
+            @Valid @RequestBody AdicionarTrativaRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(desvioService.adicionarTratativa(id, request));
+    }
+
+    @DeleteMapping("/{id}/tratativas/{trativaId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    public ResponseEntity<Void> removerTratativa(
+            @PathVariable UUID id,
+            @PathVariable UUID trativaId) {
+        desvioService.removerTratativa(id, trativaId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/submeter-tratativa")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
-    public ResponseEntity<DesvioResponse> submeterTratativa(
-            @PathVariable UUID id,
-            @Valid @RequestBody SubmeterTrativaRequest request) {
-        return ResponseEntity.ok(desvioService.submeterTratativa(id, request));
+    public ResponseEntity<DesvioResponse> submeterTratativa(@PathVariable UUID id) {
+        return ResponseEntity.ok(desvioService.submeterTratativa(id));
     }
 
     @PostMapping("/{id}/aprovar")
@@ -73,7 +88,7 @@ public class DesvioController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<DesvioResponse> reprovar(
             @PathVariable UUID id,
-            @Valid @RequestBody ReprovarDesvioRequest request) {
+            @Valid @RequestBody ReprovarTrativasDesvioRequest request) {
         return ResponseEntity.ok(desvioService.reprovar(id, request));
     }
 }

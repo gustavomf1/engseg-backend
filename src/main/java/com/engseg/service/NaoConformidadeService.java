@@ -80,6 +80,15 @@ public class NaoConformidadeService {
         } else {
             list = naoConformidadeRepository.findAll();
         }
+
+        if (securityHelper.isTecnico()) {
+            var usuarioLogado = securityHelper.getUsuarioLogado();
+            UUID uid = usuarioLogado.getId();
+            list = list.stream()
+                    .filter(nc -> nc.getUsuarioCriacao() != null && nc.getUsuarioCriacao().getId().equals(uid))
+                    .toList();
+        }
+
         return list.stream().map(this::toResponse).toList();
     }
 

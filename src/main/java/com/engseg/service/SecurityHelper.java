@@ -28,6 +28,10 @@ public class SecurityHelper {
         return getUsuarioLogado().getPerfil() == PerfilUsuario.EXTERNO;
     }
 
+    public boolean isTecnico() {
+        return getUsuarioLogado().getPerfil() == PerfilUsuario.TECNICO;
+    }
+
     public boolean isAdmin() {
         return getUsuarioLogado().isAdmin();
     }
