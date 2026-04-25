@@ -13,6 +13,7 @@ import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.*;
+import com.engseg.util.MatrizRisco;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -132,7 +133,9 @@ public class NaoConformidadeService {
         nc.setTecnico(tecnico);
         nc.setUsuarioCriacao(tecnico);
         nc.setRegraDeOuro(request.regraDeOuro());
-        nc.setNivelSeveridade(request.nivelSeveridade());
+        nc.setSeveridade(request.severidade());
+        nc.setProbabilidade(request.probabilidade());
+        nc.setNivelRisco(MatrizRisco.calcular(request.severidade(), request.probabilidade()));
         if (engConstrutora != null) nc.setEngResponsavelConstrutora(engConstrutora);
         if (engVerificacao != null) nc.setEngResponsavelVerificacao(engVerificacao);
         nc.setDataLimiteResolucao(now.toLocalDate().plusDays(30));
@@ -200,7 +203,9 @@ public class NaoConformidadeService {
         nc.setLocalizacao(localizacao);
         nc.setDescricao(request.descricao());
         nc.setRegraDeOuro(request.regraDeOuro());
-        nc.setNivelSeveridade(request.nivelSeveridade());
+        nc.setSeveridade(request.severidade());
+        nc.setProbabilidade(request.probabilidade());
+        nc.setNivelRisco(MatrizRisco.calcular(request.severidade(), request.probabilidade()));
         nc.setEngResponsavelConstrutora(engConstrutora);
         nc.setEngResponsavelVerificacao(engVerificacao);
 
@@ -836,7 +841,9 @@ public class NaoConformidadeService {
                 nc.getDataRegistro(),
                 nc.getTecnico() != null ? nc.getTecnico().getNome() : null,
                 nc.isRegraDeOuro(),
-                nc.getNivelSeveridade(),
+                nc.getSeveridade(),
+                nc.getProbabilidade(),
+                nc.getNivelRisco(),
                 nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getId() : null,
                 nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getNome() : null,
                 nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getEmail() : null,
