@@ -1,9 +1,6 @@
 package com.engseg.dto.request;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,5 +16,7 @@ public record NaoConformidadeRequest(
         boolean regraDeOuro,
         List<UUID> normaIds,
         boolean reincidencia,
-        UUID ncAnteriorId
+        UUID ncAnteriorId,
+        List<String> emailsManuais,
+        List<String> emailsPadraoExcluidos
 ) {}

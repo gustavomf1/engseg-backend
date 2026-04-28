@@ -10,12 +10,14 @@ import com.engseg.dto.request.SubmeterEvidenciasRequest;
 import com.engseg.dto.request.SubmeterExecucaoRequest;
 import com.engseg.dto.response.*;
 import com.engseg.entity.*;
+import com.engseg.event.NcEmailEvent;
 import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.*;
 import com.engseg.util.MatrizRisco;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +49,7 @@ public class NaoConformidadeService {
     private final ExecucaoSnapshotRepository execucaoSnapshotRepository;
     private final AtividadePlanoAcaoRepository atividadePlanoAcaoRepository;
     private final SecurityHelper securityHelper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId, UUID empresaId) {
         // EXTERNO: restrito aos estabelecimentos vinculados à sua empresa
@@ -160,6 +163,10 @@ public class NaoConformidadeService {
 
         NaoConformidade saved = naoConformidadeRepository.save(nc);
         registrarHistorico(saved, tecnico, TipoAcaoHistorico.CRIACAO, null, null, StatusNaoConformidade.ABERTA);
+
+        eventPublisher.publishEvent(new NcEmailEvent(this, saved.getId(),
+                null, StatusNaoConformidade.ABERTA,
+                request.emailsManuais(), request.emailsPadraoExcluidos(), null));
 
         return toResponse(naoConformidadeRepository.findById(saved.getId()).orElseThrow());
     }
@@ -330,6 +337,10 @@ public class NaoConformidadeService {
         var usuario = usuarioRepository.findByEmail(email).orElse(null);
         registrarHistorico(nc, usuario, TipoAcaoHistorico.SUBMISSAO_INVESTIGACAO, null, statusAnterior, StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
 
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                statusAnterior, StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO,
+                request.emailsManuais(), null, null));
+
         // Snapshot da investigação submetida
         InvestigacaoSnapshot snapshot = new InvestigacaoSnapshot();
         snapshot.setNaoConformidade(nc);
@@ -374,6 +385,10 @@ public class NaoConformidadeService {
                 .ifPresent(s -> { s.setStatus("APROVADO"); s.setComentarioRevisao(request != null ? request.comentario() : null); investigacaoSnapshotRepository.save(s); });
 
         nc.setStatus(StatusNaoConformidade.EM_EXECUCAO);
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO, StatusNaoConformidade.EM_EXECUCAO,
+                request != null ? request.emailsManuais() : null, null,
+                request != null ? request.comentario() : null));
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -396,6 +411,9 @@ public class NaoConformidadeService {
                 .ifPresent(s -> { s.setStatus("REPROVADO"); s.setComentarioRevisao(request.motivo()); investigacaoSnapshotRepository.save(s); });
 
         nc.setStatus(StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO);
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO, StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO,
+                request.emailsManuais(), null, request.motivo()));
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -466,6 +484,9 @@ public class NaoConformidadeService {
                 });
 
         nc.setStatus(novoStatus);
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO, novoStatus,
+                request.emailsManuais(), null, comentario));
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -514,6 +535,9 @@ public class NaoConformidadeService {
         execucaoSnapshotRepository.save(execSnapshot);
 
         nc.setStatus(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                StatusNaoConformidade.EM_EXECUCAO, StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL,
+                request.emailsManuais(), null, null));
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -586,6 +610,9 @@ public class NaoConformidadeService {
                 });
 
         nc.setStatus(novoStatus);
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL, novoStatus,
+                request.emailsManuais(), null, comentario));
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -626,6 +653,9 @@ public class NaoConformidadeService {
         evidenciaRepository.saveAll(novas);
 
         nc.setStatus(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                StatusNaoConformidade.EM_EXECUCAO, StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL,
+                request.emailsManuais(), null, null));
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -655,6 +685,10 @@ public class NaoConformidadeService {
                 .ifPresent(s -> { s.setStatus("APROVADO"); s.setComentarioRevisao(request != null ? request.comentario() : null); execucaoSnapshotRepository.save(s); });
 
         nc.setStatus(StatusNaoConformidade.CONCLUIDO);
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL, StatusNaoConformidade.CONCLUIDO,
+                request != null ? request.emailsManuais() : null, null,
+                request != null ? request.comentario() : null));
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
@@ -677,6 +711,9 @@ public class NaoConformidadeService {
                 .ifPresent(s -> { s.setStatus("REPROVADO"); s.setComentarioRevisao(request.motivo()); execucaoSnapshotRepository.save(s); });
 
         nc.setStatus(StatusNaoConformidade.EM_EXECUCAO);
+        eventPublisher.publishEvent(new NcEmailEvent(this, id,
+                StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL, StatusNaoConformidade.EM_EXECUCAO,
+                request.emailsManuais(), null, request.motivo()));
         return toResponse(naoConformidadeRepository.save(nc));
     }
 
