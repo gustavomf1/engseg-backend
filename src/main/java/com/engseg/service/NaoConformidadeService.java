@@ -920,7 +920,8 @@ public class NaoConformidadeService {
                 List.of(),
                 List.of(),
                 List.of(),
-                normas
+                normas,
+                nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getId() : null
         );
     }
 
