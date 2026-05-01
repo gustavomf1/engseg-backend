@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -47,6 +48,7 @@ class NaoConformidadeServiceTest {
     @Mock InvestigacaoSnapshotRepository investigacaoSnapshotRepository;
     @Mock ExecucaoSnapshotRepository execucaoSnapshotRepository;
     @Mock SecurityHelper securityHelper;
+    @Mock ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     NaoConformidadeService service;
@@ -102,7 +104,8 @@ class NaoConformidadeServiceTest {
                 List.of(
                         new InvestigacaoRequest.AtividadeItem("Título A", "Atividade A"),
                         new InvestigacaoRequest.AtividadeItem("Título B", "Atividade B")
-                )
+                ),
+                null
         );
     }
 
@@ -172,7 +175,7 @@ class NaoConformidadeServiceTest {
         when(investigacaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.aprovarPlano(ncId, new AprovarRejeitarRequest("ok"));
+        service.aprovarPlano(ncId, new AprovarRejeitarRequest("ok", null));
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -201,7 +204,7 @@ class NaoConformidadeServiceTest {
         when(investigacaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.rejeitarPlano(ncId, new RejeitarRequest("Motivo da rejeição"));
+        service.rejeitarPlano(ncId, new RejeitarRequest("Motivo da rejeição", null));
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -213,7 +216,7 @@ class NaoConformidadeServiceTest {
         NaoConformidade nc = buildNc(StatusNaoConformidade.EM_EXECUCAO);
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
 
-        assertThatThrownBy(() -> service.rejeitarPlano(ncId, new RejeitarRequest("motivo")))
+        assertThatThrownBy(() -> service.rejeitarPlano(ncId, new RejeitarRequest("motivo", null)))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("AGUARDANDO_APROVACAO_PLANO");
     }
@@ -226,7 +229,7 @@ class NaoConformidadeServiceTest {
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
         mockToResponseDeps(nc);
 
-        service.submeterEvidencias(ncId, new SubmeterEvidenciasRequest("Executamos as correções necessárias"));
+        service.submeterEvidencias(ncId, new SubmeterEvidenciasRequest("Executamos as correções necessárias", null));
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -238,7 +241,7 @@ class NaoConformidadeServiceTest {
         NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
 
-        assertThatThrownBy(() -> service.submeterEvidencias(ncId, new SubmeterEvidenciasRequest("desc")))
+        assertThatThrownBy(() -> service.submeterEvidencias(ncId, new SubmeterEvidenciasRequest("desc", null)))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("EM_EXECUCAO");
 
@@ -255,7 +258,7 @@ class NaoConformidadeServiceTest {
         when(execucaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Aprovado")); // atividades null → allMatch=true
+        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Aprovado", null)); // atividades null → allMatch=true
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -282,7 +285,7 @@ class NaoConformidadeServiceTest {
         when(execucaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.rejeitarEvidencias(ncId, new RejeitarRequest("Evidências insuficientes"));
+        service.rejeitarEvidencias(ncId, new RejeitarRequest("Evidências insuficientes", null));
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -294,7 +297,7 @@ class NaoConformidadeServiceTest {
         NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
 
-        assertThatThrownBy(() -> service.rejeitarEvidencias(ncId, new RejeitarRequest("motivo")))
+        assertThatThrownBy(() -> service.rejeitarEvidencias(ncId, new RejeitarRequest("motivo", null)))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("AGUARDANDO_VALIDACAO_FINAL");
     }
@@ -310,7 +313,7 @@ class NaoConformidadeServiceTest {
         nc.setAtividades(List.of(atividade));
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
 
-        assertThatThrownBy(() -> service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("ok")))
+        assertThatThrownBy(() -> service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("ok", null)))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("execução aprovada");
 
@@ -330,7 +333,7 @@ class NaoConformidadeServiceTest {
         when(execucaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Tudo certo"));
+        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Tudo certo", null));
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());

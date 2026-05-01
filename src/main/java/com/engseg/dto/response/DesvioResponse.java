@@ -29,5 +29,6 @@ public record DesvioResponse(
         String evidenciaTrativaNome,
         String evidenciaTrativaUrl,
         List<HistoricoDesvioResponse> historico,
-        List<TrativaDesvioResponse> tratativas
+        List<TrativaDesvioResponse> tratativas,
+        UUID usuarioCriacaoId
 ) {}

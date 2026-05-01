@@ -415,7 +415,8 @@ public class DesvioService {
                 d.getEvidenciaTratativa() != null ? d.getEvidenciaTratativa().getNomeArquivo() : null,
                 d.getEvidenciaTratativa() != null ? d.getEvidenciaTratativa().getUrlArquivo() : null,
                 historico,
-                tratativas
+                tratativas,
+                d.getUsuarioCriacao() != null ? d.getUsuarioCriacao().getId() : null
         );
     }
 

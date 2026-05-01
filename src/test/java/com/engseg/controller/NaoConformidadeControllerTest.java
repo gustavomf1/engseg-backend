@@ -88,7 +88,8 @@ class NaoConformidadeControllerTest {
         when(naoConformidadeService.submeterInvestigacao(any(), any())).thenReturn(mockNcResponse());
         String body = objectMapper.writeValueAsString(new com.engseg.dto.request.InvestigacaoRequest(
                 List.of(new com.engseg.dto.request.InvestigacaoRequest.PorqueItem("P1", "R1")),
-                "Causa raiz", List.of(new com.engseg.dto.request.InvestigacaoRequest.AtividadeItem("Título 1", "Atividade 1"))
+                "Causa raiz", List.of(new com.engseg.dto.request.InvestigacaoRequest.AtividadeItem("Título 1", "Atividade 1")),
+                null
         ));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/investigacao", ncId)
@@ -113,7 +114,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "EXTERNO")
     void rejeitarPlano_externoAutenticado_retorna403() throws Exception {
-        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo"));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo", null));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-plano", ncId)
                         .with(csrf())
@@ -135,7 +136,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "EXTERNO")
     void rejeitarEvidencias_externoAutenticado_retorna403() throws Exception {
-        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo"));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo", null));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-evidencias", ncId)
                         .with(csrf())
@@ -198,7 +199,7 @@ class NaoConformidadeControllerTest {
     @WithMockUser(roles = "ENGENHEIRO")
     void rejeitarPlano_engenheiroAutenticado_retorna200() throws Exception {
         when(naoConformidadeService.rejeitarPlano(any(), any())).thenReturn(mockNcResponse());
-        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo válido"));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo válido", null));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-plano", ncId)
                         .with(csrf())
@@ -223,7 +224,7 @@ class NaoConformidadeControllerTest {
     @WithMockUser(roles = "ENGENHEIRO")
     void rejeitarEvidencias_engenheiroAutenticado_retorna200() throws Exception {
         when(naoConformidadeService.rejeitarEvidencias(any(), any())).thenReturn(mockNcResponse());
-        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo válido"));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("motivo válido", null));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-evidencias", ncId)
                         .with(csrf())
@@ -237,7 +238,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "ENGENHEIRO")
     void rejeitarPlano_motivoVazio_retorna400() throws Exception {
-        String body = objectMapper.writeValueAsString(new RejeitarRequest(""));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("", null));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-plano", ncId)
                         .with(csrf())
@@ -249,7 +250,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "ENGENHEIRO")
     void rejeitarEvidencias_motivoVazio_retorna400() throws Exception {
-        String body = objectMapper.writeValueAsString(new RejeitarRequest(""));
+        String body = objectMapper.writeValueAsString(new RejeitarRequest("", null));
 
         mockMvc.perform(post("/api/nao-conformidades/{id}/rejeitar-evidencias", ncId)
                         .with(csrf())
@@ -293,7 +294,8 @@ class NaoConformidadeControllerTest {
                 List.of(),                                               // devolutivas
                 List.of(),                                               // execucoes
                 List.of(),                                               // validacoes
-                List.of()                                                // normas
+                List.of(),                                               // normas
+                null                                                     // usuarioCriacaoId
         );
     }
 }

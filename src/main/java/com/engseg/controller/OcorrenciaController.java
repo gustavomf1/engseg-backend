@@ -3,16 +3,19 @@ package com.engseg.controller;
 import com.engseg.dto.response.DesvioResponse;
 import com.engseg.dto.response.NaoConformidadeResponse;
 import com.engseg.entity.Evidencia;
+import com.engseg.entity.MeuPapelFiltro;
 import com.engseg.entity.TipoEvidencia;
 import com.engseg.repository.EvidenciaRepository;
 import com.engseg.service.DesvioService;
 import com.engseg.service.NaoConformidadeService;
+import com.engseg.service.SecurityHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/ocorrencias")
@@ -22,6 +25,7 @@ public class OcorrenciaController {
     private final DesvioService desvioService;
     private final NaoConformidadeService naoConformidadeService;
     private final EvidenciaRepository evidenciaRepository;
+    private final SecurityHelper securityHelper;
 
     private void putPrimeiraEvidencia(Map<String, Object> item, List<Evidencia> evidencias) {
         evidencias.stream().findFirst().ifPresent(e -> {
@@ -34,7 +38,8 @@ public class OcorrenciaController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO', 'EXTERNO')")
     public ResponseEntity<List<Map<String, Object>>> listarTodas(
             @RequestParam(required = false) UUID estabelecimentoId,
-            @RequestParam(required = false) UUID empresaId) {
+            @RequestParam(required = false) UUID empresaId,
+            @RequestParam(required = false) MeuPapelFiltro meuPapel) {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
         for (DesvioResponse d : desvioService.findAll(estabelecimentoId, empresaId)) {
@@ -48,6 +53,7 @@ public class OcorrenciaController {
             item.put("status", d.status());
             item.put("estabelecimentoNome", d.estabelecimentoNome());
             item.put("usuarioCriacaoEmail", d.usuarioCriacaoEmail());
+            item.put("usuarioCriacaoId", d.usuarioCriacaoId());
             item.put("responsavelDesvioId", d.responsavelDesvioId());
             item.put("responsavelTratativaId", d.responsavelTratativaId());
             putPrimeiraEvidencia(item, evidenciaRepository.findByDesvioId(d.id()));
@@ -72,6 +78,7 @@ public class OcorrenciaController {
             item.put("engResponsavelConstrutoraId", nc.engResponsavelConstrutoraId());
             item.put("engResponsavelVerificacaoId", nc.engResponsavelVerificacaoId());
             item.put("usuarioCriacaoEmail", nc.usuarioCriacaoEmail());
+            item.put("usuarioCriacaoId", nc.usuarioCriacaoId());
             item.put("vencida", nc.vencida());
             item.put("quantidadeAtividades", nc.atividades() != null ? nc.atividades().size() : 0);
             item.put("quantidadeHistorico", nc.historico() != null ? nc.historico().size() : 0);
@@ -87,6 +94,31 @@ public class OcorrenciaController {
             String db = String.valueOf(b.get("dataRegistro"));
             return db.compareTo(da);
         });
+
+        if (meuPapel != null) {
+            UUID userId = securityHelper.getUsuarioLogado().getId();
+            resultado = resultado.stream()
+                .filter(item -> switch (meuPapel) {
+                    case REGISTRANTE -> userId.equals(item.get("usuarioCriacaoId"));
+                    case RESPONSAVEL_NC -> {
+                        if (!"NAO_CONFORMIDADE".equals(item.get("tipo"))) yield false;
+                        yield userId.equals(item.get("engResponsavelVerificacaoId"));
+                    }
+                    case RESPONSAVEL_TRATATIVA_NC -> {
+                        if (!"NAO_CONFORMIDADE".equals(item.get("tipo"))) yield false;
+                        yield userId.equals(item.get("engResponsavelConstrutoraId"));
+                    }
+                    case RESPONSAVEL_DESVIO -> {
+                        if (!"DESVIO".equals(item.get("tipo"))) yield false;
+                        yield userId.equals(item.get("responsavelDesvioId"));
+                    }
+                    case RESPONSAVEL_TRATATIVA_DESVIO -> {
+                        if (!"DESVIO".equals(item.get("tipo"))) yield false;
+                        yield userId.equals(item.get("responsavelTratativaId"));
+                    }
+                })
+                .collect(Collectors.toList());
+        }
 
         return ResponseEntity.ok(resultado);
     }

@@ -8,11 +8,12 @@ import java.util.UUID;
 
 public record RevisarAtividadesRequest(
         @NotEmpty List<@Valid DecisaoAtividade> decisoes,
-        String comentario
+        String comentario,
+        List<String> emailsManuais
 ) {
     public record DecisaoAtividade(
             @NotNull UUID atividadeId,
-            @NotNull String status,   // "APROVADA" ou "REJEITADA"
-            String motivo             // obrigatório quando REJEITADA
+            @NotNull String status,
+            String motivo
     ) {}
 }

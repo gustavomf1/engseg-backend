@@ -58,5 +58,6 @@ public record NaoConformidadeResponse(
         List<DevolutivaResponse> devolutivas,
         List<ExecucaoAcaoResponse> execucoes,
         List<ValidacaoResponse> validacoes,
-        List<NormaResponse> normas
+        List<NormaResponse> normas,
+        UUID usuarioCriacaoId
 ) {}
