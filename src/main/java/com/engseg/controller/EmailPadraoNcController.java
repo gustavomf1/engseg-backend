@@ -21,7 +21,7 @@ public class EmailPadraoNcController {
     private final EmailPadraoNcService service;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<EmailPadraoNcResponse>> listar(
             @RequestParam UUID estabelecimentoId,
             @RequestParam UUID empresaId) {

@@ -30,7 +30,9 @@ com/engseg/entity/Ocorrencia.class
 com/engseg/entity/HistoricoNc.class
 com/engseg/dto/response/DevolutivaResponse.class
 com/engseg/entity/EstabelecimentoEmpresa.class
+com/engseg/entity/MeuPapelFiltro.class
 com/engseg/service/DesvioService.class
+com/engseg/controller/EmailPadraoNcController.class
 com/engseg/entity/ConviteUsuario.class
 com/engseg/dto/request/DevolutivaRequest.class
 com/engseg/security/UserDetailsServiceImpl.class
@@ -41,6 +43,7 @@ com/engseg/dto/request/EstabelecimentoRequest.class
 com/engseg/repository/InvestigacaoSnapshotRepository.class
 com/engseg/entity/Empresa.class
 com/engseg/dto/response/HistoricoNcResponse.class
+com/engseg/entity/EmailPadraoNc$EmailPadraoNcBuilder.class
 com/engseg/security/JwtService.class
 com/engseg/entity/ExecucaoAcao$ExecucaoAcaoBuilder.class
 com/engseg/dto/request/RejeitarAtividadesRequest.class
@@ -51,6 +54,7 @@ com/engseg/dto/request/SubmeterTrativaRequest.class
 com/engseg/dto/request/RevisarAtividadesRequest.class
 com/engseg/entity/HistoricoDesvio$HistoricoDesvioBuilder.class
 com/engseg/entity/Desvio$DesvioBuilderImpl.class
+com/engseg/event/NcEmailEvent.class
 com/engseg/service/SecurityHelper.class
 com/engseg/service/EvidenciaService.class
 com/engseg/security/JwtFilter.class
@@ -68,6 +72,7 @@ com/engseg/dto/request/ReprovarDesvioRequest.class
 com/engseg/dto/response/ExecucaoAcaoResponse.class
 com/engseg/dto/request/UsuarioRequest.class
 com/engseg/dto/request/BuscarTrechoRequest.class
+com/engseg/repository/EmailPadraoNcRepository.class
 com/engseg/entity/Localizacao$LocalizacaoBuilder.class
 com/engseg/dto/response/TrativaDesvioResponse$EvidenciaInfo.class
 com/engseg/entity/Devolutiva$DevolutivaBuilder.class
@@ -76,6 +81,7 @@ com/engseg/entity/NaoConformidade$NaoConformidadeBuilder.class
 com/engseg/entity/ParecerValidacao.class
 com/engseg/entity/Validacao.class
 com/engseg/repository/NcTrechoNormaRepository.class
+com/engseg/entity/EmailPadraoNc.class
 com/engseg/dto/response/NaoConformidadeResponse.class
 com/engseg/entity/Desvio$DesvioBuilder.class
 com/engseg/controller/UsuarioController.class
@@ -115,6 +121,7 @@ com/engseg/config/S3Config.class
 com/engseg/entity/TrativaDesvio.class
 com/engseg/service/DashboardService.class
 com/engseg/service/EmpresaService.class
+com/engseg/config/AsyncConfig.class
 com/engseg/dto/response/BuscarTrechoResponse.class
 com/engseg/dto/response/ConviteResponse.class
 com/engseg/controller/EstabelecimentoController.class
@@ -129,9 +136,12 @@ com/engseg/service/EstabelecimentoService.class
 com/engseg/entity/ExecucaoSnapshot.class
 com/engseg/entity/Validacao$ValidacaoBuilder.class
 com/engseg/dto/response/NormaResponse.class
+com/engseg/dto/response/EmailPadraoNcResponse.class
+com/engseg/controller/OcorrenciaController$1.class
 com/engseg/dto/request/RevisarAtividadesRequest$DecisaoAtividade.class
 com/engseg/dto/request/EstabelecimentoEmpresaRequest.class
 com/engseg/entity/NcTrechoNorma$NcTrechoNormaBuilder.class
+com/engseg/service/NcEmailSender.class
 com/engseg/repository/ConviteRepository.class
 com/engseg/dto/response/EstabelecimentoEmpresaResponse.class
 com/engseg/dto/request/NormaRequest.class
@@ -145,9 +155,11 @@ com/engseg/controller/EmpresaController.class
 com/engseg/repository/TrativaDesvioRepository.class
 com/engseg/EngSegApplication.class
 com/engseg/dto/response/NcTrechoNormaResponse.class
+com/engseg/event/NcEmailListener.class
 com/engseg/dto/request/InvestigacaoRequest$PorqueItem.class
 com/engseg/dto/request/LoginRequest.class
 com/engseg/repository/HistoricoNcRepository.class
+com/engseg/service/EmailPadraoNcService.class
 com/engseg/dto/response/ValidacaoResponse.class
 com/engseg/dto/request/SubmeterExecucaoRequest$AtividadeExecucao.class
 com/engseg/controller/NaoConformidadeController.class
@@ -170,6 +182,7 @@ com/engseg/entity/Localizacao.class
 com/engseg/service/ClaudeService.class
 com/engseg/entity/Estabelecimento$EstabelecimentoBuilder.class
 com/engseg/dto/request/AdicionarTrativaRequest.class
+com/engseg/dto/request/EmailPadraoNcRequest.class
 com/engseg/entity/Norma$NormaBuilder.class
 com/engseg/dto/response/DashboardStatsResponse.class
 com/engseg/entity/PerfilUsuario.class

@@ -45,7 +45,7 @@ public class NcEmailSender {
                     <p style="margin:0 0 8px"><strong>Estabelecimento:</strong> %s</p>
                     <p style="margin:0 0 24px"><strong>Empresa Contratada:</strong> %s</p>
                     <div style="text-align:center">
-                      <a href="%s/ocorrencias/NAO_CONFORMIDADE/%s"
+                      <a href="%s/tratativas/NAO_CONFORMIDADE/%s"
                          style="background:#1d4ed8;color:#fff;padding:12px 28px;text-decoration:none;border-radius:6px;font-size:14px;display:inline-block">
                         Acessar Não Conformidade
                       </a>
@@ -90,7 +90,7 @@ public class NcEmailSender {
                     <p style="margin:0 0 8px"><strong>Estabelecimento:</strong> %s</p>
                     %s
                     <div style="text-align:center;margin-top:24px">
-                      <a href="%s/ocorrencias/NAO_CONFORMIDADE/%s"
+                      <a href="%s/tratativas/NAO_CONFORMIDADE/%s"
                          style="background:#1d4ed8;color:#fff;padding:12px 28px;text-decoration:none;border-radius:6px;font-size:14px;display:inline-block">
                         Acessar Não Conformidade
                       </a>
