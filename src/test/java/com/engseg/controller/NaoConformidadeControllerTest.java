@@ -294,7 +294,8 @@ class NaoConformidadeControllerTest {
                 List.of(),                                               // devolutivas
                 List.of(),                                               // execucoes
                 List.of(),                                               // validacoes
-                List.of()                                                // normas
+                List.of(),                                               // normas
+                null                                                     // usuarioCriacaoId
         );
     }
 }
