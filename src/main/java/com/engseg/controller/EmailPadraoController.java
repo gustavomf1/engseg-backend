@@ -1,8 +1,9 @@
 package com.engseg.controller;
 
-import com.engseg.dto.request.EmailPadraoNcRequest;
-import com.engseg.dto.response.EmailPadraoNcResponse;
-import com.engseg.service.EmailPadraoNcService;
+import com.engseg.dto.request.EmailPadraoRequest;
+import com.engseg.dto.response.EmailPadraoResponse;
+import com.engseg.entity.TipoEmailPadrao;
+import com.engseg.service.EmailPadraoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,30 +15,31 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/emails-padrao-nc")
+@RequestMapping("/api/emails-padrao")
 @RequiredArgsConstructor
-public class EmailPadraoNcController {
+public class EmailPadraoController {
 
-    private final EmailPadraoNcService service;
+    private final EmailPadraoService service;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<EmailPadraoNcResponse>> listar(
+    public ResponseEntity<List<EmailPadraoResponse>> listar(
             @RequestParam UUID estabelecimentoId,
-            @RequestParam UUID empresaId) {
-        return ResponseEntity.ok(service.listar(estabelecimentoId, empresaId));
+            @RequestParam UUID empresaId,
+            @RequestParam TipoEmailPadrao tipo) {
+        return ResponseEntity.ok(service.listar(estabelecimentoId, empresaId, tipo));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EmailPadraoNcResponse> criar(
-            @Valid @RequestBody EmailPadraoNcRequest request) {
+    public ResponseEntity<EmailPadraoResponse> criar(
+            @Valid @RequestBody EmailPadraoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(request));
     }
 
     @PatchMapping("/{id}/descricao")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EmailPadraoNcResponse> atualizarDescricao(
+    public ResponseEntity<EmailPadraoResponse> atualizarDescricao(
             @PathVariable UUID id,
             @RequestBody String descricao) {
         return ResponseEntity.ok(service.atualizarDescricao(id, descricao));

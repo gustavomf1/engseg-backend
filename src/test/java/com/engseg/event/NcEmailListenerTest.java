@@ -1,7 +1,8 @@
 package com.engseg.event;
 
 import com.engseg.entity.*;
-import com.engseg.repository.EmailPadraoNcRepository;
+import com.engseg.entity.TipoEmailPadrao;
+import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.NaoConformidadeRepository;
 import com.engseg.service.NcEmailSender;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.*;
 class NcEmailListenerTest {
 
     @Mock NaoConformidadeRepository ncRepository;
-    @Mock EmailPadraoNcRepository emailPadraoNcRepository;
+    @Mock EmailPadraoRepository emailPadraoRepository;
     @Mock NcEmailSender sender;
     @InjectMocks NcEmailListener listener;
 
@@ -59,11 +60,11 @@ class NcEmailListenerTest {
         UUID estId = estabelecimento.getId();
         UUID empId = empresa.getId();
 
-        EmailPadraoNc padrao = new EmailPadraoNc();
+        EmailPadrao padrao = new EmailPadrao();
         padrao.setEmail("diretor@empresa.com");
 
         when(ncRepository.findById(nc.getId())).thenReturn(Optional.of(nc));
-        when(emailPadraoNcRepository.findByEstabelecimentoIdAndEmpresaId(estId, empId))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(estId, empId, TipoEmailPadrao.NC))
                 .thenReturn(List.of(padrao));
 
         NcEmailEvent event = new NcEmailEvent(this, nc.getId(),
@@ -81,11 +82,11 @@ class NcEmailListenerTest {
         UUID estId = estabelecimento.getId();
         UUID empId = empresa.getId();
 
-        EmailPadraoNc padrao = new EmailPadraoNc();
+        EmailPadrao padrao = new EmailPadrao();
         padrao.setEmail("eng@construtora.com");
 
         when(ncRepository.findById(nc.getId())).thenReturn(Optional.of(nc));
-        when(emailPadraoNcRepository.findByEstabelecimentoIdAndEmpresaId(estId, empId))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(estId, empId, TipoEmailPadrao.NC))
                 .thenReturn(List.of(padrao));
 
         NcEmailEvent event = new NcEmailEvent(this, nc.getId(),
@@ -103,11 +104,11 @@ class NcEmailListenerTest {
         UUID estId = estabelecimento.getId();
         UUID empId = empresa.getId();
 
-        EmailPadraoNc padrao = new EmailPadraoNc();
+        EmailPadrao padrao = new EmailPadrao();
         padrao.setEmail("excluido@empresa.com");
 
         when(ncRepository.findById(nc.getId())).thenReturn(Optional.of(nc));
-        when(emailPadraoNcRepository.findByEstabelecimentoIdAndEmpresaId(estId, empId))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(estId, empId, TipoEmailPadrao.NC))
                 .thenReturn(List.of(padrao));
 
         NcEmailEvent event = new NcEmailEvent(this, nc.getId(),
@@ -134,7 +135,7 @@ class NcEmailListenerTest {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass(Set.class);
         verify(sender).enviarTemplateB(any(), any(), any(), captor.capture(), eq("investigação submetida"));
-        verify(emailPadraoNcRepository, never()).findByEstabelecimentoIdAndEmpresaId(any(), any());
+        verify(emailPadraoRepository, never()).findByEstabelecimentoIdAndEmpresaIdAndTipo(any(), any(), any());
         assertThat(captor.getValue()).contains("eng@construtora.com", "manual@empresa.com");
     }
 }
