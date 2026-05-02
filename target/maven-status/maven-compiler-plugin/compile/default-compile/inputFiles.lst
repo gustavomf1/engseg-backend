@@ -17,10 +17,12 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/NcTrechoNormaRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/NormaRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/EvidenciaService.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/EmailPadraoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RegistrarViaConviteRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Devolutiva.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/StatusNaoConformidade.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Usuario.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/TipoEmailPadrao.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/InvestigacaoSnapshot.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/EvidenciaController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/LoginResponse.java
@@ -37,7 +39,6 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/DashboardController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/util/MatrizRisco.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/TrativaDesvioResponse.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EmailPadraoNcResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/security/UserDetailsServiceImpl.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/NormaRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Norma.java
@@ -60,9 +61,9 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/NcResumoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/StatusTratativaDesvio.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/ExecucaoAcaoRequest.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/EmailPadraoNcRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/EmpresaController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RejeitarAtividadesRequest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/EmailPadraoRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/EstabelecimentoEmpresaRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/ConviteUsuario.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/AtividadePlanoAcao.java
@@ -75,7 +76,6 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/ConviteRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/HistoricoNcResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/UsuarioRepository.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/EmailPadraoNc.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/ReprovarTrativasDesvioRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/BuscarTrechoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/UsuarioService.java
@@ -99,14 +99,16 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/UsuarioRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/DevolutivaRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/EvidenciaRepository.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/EmailPadraoService.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/EmailPadraoController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EmpresaResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/InvestigacaoSnapshotResponse.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EmailPadraoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/DevolutivaRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/UsuarioController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/EstabelecimentoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/NaoConformidadeRepository.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/EmailPadraoNcRepository.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/EmailPadraoNcController.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/EmailPadrao.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/NormaController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/LocalizacaoService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/AtividadeResponse.java
@@ -136,7 +138,6 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EstabelecimentoEmpresaResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/BuscarTrechoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/ParecerValidacao.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/EmailPadraoNcService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RevisarExecucaoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/LoginRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/NcTrechoNorma.java

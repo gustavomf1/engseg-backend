@@ -1,9 +1,7 @@
 package com.engseg.service;
 
-import com.engseg.entity.EmailPadraoNc;
-import com.engseg.entity.Empresa;
-import com.engseg.entity.Estabelecimento;
-import com.engseg.repository.EmailPadraoNcRepository;
+import com.engseg.entity.*;
+import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.EmpresaRepository;
 import com.engseg.repository.EstabelecimentoRepository;
 import org.junit.jupiter.api.Test;
@@ -19,16 +17,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class EmailPadraoNcServiceTest {
+class EmailPadraoServiceTest {
 
-    @Mock EmailPadraoNcRepository repository;
+    @Mock EmailPadraoRepository repository;
     @Mock EstabelecimentoRepository estabelecimentoRepository;
     @Mock EmpresaRepository empresaRepository;
 
-    @InjectMocks EmailPadraoNcService service;
+    @InjectMocks EmailPadraoService service;
 
     @Test
-    void listar_retorna_emails_do_par_estabelecimento_empresa() {
+    void listar_retorna_emails_do_par_filtrado_por_tipo() {
         UUID estId = UUID.randomUUID();
         UUID empId = UUID.randomUUID();
 
@@ -41,19 +39,21 @@ class EmailPadraoNcServiceTest {
         emp.setId(empId);
         emp.setRazaoSocial("Construtora ABC");
 
-        EmailPadraoNc e = new EmailPadraoNc();
+        EmailPadrao e = new EmailPadrao();
         e.setId(UUID.randomUUID());
         e.setEstabelecimento(est);
         e.setEmpresa(emp);
         e.setEmail("diretor@empresa.com");
         e.setDescricao("Diretor");
+        e.setTipo(TipoEmailPadrao.NC);
 
-        when(repository.findByEstabelecimentoIdAndEmpresaId(estId, empId)).thenReturn(List.of(e));
+        when(repository.findByEstabelecimentoIdAndEmpresaIdAndTipo(estId, empId, TipoEmailPadrao.NC))
+                .thenReturn(List.of(e));
 
-        var result = service.listar(estId, empId);
+        var result = service.listar(estId, empId, TipoEmailPadrao.NC);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).email()).isEqualTo("diretor@empresa.com");
-        assertThat(result.get(0).descricao()).isEqualTo("Diretor");
+        assertThat(result.get(0).tipo()).isEqualTo(TipoEmailPadrao.NC);
     }
 }
