@@ -9,6 +9,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/UsuarioServiceDiretoTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/controller/NaoConformidadeControllerTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/UsuarioServiceTest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/event/DesvioEmailListenerTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/NaoConformidadeServiceTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/entity/UsuarioTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/EngSegApplicationTests.java

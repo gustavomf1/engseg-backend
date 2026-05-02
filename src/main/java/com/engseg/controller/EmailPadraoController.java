@@ -2,7 +2,6 @@ package com.engseg.controller;
 
 import com.engseg.dto.request.EmailPadraoRequest;
 import com.engseg.dto.response.EmailPadraoResponse;
-import com.engseg.entity.TipoEmailPadrao;
 import com.engseg.service.EmailPadraoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +24,8 @@ public class EmailPadraoController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<EmailPadraoResponse>> listar(
             @RequestParam UUID estabelecimentoId,
-            @RequestParam UUID empresaId,
-            @RequestParam TipoEmailPadrao tipo) {
-        return ResponseEntity.ok(service.listar(estabelecimentoId, empresaId, tipo));
+            @RequestParam UUID empresaId) {
+        return ResponseEntity.ok(service.listar(estabelecimentoId, empresaId));
     }
 
     @PostMapping

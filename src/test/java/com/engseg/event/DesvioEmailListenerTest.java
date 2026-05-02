@@ -72,8 +72,8 @@ class DesvioEmailListenerTest {
         padrao.setEmail("diretor@empresa.com");
 
         when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(
-                estabelecimento.getId(), empresa.getId(), TipoEmailPadrao.DESVIO))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(
+                estabelecimento.getId(), empresa.getId()))
                 .thenReturn(List.of(padrao));
 
         DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
@@ -94,8 +94,8 @@ class DesvioEmailListenerTest {
         padrao.setEmail("diretor@empresa.com");
 
         when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(
-                estabelecimento.getId(), empresa.getId(), TipoEmailPadrao.DESVIO))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(
+                estabelecimento.getId(), empresa.getId()))
                 .thenReturn(List.of(padrao));
 
         DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
@@ -114,8 +114,8 @@ class DesvioEmailListenerTest {
         padrao.setEmail("excluido@empresa.com");
 
         when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(
-                estabelecimento.getId(), empresa.getId(), TipoEmailPadrao.DESVIO))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(
+                estabelecimento.getId(), empresa.getId()))
                 .thenReturn(List.of(padrao));
 
         DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
@@ -141,7 +141,7 @@ class DesvioEmailListenerTest {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass(Set.class);
         verify(sender).enviarTemplateB(any(), any(), any(), captor.capture(), any());
-        verify(emailPadraoRepository, never()).findByEstabelecimentoIdAndEmpresaIdAndTipo(any(), any(), any());
+        verify(emailPadraoRepository, never()).findByEstabelecimentoIdAndEmpresaId(any(), any());
         assertThat(captor.getValue()).contains("resp.desvio@construtora.com", "manual@empresa.com");
     }
 
@@ -157,6 +157,6 @@ class DesvioEmailListenerTest {
         verify(sender).enviarTemplateB(eq(desvio),
                 eq(StatusDesvio.AGUARDANDO_APROVACAO), eq(StatusDesvio.AGUARDANDO_TRATATIVA),
                 any(), eq("Tratativa 1: motivo da reprovação"));
-        verify(emailPadraoRepository, never()).findByEstabelecimentoIdAndEmpresaIdAndTipo(any(), any(), any());
+        verify(emailPadraoRepository, never()).findByEstabelecimentoIdAndEmpresaId(any(), any());
     }
 }

@@ -7,6 +7,7 @@ com/engseg/entity/ConviteUsuario$ConviteUsuarioBuilder.class
 com/engseg/repository/UsuarioRepository.class
 com/engseg/entity/Desvio.class
 com/engseg/dto/response/HistoricoDesvioResponse.class
+com/engseg/event/DesvioEmailEvent.class
 com/engseg/dto/request/RevisarExecucaoRequest.class
 com/engseg/dto/response/NcResumoResponse.class
 com/engseg/entity/Devolutiva.class
@@ -50,6 +51,7 @@ com/engseg/controller/NcTrechoNormaController.class
 com/engseg/entity/NcTrechoNorma.class
 com/engseg/service/NaoConformidadeService.class
 com/engseg/dto/request/SubmeterTrativaRequest.class
+com/engseg/dto/request/SubmeterTrativaDesvioRequest.class
 com/engseg/dto/request/RevisarAtividadesRequest.class
 com/engseg/dto/request/EmailPadraoRequest.class
 com/engseg/entity/HistoricoDesvio$HistoricoDesvioBuilder.class
@@ -125,6 +127,7 @@ com/engseg/service/EmailPadraoService.class
 com/engseg/service/EmpresaService.class
 com/engseg/config/AsyncConfig.class
 com/engseg/dto/response/BuscarTrechoResponse.class
+com/engseg/event/DesvioEmailListener.class
 com/engseg/dto/response/ConviteResponse.class
 com/engseg/controller/EstabelecimentoController.class
 com/engseg/config/RestTemplateConfig.class
@@ -157,6 +160,7 @@ com/engseg/repository/TrativaDesvioRepository.class
 com/engseg/EngSegApplication.class
 com/engseg/dto/response/NcTrechoNormaResponse.class
 com/engseg/event/NcEmailListener.class
+com/engseg/service/DesvioEmailSender.class
 com/engseg/dto/request/InvestigacaoRequest$PorqueItem.class
 com/engseg/dto/request/LoginRequest.class
 com/engseg/repository/HistoricoNcRepository.class

@@ -3,7 +3,6 @@ package com.engseg.event;
 import com.engseg.entity.EmailPadrao;
 import com.engseg.entity.NaoConformidade;
 import com.engseg.entity.StatusNaoConformidade;
-import com.engseg.entity.TipoEmailPadrao;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.NaoConformidadeRepository;
 import com.engseg.service.NcEmailSender;
@@ -56,7 +55,7 @@ public class NcEmailListener {
                 UUID empresaId = nc.getEngResponsavelConstrutora().getEmpresa().getId();
                 Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
                 emailPadraoRepository
-                        .findByEstabelecimentoIdAndEmpresaIdAndTipo(nc.getEstabelecimento().getId(), empresaId, TipoEmailPadrao.NC)
+                        .findByEstabelecimentoIdAndEmpresaId(nc.getEstabelecimento().getId(), empresaId)
                         .stream()
                         .map(EmailPadrao::getEmail)
                         .filter(e -> !dinamicos.contains(e) && !excluidos.contains(e))

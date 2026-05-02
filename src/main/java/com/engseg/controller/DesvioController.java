@@ -47,10 +47,16 @@ public class DesvioController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         desvioService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/abrir-tratativa")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<DesvioResponse> abrirTratativa(@PathVariable UUID id) {
+        return ResponseEntity.ok(desvioService.abrirTratativa(id));
     }
 
     @PostMapping("/{id}/tratativas")

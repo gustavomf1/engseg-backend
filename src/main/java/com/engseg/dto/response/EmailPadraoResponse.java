@@ -1,6 +1,5 @@
 package com.engseg.dto.response;
 
-import com.engseg.entity.TipoEmailPadrao;
 import java.util.UUID;
 
 public record EmailPadraoResponse(
@@ -10,6 +9,5 @@ public record EmailPadraoResponse(
         UUID empresaId,
         String empresaNome,
         String email,
-        String descricao,
-        TipoEmailPadrao tipo
+        String descricao
 ) {}

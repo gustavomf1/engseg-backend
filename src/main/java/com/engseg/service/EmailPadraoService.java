@@ -3,7 +3,6 @@ package com.engseg.service;
 import com.engseg.dto.request.EmailPadraoRequest;
 import com.engseg.dto.response.EmailPadraoResponse;
 import com.engseg.entity.EmailPadrao;
-import com.engseg.entity.TipoEmailPadrao;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.EmpresaRepository;
@@ -24,8 +23,8 @@ public class EmailPadraoService {
     private final EmpresaRepository empresaRepository;
 
     @Transactional(readOnly = true)
-    public List<EmailPadraoResponse> listar(UUID estabelecimentoId, UUID empresaId, TipoEmailPadrao tipo) {
-        return repository.findByEstabelecimentoIdAndEmpresaIdAndTipo(estabelecimentoId, empresaId, tipo)
+    public List<EmailPadraoResponse> listar(UUID estabelecimentoId, UUID empresaId) {
+        return repository.findByEstabelecimentoIdAndEmpresaId(estabelecimentoId, empresaId)
                 .stream().map(this::toResponse).toList();
     }
 
@@ -41,7 +40,6 @@ public class EmailPadraoService {
                 .empresa(empresa)
                 .email(request.email())
                 .descricao(request.descricao())
-                .tipo(request.tipo())
                 .build();
         return toResponse(repository.save(entity));
     }
@@ -72,8 +70,7 @@ public class EmailPadraoService {
                 e.getEmpresa().getId(),
                 nomeEmpresa,
                 e.getEmail(),
-                e.getDescricao(),
-                e.getTipo()
+                e.getDescricao()
         );
     }
 }

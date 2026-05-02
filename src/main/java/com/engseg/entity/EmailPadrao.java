@@ -28,8 +28,4 @@ public class EmailPadrao {
     private String email;
 
     private String descricao;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TipoEmailPadrao tipo;
 }

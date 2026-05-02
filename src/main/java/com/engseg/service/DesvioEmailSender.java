@@ -24,7 +24,7 @@ public class DesvioEmailSender {
     @Value("${app.frontend.url}")
     private String frontendUrl;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.mail.from}")
     private String from;
 
     public void enviarTemplateA(Desvio desvio, StatusDesvio statusNovo, Set<String> destinatarios) {
@@ -126,17 +126,23 @@ public class DesvioEmailSender {
     }
 
     private void enviar(Set<String> destinatarios, String assunto, String html) {
-        if (destinatarios.isEmpty()) return;
-        try {
-            MimeMessage msg = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(msg, false, "UTF-8");
-            helper.setFrom(from);
-            helper.setTo(destinatarios.toArray(new String[0]));
-            helper.setSubject(assunto);
-            helper.setText(html, true);
-            mailSender.send(msg);
-        } catch (MessagingException e) {
-            log.error("Falha ao enviar email de Desvio para {} destinatários: {}", destinatarios.size(), e.getMessage(), e);
+        for (String destinatario : destinatarios) {
+            try {
+                MimeMessage msg = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(msg, false, "UTF-8");
+                helper.setFrom(from);
+                helper.setTo(destinatario);
+                helper.setSubject(assunto);
+                helper.setText(html, true);
+                mailSender.send(msg);
+                Thread.sleep(500);
+            } catch (MessagingException e) {
+                log.error("Falha ao enviar email de Desvio para {}: {}", destinatario, e.getMessage(), e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("Envio de email interrompido após {}", destinatario);
+                break;
+            }
         }
     }
 }

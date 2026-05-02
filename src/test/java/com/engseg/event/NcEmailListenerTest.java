@@ -1,7 +1,6 @@
 package com.engseg.event;
 
 import com.engseg.entity.*;
-import com.engseg.entity.TipoEmailPadrao;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.NaoConformidadeRepository;
 import com.engseg.service.NcEmailSender;
@@ -64,7 +63,7 @@ class NcEmailListenerTest {
         padrao.setEmail("diretor@empresa.com");
 
         when(ncRepository.findById(nc.getId())).thenReturn(Optional.of(nc));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(estId, empId, TipoEmailPadrao.NC))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(estId, empId))
                 .thenReturn(List.of(padrao));
 
         NcEmailEvent event = new NcEmailEvent(this, nc.getId(),
@@ -86,7 +85,7 @@ class NcEmailListenerTest {
         padrao.setEmail("eng@construtora.com");
 
         when(ncRepository.findById(nc.getId())).thenReturn(Optional.of(nc));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(estId, empId, TipoEmailPadrao.NC))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(estId, empId))
                 .thenReturn(List.of(padrao));
 
         NcEmailEvent event = new NcEmailEvent(this, nc.getId(),
@@ -108,7 +107,7 @@ class NcEmailListenerTest {
         padrao.setEmail("excluido@empresa.com");
 
         when(ncRepository.findById(nc.getId())).thenReturn(Optional.of(nc));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaIdAndTipo(estId, empId, TipoEmailPadrao.NC))
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(estId, empId))
                 .thenReturn(List.of(padrao));
 
         NcEmailEvent event = new NcEmailEvent(this, nc.getId(),
@@ -135,7 +134,7 @@ class NcEmailListenerTest {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass(Set.class);
         verify(sender).enviarTemplateB(any(), any(), any(), captor.capture(), eq("investigação submetida"));
-        verify(emailPadraoRepository, never()).findByEstabelecimentoIdAndEmpresaIdAndTipo(any(), any(), any());
+        verify(emailPadraoRepository, never()).findByEstabelecimentoIdAndEmpresaId(any(), any());
         assertThat(captor.getValue()).contains("eng@construtora.com", "manual@empresa.com");
     }
 }

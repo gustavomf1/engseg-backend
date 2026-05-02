@@ -1,6 +1,8 @@
 package com.engseg.event;
 
-import com.engseg.entity.*;
+import com.engseg.entity.Desvio;
+import com.engseg.entity.EmailPadrao;
+import com.engseg.entity.StatusDesvio;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.service.DesvioEmailSender;
@@ -53,8 +55,7 @@ public class DesvioEmailListener {
                 UUID empresaId = desvio.getResponsavelDesvio().getEmpresa().getId();
                 Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
                 emailPadraoRepository
-                        .findByEstabelecimentoIdAndEmpresaIdAndTipo(
-                                desvio.getEstabelecimento().getId(), empresaId, TipoEmailPadrao.DESVIO)
+                        .findByEstabelecimentoIdAndEmpresaId(desvio.getEstabelecimento().getId(), empresaId)
                         .stream()
                         .map(EmailPadrao::getEmail)
                         .filter(e -> !dinamicos.contains(e) && !excluidos.contains(e))
