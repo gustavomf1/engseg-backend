@@ -32,6 +32,12 @@ public class DesvioEmailSender {
         String labelStatus = statusNovo == StatusDesvio.AGUARDANDO_TRATATIVA ? "ABERTO" : "CONCLUÍDO";
         String empresaNome = resolverNomeEmpresa(desvio);
 
+        // Escape HTML entities to prevent XSS
+        String titulo = HtmlUtils.htmlEscape(desvio.getTitulo());
+        String descricao = HtmlUtils.htmlEscape(desvio.getDescricao() != null ? desvio.getDescricao() : "");
+        String estNome = HtmlUtils.htmlEscape(desvio.getEstabelecimento().getNome());
+        String empresaNomeEscaped = HtmlUtils.htmlEscape(empresaNome);
+
         String html = String.format("""
                 <html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
                   <div style="background:%s;color:#fff;padding:24px;border-radius:8px 8px 0 0">
@@ -56,12 +62,12 @@ public class DesvioEmailSender {
                 </body></html>
                 """,
                 corHeader, labelStatus,
-                desvio.getTitulo(), desvio.getId(), desvio.getDescricao(),
-                desvio.getEstabelecimento().getNome(), empresaNome,
+                titulo, desvio.getId(), descricao,
+                estNome, empresaNomeEscaped,
                 frontendUrl, desvio.getId()
         );
 
-        enviar(destinatarios, "Desvio " + labelStatus + " — " + desvio.getTitulo(), html);
+        enviar(destinatarios, "Desvio " + labelStatus + " — " + titulo, html);
     }
 
     public void enviarTemplateB(Desvio desvio, StatusDesvio statusAnterior, StatusDesvio statusNovo,
@@ -72,6 +78,11 @@ public class DesvioEmailSender {
         String blocoComentario = (comentario != null && !comentario.isBlank())
                 ? "<p style=\"margin:0 0 8px\"><strong>Comentário:</strong> " + HtmlUtils.htmlEscape(comentario) + "</p>"
                 : "";
+
+        // Escape HTML entities to prevent XSS
+        String titulo = HtmlUtils.htmlEscape(desvio.getTitulo());
+        String descricao = HtmlUtils.htmlEscape(desvio.getDescricao() != null ? desvio.getDescricao() : "");
+        String estNome = HtmlUtils.htmlEscape(desvio.getEstabelecimento().getNome());
 
         String html = String.format("""
                 <html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
@@ -98,19 +109,20 @@ public class DesvioEmailSender {
                 </body></html>
                 """,
                 labelAnterior, labelNovo,
-                desvio.getTitulo(), desvio.getId(), desvio.getDescricao(),
-                desvio.getEstabelecimento().getNome(), blocoComentario,
+                titulo, desvio.getId(), descricao,
+                estNome, blocoComentario,
                 frontendUrl, desvio.getId()
         );
 
-        enviar(destinatarios, "Desvio Atualizado — " + desvio.getTitulo(), html);
+        enviar(destinatarios, "Desvio Atualizado — " + titulo, html);
     }
 
     private String resolverNomeEmpresa(Desvio desvio) {
         if (desvio.getResponsavelDesvio() == null) return "—";
         var emp = desvio.getResponsavelDesvio().getEmpresa();
         if (emp == null) return "—";
-        return emp.getNomeFantasia() != null ? emp.getNomeFantasia() : emp.getRazaoSocial();
+        String nomeEmpresa = emp.getNomeFantasia() != null ? emp.getNomeFantasia() : emp.getRazaoSocial();
+        return HtmlUtils.htmlEscape(nomeEmpresa);
     }
 
     private void enviar(Set<String> destinatarios, String assunto, String html) {
