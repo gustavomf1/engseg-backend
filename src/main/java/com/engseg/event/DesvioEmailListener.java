@@ -45,32 +45,32 @@ public class DesvioEmailListener {
             dinamicos.add(desvio.getResponsavelTratativa().getEmail());
         event.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
 
-        boolean isAbertaOuConcluida = event.getStatusAnterior() == null
+        Set<String> padraoEfetivo = new LinkedHashSet<>();
+        if (desvio.getResponsavelDesvio() != null
+                && desvio.getResponsavelDesvio().getEmpresa() != null) {
+            UUID empresaId = desvio.getResponsavelDesvio().getEmpresa().getId();
+            Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
+            emailPadraoRepository
+                    .findByEstabelecimentoIdAndEmpresaId(desvio.getEstabelecimento().getId(), empresaId)
+                    .stream()
+                    .map(EmailPadrao::getEmail)
+                    .filter(e -> !dinamicos.contains(e) && !excluidos.contains(e))
+                    .forEach(padraoEfetivo::add);
+        }
+
+        Set<String> destinatarios = new LinkedHashSet<>(dinamicos);
+        destinatarios.addAll(padraoEfetivo);
+
+        if (destinatarios.isEmpty()) return;
+
+        boolean isCriacaoOuConclusao = event.getStatusAnterior() == null
                 || event.getStatusNovo() == StatusDesvio.CONCLUIDO;
 
-        if (isAbertaOuConcluida) {
-            Set<String> padraoEfetivo = new LinkedHashSet<>();
-            if (desvio.getResponsavelDesvio() != null
-                    && desvio.getResponsavelDesvio().getEmpresa() != null) {
-                UUID empresaId = desvio.getResponsavelDesvio().getEmpresa().getId();
-                Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
-                emailPadraoRepository
-                        .findByEstabelecimentoIdAndEmpresaId(desvio.getEstabelecimento().getId(), empresaId)
-                        .stream()
-                        .map(EmailPadrao::getEmail)
-                        .filter(e -> !dinamicos.contains(e) && !excluidos.contains(e))
-                        .forEach(padraoEfetivo::add);
-            }
-            Set<String> destinatarios = new LinkedHashSet<>(dinamicos);
-            destinatarios.addAll(padraoEfetivo);
-            if (!destinatarios.isEmpty()) {
-                desvioEmailSender.enviarTemplateA(desvio, event.getStatusNovo(), destinatarios);
-            }
+        if (isCriacaoOuConclusao) {
+            desvioEmailSender.enviarTemplateA(desvio, event.getStatusNovo(), destinatarios);
         } else {
-            if (!dinamicos.isEmpty()) {
-                desvioEmailSender.enviarTemplateB(desvio, event.getStatusAnterior(),
-                        event.getStatusNovo(), dinamicos, event.getComentario());
-            }
+            desvioEmailSender.enviarTemplateB(desvio, event.getStatusAnterior(),
+                    event.getStatusNovo(), destinatarios, event.getComentario());
         }
     }
 }
