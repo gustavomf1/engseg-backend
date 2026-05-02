@@ -5,10 +5,12 @@ import com.engseg.dto.response.DesvioResponse;
 import com.engseg.dto.response.HistoricoDesvioResponse;
 import com.engseg.dto.response.TrativaDesvioResponse;
 import com.engseg.entity.*;
+import com.engseg.event.DesvioEmailEvent;
 import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ public class DesvioService {
     private final TrativaDesvioRepository trativaDesvioRepository;
     private final S3StorageService s3StorageService;
     private final SecurityHelper securityHelper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<DesvioResponse> findAll(UUID estabelecimentoId, UUID empresaId) {
         if (securityHelper.isExterno()) {
@@ -128,6 +131,10 @@ public class DesvioService {
                 .statusAtual(StatusDesvio.AGUARDANDO_TRATATIVA)
                 .dataAcao(LocalDateTime.now())
                 .build());
+
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), null, StatusDesvio.AGUARDANDO_TRATATIVA,
+                request.emailsManuais(), request.emailsPadraoExcluidos(), null));
 
         return toResponse(saved);
     }
@@ -231,7 +238,7 @@ public class DesvioService {
     }
 
     @Transactional
-    public DesvioResponse submeterTratativa(UUID id) {
+    public DesvioResponse submeterTratativa(UUID id, SubmeterTrativaDesvioRequest request) {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
 
@@ -268,6 +275,10 @@ public class DesvioService {
                 .statusAtual(StatusDesvio.AGUARDANDO_APROVACAO)
                 .dataAcao(LocalDateTime.now())
                 .build());
+
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), anterior, StatusDesvio.AGUARDANDO_APROVACAO,
+                request != null ? request.emailsManuais() : List.of(), List.of(), null));
 
         return toResponse(saved);
     }
@@ -306,6 +317,10 @@ public class DesvioService {
                 .statusAtual(StatusDesvio.CONCLUIDO)
                 .dataAcao(LocalDateTime.now())
                 .build());
+
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), anterior, StatusDesvio.CONCLUIDO,
+                request.emailsManuais(), List.of(), request.comentario()));
 
         return toResponse(saved);
     }
@@ -360,6 +375,10 @@ public class DesvioService {
                 .statusAtual(StatusDesvio.AGUARDANDO_TRATATIVA)
                 .dataAcao(LocalDateTime.now())
                 .build());
+
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), anterior, StatusDesvio.AGUARDANDO_TRATATIVA,
+                request.emailsManuais(), List.of(), String.join("; ", motivosSummary)));
 
         return toResponse(saved);
     }

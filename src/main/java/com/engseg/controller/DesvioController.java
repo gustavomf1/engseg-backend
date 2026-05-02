@@ -72,8 +72,10 @@ public class DesvioController {
 
     @PostMapping("/{id}/submeter-tratativa")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
-    public ResponseEntity<DesvioResponse> submeterTratativa(@PathVariable UUID id) {
-        return ResponseEntity.ok(desvioService.submeterTratativa(id));
+    public ResponseEntity<DesvioResponse> submeterTratativa(
+            @PathVariable UUID id,
+            @RequestBody(required = false) SubmeterTrativaDesvioRequest request) {
+        return ResponseEntity.ok(desvioService.submeterTratativa(id, request));
     }
 
     @PostMapping("/{id}/aprovar")
