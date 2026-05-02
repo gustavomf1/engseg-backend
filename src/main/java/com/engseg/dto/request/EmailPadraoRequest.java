@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
-public record EmailPadraoNcRequest(
+public record EmailPadraoRequest(
         @NotNull UUID estabelecimentoId,
         @NotNull UUID empresaId,
         @NotBlank @Email String email,

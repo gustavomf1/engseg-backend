@@ -2,7 +2,7 @@ package com.engseg.dto.response;
 
 import java.util.UUID;
 
-public record EmailPadraoNcResponse(
+public record EmailPadraoResponse(
         UUID id,
         UUID estabelecimentoId,
         String estabelecimentoNome,

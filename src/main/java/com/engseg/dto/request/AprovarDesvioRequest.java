@@ -1,3 +1,5 @@
 package com.engseg.dto.request;
 
-public record AprovarDesvioRequest(String comentario) {}
+import java.util.List;
+
+public record AprovarDesvioRequest(String comentario, List<String> emailsManuais) {}

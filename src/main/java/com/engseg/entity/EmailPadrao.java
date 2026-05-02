@@ -5,12 +5,12 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "email_padrao_nc")
+@Table(name = "email_padrao")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmailPadraoNc {
+public class EmailPadrao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

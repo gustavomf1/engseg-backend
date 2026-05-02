@@ -2,8 +2,8 @@ com/engseg/service/AuthServiceTest.class
 com/engseg/entity/UsuarioTest.class
 com/engseg/controller/NaoConformidadeControllerTest.class
 com/engseg/scheduler/NcSchedulerTest.class
-com/engseg/service/EmailPadraoNcServiceTest.class
 com/engseg/service/NaoConformidadeServiceTest.class
+com/engseg/event/DesvioEmailListenerTest.class
 com/engseg/util/MatrizRiscoTest.class
 com/engseg/EngSegApplicationTests.class
 com/engseg/event/NcEmailListenerTest.class
@@ -12,3 +12,4 @@ com/engseg/service/UsuarioServiceDiretoTest.class
 com/engseg/controller/EmpresaControllerSecurityTest.class
 com/engseg/security/UserDetailsServiceImplTest.class
 com/engseg/service/DashboardServiceTest.class
+com/engseg/service/EmailPadraoServiceTest.class

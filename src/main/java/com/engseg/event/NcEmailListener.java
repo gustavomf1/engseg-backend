@@ -1,9 +1,9 @@
 package com.engseg.event;
 
-import com.engseg.entity.EmailPadraoNc;
+import com.engseg.entity.EmailPadrao;
 import com.engseg.entity.NaoConformidade;
 import com.engseg.entity.StatusNaoConformidade;
-import com.engseg.repository.EmailPadraoNcRepository;
+import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.NaoConformidadeRepository;
 import com.engseg.service.NcEmailSender;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.*;
 public class NcEmailListener {
 
     private final NaoConformidadeRepository naoConformidadeRepository;
-    private final EmailPadraoNcRepository emailPadraoNcRepository;
+    private final EmailPadraoRepository emailPadraoRepository;
     private final NcEmailSender ncEmailSender;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -54,10 +54,10 @@ public class NcEmailListener {
             if (nc.getEngResponsavelConstrutora() != null) {
                 UUID empresaId = nc.getEngResponsavelConstrutora().getEmpresa().getId();
                 Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
-                emailPadraoNcRepository
+                emailPadraoRepository
                         .findByEstabelecimentoIdAndEmpresaId(nc.getEstabelecimento().getId(), empresaId)
                         .stream()
-                        .map(EmailPadraoNc::getEmail)
+                        .map(EmailPadrao::getEmail)
                         .filter(e -> !dinamicos.contains(e) && !excluidos.contains(e))
                         .forEach(padraoEfetivo::add);
             }

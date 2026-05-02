@@ -57,10 +57,16 @@ public class NaoConformidadeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         naoConformidadeService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/ativar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO')")
+    public ResponseEntity<NaoConformidadeResponse> ativar(@PathVariable UUID id) {
+        return ResponseEntity.ok(naoConformidadeService.ativar(id));
     }
 
     // -------------------------------------------------------------------------

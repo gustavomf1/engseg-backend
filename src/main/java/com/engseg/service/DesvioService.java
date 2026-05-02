@@ -5,10 +5,12 @@ import com.engseg.dto.response.DesvioResponse;
 import com.engseg.dto.response.HistoricoDesvioResponse;
 import com.engseg.dto.response.TrativaDesvioResponse;
 import com.engseg.entity.*;
+import com.engseg.event.DesvioEmailEvent;
 import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ public class DesvioService {
     private final TrativaDesvioRepository trativaDesvioRepository;
     private final S3StorageService s3StorageService;
     private final SecurityHelper securityHelper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<DesvioResponse> findAll(UUID estabelecimentoId, UUID empresaId) {
         if (securityHelper.isExterno()) {
@@ -117,7 +120,7 @@ public class DesvioService {
         desvio.setOrientacaoRealizada(request.orientacaoRealizada());
         desvio.setResponsavelDesvio(responsavelDesvio);
         desvio.setResponsavelTratativa(responsavelTratativa);
-        desvio.setStatus(StatusDesvio.AGUARDANDO_TRATATIVA);
+        desvio.setStatus(StatusDesvio.ABERTO);
 
         Desvio saved = desvioRepository.save(desvio);
 
@@ -125,9 +128,13 @@ public class DesvioService {
                 .desvio(saved)
                 .usuario(usuarioLogado)
                 .tipo(TipoAcaoHistoricoDesvio.CRIACAO)
-                .statusAtual(StatusDesvio.AGUARDANDO_TRATATIVA)
+                .statusAtual(StatusDesvio.ABERTO)
                 .dataAcao(LocalDateTime.now())
                 .build());
+
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), null, StatusDesvio.ABERTO,
+                request.emailsManuais(), request.emailsPadraoExcluidos(), null));
 
         return toResponse(saved);
     }
@@ -137,8 +144,16 @@ public class DesvioService {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
 
-        if (desvio.getStatus() != StatusDesvio.AGUARDANDO_TRATATIVA) {
-            throw new BusinessException("Só é possível editar um desvio com status AGUARDANDO_TRATATIVA");
+        if (desvio.getStatus() != StatusDesvio.ABERTO) {
+            throw new BusinessException("Só é possível editar um desvio com status ABERTO");
+        }
+
+        var usuarioLogado = securityHelper.getUsuarioLogado();
+        boolean isCriador = desvio.getUsuarioCriacao() != null &&
+                desvio.getUsuarioCriacao().getId().equals(usuarioLogado.getId()) &&
+                usuarioLogado.getPerfil() != PerfilUsuario.EXTERNO;
+        if (!isCriador && !usuarioLogado.isAdmin()) {
+            throw new BusinessException("Apenas o criador do desvio ou um administrador pode editar");
         }
 
         var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
@@ -231,7 +246,7 @@ public class DesvioService {
     }
 
     @Transactional
-    public DesvioResponse submeterTratativa(UUID id) {
+    public DesvioResponse submeterTratativa(UUID id, SubmeterTrativaDesvioRequest request) {
         Desvio desvio = desvioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
 
@@ -268,6 +283,10 @@ public class DesvioService {
                 .statusAtual(StatusDesvio.AGUARDANDO_APROVACAO)
                 .dataAcao(LocalDateTime.now())
                 .build());
+
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), anterior, StatusDesvio.AGUARDANDO_APROVACAO,
+                request != null ? request.emailsManuais() : List.of(), List.of(), null));
 
         return toResponse(saved);
     }
@@ -306,6 +325,10 @@ public class DesvioService {
                 .statusAtual(StatusDesvio.CONCLUIDO)
                 .dataAcao(LocalDateTime.now())
                 .build());
+
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), anterior, StatusDesvio.CONCLUIDO,
+                request.emailsManuais(), List.of(), request.comentario()));
 
         return toResponse(saved);
     }
@@ -361,6 +384,10 @@ public class DesvioService {
                 .dataAcao(LocalDateTime.now())
                 .build());
 
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), anterior, StatusDesvio.AGUARDANDO_TRATATIVA,
+                request.emailsManuais(), List.of(), String.join("; ", motivosSummary)));
+
         return toResponse(saved);
     }
 
@@ -370,8 +397,15 @@ public class DesvioService {
                 .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
 
         var usuario = securityHelper.getUsuarioLogado();
-        if (desvio.getStatus() == StatusDesvio.CONCLUIDO && !usuario.isAdmin()) {
-            throw new BusinessException("Apenas administradores podem excluir desvios concluídos");
+        if (desvio.getStatus() == StatusDesvio.ABERTO) {
+            boolean isCriador = desvio.getUsuarioCriacao() != null &&
+                    desvio.getUsuarioCriacao().getId().equals(usuario.getId()) &&
+                    usuario.getPerfil() != PerfilUsuario.EXTERNO;
+            if (!isCriador && !usuario.isAdmin()) {
+                throw new BusinessException("Apenas o criador do desvio ou um administrador pode excluir");
+            }
+        } else if (!usuario.isAdmin()) {
+            throw new BusinessException("Apenas administradores podem excluir desvios após envio para tratativa");
         }
 
         List<Evidencia> evidencias = evidenciaRepository.findByDesvioId(id);
@@ -380,6 +414,42 @@ public class DesvioService {
         }
         evidenciaRepository.deleteAll(evidencias);
         desvioRepository.delete(desvio);
+    }
+
+    @Transactional
+    public DesvioResponse abrirTratativa(UUID id) {
+        Desvio desvio = desvioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Desvio não encontrado: " + id));
+
+        if (desvio.getStatus() != StatusDesvio.ABERTO) {
+            throw new BusinessException("Desvio não está com status ABERTO");
+        }
+
+        var usuarioLogado = securityHelper.getUsuarioLogado();
+        boolean isCriador = desvio.getUsuarioCriacao() != null &&
+                desvio.getUsuarioCriacao().getId().equals(usuarioLogado.getId()) &&
+                usuarioLogado.getPerfil() != PerfilUsuario.EXTERNO;
+        if (!isCriador && !usuarioLogado.isAdmin()) {
+            throw new BusinessException("Apenas o criador do desvio ou um administrador pode enviar para tratativa");
+        }
+
+        desvio.setStatus(StatusDesvio.AGUARDANDO_TRATATIVA);
+        Desvio saved = desvioRepository.save(desvio);
+
+        historicoDesvioRepository.save(HistoricoDesvio.builder()
+                .desvio(saved)
+                .usuario(usuarioLogado)
+                .tipo(TipoAcaoHistoricoDesvio.CRIACAO)
+                .statusAnterior(StatusDesvio.ABERTO)
+                .statusAtual(StatusDesvio.AGUARDANDO_TRATATIVA)
+                .dataAcao(LocalDateTime.now())
+                .build());
+
+        eventPublisher.publishEvent(new DesvioEmailEvent(
+                this, saved.getId(), StatusDesvio.ABERTO, StatusDesvio.AGUARDANDO_TRATATIVA,
+                List.of(), List.of(), null));
+
+        return toResponse(saved);
     }
 
     private DesvioResponse toResponse(Desvio d) {

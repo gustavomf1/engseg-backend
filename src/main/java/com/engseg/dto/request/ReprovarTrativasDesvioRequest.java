@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public record ReprovarTrativasDesvioRequest(
-        @NotNull @NotEmpty List<ItemReprovacao> itens
+        @NotNull @NotEmpty List<ItemReprovacao> itens,
+        List<String> emailsManuais
 ) {
     public record ItemReprovacao(
             @NotNull UUID trativaId,

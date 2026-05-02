@@ -175,16 +175,16 @@ public class NaoConformidadeService {
     public NaoConformidadeResponse update(UUID id, NaoConformidadeRequest request) {
         NaoConformidade nc = findNcOrThrow(id);
 
-        if (nc.getStatus() == StatusNaoConformidade.CONCLUIDO) {
-            throw new BusinessException("Não é permitido editar uma NC concluída");
+        if (nc.getStatus() != StatusNaoConformidade.ABERTA) {
+            throw new BusinessException("Só é possível editar uma NC com status ABERTA");
         }
 
-        if (nc.getStatus() != StatusNaoConformidade.ABERTA) {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            var usuario = usuarioRepository.findByEmail(email).orElse(null);
-            if (usuario != null && usuario.getPerfil() == PerfilUsuario.TECNICO) {
-                throw new BusinessException("Técnico não pode editar uma NC que não está com status ABERTA");
-            }
+        var usuarioLogado = securityHelper.getUsuarioLogado();
+        boolean isCriador = nc.getUsuarioCriacao() != null &&
+                nc.getUsuarioCriacao().getId().equals(usuarioLogado.getId()) &&
+                usuarioLogado.getPerfil() != PerfilUsuario.EXTERNO;
+        if (!isCriador && !usuarioLogado.isAdmin()) {
+            throw new BusinessException("Apenas o criador da NC ou um administrador pode editar");
         }
 
         var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
@@ -243,13 +243,16 @@ public class NaoConformidadeService {
     public void delete(UUID id) {
         NaoConformidade nc = findNcOrThrow(id);
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var usuario = usuarioRepository.findByEmail(email).orElse(null);
-        if (nc.getStatus() == StatusNaoConformidade.CONCLUIDO && (usuario == null || !usuario.isAdmin())) {
-            throw new BusinessException("Apenas administradores podem excluir NCs concluídas");
-        }
-        if (usuario != null && usuario.getPerfil() == PerfilUsuario.TECNICO && nc.getStatus() != StatusNaoConformidade.ABERTA) {
-            throw new BusinessException("Técnico só pode excluir NC com status ABERTA");
+        var usuario = securityHelper.getUsuarioLogado();
+        if (nc.getStatus() == StatusNaoConformidade.ABERTA) {
+            boolean isCriador = nc.getUsuarioCriacao() != null &&
+                    nc.getUsuarioCriacao().getId().equals(usuario.getId()) &&
+                    usuario.getPerfil() != PerfilUsuario.EXTERNO;
+            if (!isCriador && !usuario.isAdmin()) {
+                throw new BusinessException("Apenas o criador da NC ou um administrador pode excluir");
+            }
+        } else if (!usuario.isAdmin()) {
+            throw new BusinessException("Apenas administradores podem excluir NCs após ativação");
         }
 
         // Remove arquivos do S3 (evidências da NC e das execuções)
@@ -273,6 +276,35 @@ public class NaoConformidadeService {
     // -------------------------------------------------------------------------
     // Novo fluxo: Investigação → Plano → Execução → Validação Final
     // -------------------------------------------------------------------------
+
+    @Transactional
+    public NaoConformidadeResponse ativar(UUID id) {
+        NaoConformidade nc = findNcOrThrow(id);
+
+        if (nc.getStatus() != StatusNaoConformidade.ABERTA) {
+            throw new BusinessException("NC não está com status ABERTA");
+        }
+
+        var usuarioLogado = securityHelper.getUsuarioLogado();
+        boolean isCriador = nc.getUsuarioCriacao() != null &&
+                nc.getUsuarioCriacao().getId().equals(usuarioLogado.getId()) &&
+                usuarioLogado.getPerfil() != PerfilUsuario.EXTERNO;
+        if (!isCriador && !usuarioLogado.isAdmin()) {
+            throw new BusinessException("Apenas o criador da NC ou um administrador pode enviar para plano de ação");
+        }
+
+        nc.setStatus(StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
+        NaoConformidade saved = naoConformidadeRepository.save(nc);
+
+        registrarHistorico(saved, usuarioLogado, TipoAcaoHistorico.SUBMISSAO_INVESTIGACAO,
+                null, StatusNaoConformidade.ABERTA, StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
+
+        eventPublisher.publishEvent(new NcEmailEvent(this, saved.getId(),
+                StatusNaoConformidade.ABERTA, StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO,
+                List.of(), List.of(), null));
+
+        return toResponse(naoConformidadeRepository.findById(saved.getId()).orElseThrow());
+    }
 
     @Transactional
     public NaoConformidadeResponse submeterInvestigacao(UUID id, InvestigacaoRequest request) {
