@@ -7,6 +7,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -126,6 +127,7 @@ public class DesvioEmailSender {
     }
 
     private void enviar(Set<String> destinatarios, String assunto, String html) {
+        log.info("DesvioEmailSender: enviando '{}' para {} destinatário(s): {}", assunto, destinatarios.size(), destinatarios);
         for (String destinatario : destinatarios) {
             try {
                 MimeMessage msg = mailSender.createMimeMessage();
@@ -135,8 +137,9 @@ public class DesvioEmailSender {
                 helper.setSubject(assunto);
                 helper.setText(html, true);
                 mailSender.send(msg);
+                log.info("DesvioEmailSender: email enviado para {}", destinatario);
                 Thread.sleep(500);
-            } catch (MessagingException e) {
+            } catch (MailException | MessagingException e) {
                 log.error("Falha ao enviar email de Desvio para {}: {}", destinatario, e.getMessage(), e);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

@@ -30,6 +30,7 @@ public class DesvioEmailListener {
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onDesvioEmail(DesvioEmailEvent event) {
+        log.info("DesvioEmailListener: evento recebido desvio={} {} -> {}", event.getDesvioId(), event.getStatusAnterior(), event.getStatusNovo());
         Desvio desvio = desvioRepository.findById(event.getDesvioId()).orElse(null);
         if (desvio == null) {
             log.warn("DesvioEmailListener: Desvio {} não encontrado, email ignorado", event.getDesvioId());
@@ -61,7 +62,10 @@ public class DesvioEmailListener {
         Set<String> destinatarios = new LinkedHashSet<>(dinamicos);
         destinatarios.addAll(padraoEfetivo);
 
-        if (destinatarios.isEmpty()) return;
+        if (destinatarios.isEmpty()) {
+            log.warn("DesvioEmailListener: nenhum destinatário para desvio {}, email ignorado", event.getDesvioId());
+            return;
+        }
 
         boolean isCriacaoOuConclusao = event.getStatusAnterior() == null
                 || event.getStatusNovo() == StatusDesvio.CONCLUIDO;
