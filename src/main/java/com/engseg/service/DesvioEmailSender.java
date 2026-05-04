@@ -2,14 +2,9 @@ package com.engseg.service;
 
 import com.engseg.entity.Desvio;
 import com.engseg.entity.StatusDesvio;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -20,13 +15,10 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class DesvioEmailSender {
 
-    private final JavaMailSender mailSender;
+    private final BrevoEmailService brevoEmailService;
 
     @Value("${app.frontend.url}")
     private String frontendUrl;
-
-    @Value("${app.mail.from}")
-    private String from;
 
     public void enviarTemplateA(Desvio desvio, StatusDesvio statusNovo, Set<String> destinatarios) {
         String corHeader = statusNovo == StatusDesvio.AGUARDANDO_TRATATIVA ? "#2563eb" : "#16a34a";
@@ -130,21 +122,14 @@ public class DesvioEmailSender {
         log.info("DesvioEmailSender: enviando '{}' para {} destinatário(s): {}", assunto, destinatarios.size(), destinatarios);
         for (String destinatario : destinatarios) {
             try {
-                MimeMessage msg = mailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(msg, false, "UTF-8");
-                helper.setFrom(from);
-                helper.setTo(destinatario);
-                helper.setSubject(assunto);
-                helper.setText(html, true);
-                mailSender.send(msg);
-                log.info("DesvioEmailSender: email enviado para {}", destinatario);
+                brevoEmailService.send(destinatario, assunto, html);
                 Thread.sleep(500);
-            } catch (MailException | MessagingException e) {
-                log.error("Falha ao enviar email de Desvio para {}: {}", destinatario, e.getMessage(), e);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.warn("Envio de email interrompido após {}", destinatario);
                 break;
+            } catch (Exception e) {
+                log.error("Falha ao enviar email de Desvio para {}: {}", destinatario, e.getMessage(), e);
             }
         }
     }

@@ -2,13 +2,9 @@ package com.engseg.service;
 
 import com.engseg.entity.NaoConformidade;
 import com.engseg.entity.StatusNaoConformidade;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -19,13 +15,10 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class NcEmailSender {
 
-    private final JavaMailSender mailSender;
+    private final BrevoEmailService brevoEmailService;
 
     @Value("${app.frontend.url}")
     private String frontendUrl;
-
-    @Value("${app.mail.from}")
-    private String from;
 
     public void enviarTemplateA(NaoConformidade nc, StatusNaoConformidade statusNovo,
                                  Set<String> destinatarios) {
@@ -120,20 +113,14 @@ public class NcEmailSender {
     private void enviar(Set<String> destinatarios, String assunto, String html) {
         for (String destinatario : destinatarios) {
             try {
-                MimeMessage msg = mailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(msg, false, "UTF-8");
-                helper.setFrom(from);
-                helper.setTo(destinatario);
-                helper.setSubject(assunto);
-                helper.setText(html, true);
-                mailSender.send(msg);
+                brevoEmailService.send(destinatario, assunto, html);
                 Thread.sleep(500);
-            } catch (MessagingException e) {
-                log.error("Falha ao enviar email para {}: {}", destinatario, e.getMessage(), e);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.warn("Envio de email interrompido após {}", destinatario);
                 break;
+            } catch (Exception e) {
+                log.error("Falha ao enviar email para {}: {}", destinatario, e.getMessage(), e);
             }
         }
     }
