@@ -77,7 +77,7 @@ class DesvioEmailListenerTest {
                 .thenReturn(List.of(padrao));
 
         DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
-                null, StatusDesvio.AGUARDANDO_TRATATIVA, List.of(), List.of(), null);
+                null, StatusDesvio.AGUARDANDO_TRATATIVA, List.of(), List.of(), null, empresa.getId());
         listener.onDesvioEmail(event);
 
         @SuppressWarnings("unchecked")
@@ -99,7 +99,7 @@ class DesvioEmailListenerTest {
                 .thenReturn(List.of(padrao));
 
         DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
-                StatusDesvio.AGUARDANDO_APROVACAO, StatusDesvio.CONCLUIDO, List.of(), List.of(), null);
+                StatusDesvio.AGUARDANDO_APROVACAO, StatusDesvio.CONCLUIDO, List.of(), List.of(), null, empresa.getId());
         listener.onDesvioEmail(event);
 
         @SuppressWarnings("unchecked")
@@ -120,7 +120,7 @@ class DesvioEmailListenerTest {
 
         DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
                 null, StatusDesvio.AGUARDANDO_TRATATIVA, List.of(),
-                List.of("excluido@empresa.com"), null);
+                List.of("excluido@empresa.com"), null, empresa.getId());
         listener.onDesvioEmail(event);
 
         @SuppressWarnings("unchecked")
@@ -130,41 +130,29 @@ class DesvioEmailListenerTest {
     }
 
     @Test
-    void submeter_tratativa_envia_templateB_para_dinamicos_e_padrao() {
-        EmailPadrao padrao = new EmailPadrao();
-        padrao.setEmail("diretor@empresa.com");
-
+    void submeter_tratativa_envia_templateB_apenas_para_dinamicos() {
         when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(
-                estabelecimento.getId(), empresa.getId()))
-                .thenReturn(List.of(padrao));
 
         DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
                 StatusDesvio.AGUARDANDO_TRATATIVA, StatusDesvio.AGUARDANDO_APROVACAO,
-                List.of("manual@empresa.com"), List.of(), null);
+                List.of("manual@empresa.com"), List.of(), null, empresa.getId());
         listener.onDesvioEmail(event);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass(Set.class);
         verify(sender).enviarTemplateB(any(), any(), any(), captor.capture(), any());
-        verify(emailPadraoRepository).findByEstabelecimentoIdAndEmpresaId(any(), any());
-        assertThat(captor.getValue()).contains(
-                "resp.desvio@construtora.com", "manual@empresa.com", "diretor@empresa.com");
+        verifyNoInteractions(emailPadraoRepository);
+        assertThat(captor.getValue()).contains("resp.desvio@construtora.com", "manual@empresa.com");
+        assertThat(captor.getValue()).doesNotContain("diretor@empresa.com");
     }
 
     @Test
-    void reprovar_envia_templateB_para_dinamicos_e_padrao() {
-        EmailPadrao padrao = new EmailPadrao();
-        padrao.setEmail("diretor@empresa.com");
-
+    void reprovar_envia_templateB_apenas_para_dinamicos() {
         when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(
-                estabelecimento.getId(), empresa.getId()))
-                .thenReturn(List.of(padrao));
 
         DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
                 StatusDesvio.AGUARDANDO_APROVACAO, StatusDesvio.AGUARDANDO_TRATATIVA,
-                List.of(), List.of(), "Tratativa 1: motivo da reprovação");
+                List.of(), List.of(), "Tratativa 1: motivo da reprovação", empresa.getId());
         listener.onDesvioEmail(event);
 
         @SuppressWarnings("unchecked")
@@ -172,7 +160,7 @@ class DesvioEmailListenerTest {
         verify(sender).enviarTemplateB(eq(desvio),
                 eq(StatusDesvio.AGUARDANDO_APROVACAO), eq(StatusDesvio.AGUARDANDO_TRATATIVA),
                 captor.capture(), eq("Tratativa 1: motivo da reprovação"));
-        verify(emailPadraoRepository).findByEstabelecimentoIdAndEmpresaId(any(), any());
-        assertThat(captor.getValue()).contains("diretor@empresa.com");
+        verifyNoInteractions(emailPadraoRepository);
+        assertThat(captor.getValue()).doesNotContain("diretor@empresa.com");
     }
 }

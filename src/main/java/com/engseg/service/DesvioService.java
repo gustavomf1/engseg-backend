@@ -30,6 +30,7 @@ public class DesvioService {
     private final EvidenciaRepository evidenciaRepository;
     private final HistoricoDesvioRepository historicoDesvioRepository;
     private final TrativaDesvioRepository trativaDesvioRepository;
+    private final EmpresaRepository empresaRepository;
     private final S3StorageService s3StorageService;
     private final SecurityHelper securityHelper;
     private final ApplicationEventPublisher eventPublisher;
@@ -121,6 +122,10 @@ public class DesvioService {
         desvio.setResponsavelDesvio(responsavelDesvio);
         desvio.setResponsavelTratativa(responsavelTratativa);
         desvio.setStatus(StatusDesvio.ABERTO);
+        if (request.empresaContratadaId() != null) {
+            empresaRepository.findById(request.empresaContratadaId())
+                    .ifPresent(desvio::setEmpresaContratada);
+        }
 
         Desvio saved = desvioRepository.save(desvio);
 
@@ -134,7 +139,8 @@ public class DesvioService {
 
         eventPublisher.publishEvent(new DesvioEmailEvent(
                 this, saved.getId(), null, StatusDesvio.ABERTO,
-                request.emailsManuais(), request.emailsPadraoExcluidos(), null));
+                request.emailsManuais(), request.emailsPadraoExcluidos(), null,
+                saved.getEmpresaContratada() != null ? saved.getEmpresaContratada().getId() : null));
 
         return toResponse(saved);
     }
@@ -286,7 +292,8 @@ public class DesvioService {
 
         eventPublisher.publishEvent(new DesvioEmailEvent(
                 this, saved.getId(), anterior, StatusDesvio.AGUARDANDO_APROVACAO,
-                request != null ? request.emailsManuais() : List.of(), List.of(), null));
+                request != null ? request.emailsManuais() : List.of(), List.of(), null,
+                saved.getEmpresaContratada() != null ? saved.getEmpresaContratada().getId() : null));
 
         return toResponse(saved);
     }
@@ -328,7 +335,8 @@ public class DesvioService {
 
         eventPublisher.publishEvent(new DesvioEmailEvent(
                 this, saved.getId(), anterior, StatusDesvio.CONCLUIDO,
-                request.emailsManuais(), List.of(), request.comentario()));
+                request.emailsManuais(), List.of(), request.comentario(),
+                saved.getEmpresaContratada() != null ? saved.getEmpresaContratada().getId() : null));
 
         return toResponse(saved);
     }
@@ -386,7 +394,8 @@ public class DesvioService {
 
         eventPublisher.publishEvent(new DesvioEmailEvent(
                 this, saved.getId(), anterior, StatusDesvio.AGUARDANDO_TRATATIVA,
-                request.emailsManuais(), List.of(), String.join("; ", motivosSummary)));
+                request.emailsManuais(), List.of(), String.join("; ", motivosSummary),
+                saved.getEmpresaContratada() != null ? saved.getEmpresaContratada().getId() : null));
 
         return toResponse(saved);
     }
@@ -447,7 +456,8 @@ public class DesvioService {
 
         eventPublisher.publishEvent(new DesvioEmailEvent(
                 this, saved.getId(), StatusDesvio.ABERTO, StatusDesvio.AGUARDANDO_TRATATIVA,
-                List.of(), List.of(), null));
+                List.of(), List.of(), null,
+                saved.getEmpresaContratada() != null ? saved.getEmpresaContratada().getId() : null));
 
         return toResponse(saved);
     }

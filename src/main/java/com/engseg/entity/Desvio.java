@@ -21,6 +21,10 @@ public class Desvio extends Ocorrencia {
     private String orientacaoRealizada;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_contratada_id")
+    private Empresa empresaContratada;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_criacao_id")
     private Usuario usuarioCriacao;
 

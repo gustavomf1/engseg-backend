@@ -15,5 +15,6 @@ public record DesvioRequest(
         @NotNull UUID responsavelDesvioId,
         @NotNull UUID responsavelTratativaId,
         List<String> emailsManuais,
-        List<String> emailsPadraoExcluidos
+        List<String> emailsPadraoExcluidos,
+        UUID empresaContratadaId
 ) {}

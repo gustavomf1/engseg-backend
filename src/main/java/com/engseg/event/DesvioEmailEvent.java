@@ -16,13 +16,15 @@ public class DesvioEmailEvent extends ApplicationEvent {
     private final List<String> emailsManuais;
     private final List<String> emailsPadraoExcluidos;
     private final String comentario;
+    private final UUID empresaContratadaId;
 
     public DesvioEmailEvent(Object source, UUID desvioId,
                             StatusDesvio statusAnterior,
                             StatusDesvio statusNovo,
                             List<String> emailsManuais,
                             List<String> emailsPadraoExcluidos,
-                            String comentario) {
+                            String comentario,
+                            UUID empresaContratadaId) {
         super(source);
         this.desvioId = desvioId;
         this.statusAnterior = statusAnterior;
@@ -30,5 +32,6 @@ public class DesvioEmailEvent extends ApplicationEvent {
         this.emailsManuais = emailsManuais != null ? emailsManuais : List.of();
         this.emailsPadraoExcluidos = emailsPadraoExcluidos != null ? emailsPadraoExcluidos : List.of();
         this.comentario = comentario;
+        this.empresaContratadaId = empresaContratadaId;
     }
 }

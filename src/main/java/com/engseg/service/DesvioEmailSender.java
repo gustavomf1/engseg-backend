@@ -21,8 +21,8 @@ public class DesvioEmailSender {
     private String frontendUrl;
 
     public void enviarTemplateA(Desvio desvio, StatusDesvio statusNovo, Set<String> destinatarios) {
-        String corHeader = statusNovo == StatusDesvio.AGUARDANDO_TRATATIVA ? "#2563eb" : "#16a34a";
-        String labelStatus = statusNovo == StatusDesvio.AGUARDANDO_TRATATIVA ? "ABERTO" : "CONCLUÍDO";
+        String corHeader = statusNovo == StatusDesvio.CONCLUIDO ? "#16a34a" : "#2563eb";
+        String labelStatus = statusNovo == StatusDesvio.CONCLUIDO ? "CONCLUÍDO" : "ABERTO";
         String empresaNome = resolverNomeEmpresa(desvio);
 
         // Escape HTML entities to prevent XSS
