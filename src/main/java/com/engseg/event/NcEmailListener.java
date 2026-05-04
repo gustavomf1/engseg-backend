@@ -43,6 +43,8 @@ public class NcEmailListener {
             dinamicos.add(nc.getEngResponsavelConstrutora().getEmail());
         if (nc.getEngResponsavelVerificacao() != null && nc.getEngResponsavelVerificacao().getEmail() != null)
             dinamicos.add(nc.getEngResponsavelVerificacao().getEmail());
+        if (nc.getEmailsManuais() != null)
+            nc.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
         event.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
 
         StatusNaoConformidade statusNovo = event.getStatusNovo();

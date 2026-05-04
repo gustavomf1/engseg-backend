@@ -161,6 +161,11 @@ public class NaoConformidadeService {
             nc.setNcAnterior(ncAnterior);
         }
 
+        if (request.emailsManuais() != null) {
+            nc.setEmailsManuais(request.emailsManuais().stream()
+                    .filter(e -> e != null && !e.isBlank()).toList());
+        }
+
         NaoConformidade saved = naoConformidadeRepository.save(nc);
         registrarHistorico(saved, tecnico, TipoAcaoHistorico.CRIACAO, null, null, StatusNaoConformidade.ABERTA);
 
