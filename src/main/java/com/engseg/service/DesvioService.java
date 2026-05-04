@@ -126,6 +126,10 @@ public class DesvioService {
             empresaRepository.findById(request.empresaContratadaId())
                     .ifPresent(desvio::setEmpresaContratada);
         }
+        if (request.emailsManuais() != null) {
+            desvio.setEmailsManuais(request.emailsManuais().stream()
+                    .filter(e -> e != null && !e.isBlank()).toList());
+        }
 
         Desvio saved = desvioRepository.save(desvio);
 

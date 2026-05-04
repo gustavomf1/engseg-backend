@@ -24,6 +24,12 @@ public class Desvio extends Ocorrencia {
     @JoinColumn(name = "empresa_contratada_id")
     private Empresa empresaContratada;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "desvio_email_manual", joinColumns = @JoinColumn(name = "desvio_id"))
+    @Column(name = "email")
+    @Builder.Default
+    private List<String> emailsManuais = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_criacao_id")
     private Usuario usuarioCriacao;

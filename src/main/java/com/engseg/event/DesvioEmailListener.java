@@ -44,6 +44,8 @@ public class DesvioEmailListener {
             dinamicos.add(desvio.getResponsavelDesvio().getEmail());
         if (desvio.getResponsavelTratativa() != null && desvio.getResponsavelTratativa().getEmail() != null)
             dinamicos.add(desvio.getResponsavelTratativa().getEmail());
+        if (desvio.getEmailsManuais() != null)
+            desvio.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
         event.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
 
         boolean isCriacaoOuConclusao = event.getStatusAnterior() == null
