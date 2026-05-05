@@ -13,5 +13,6 @@ public record EmpresaResponse(
         UUID empresaMaeId,
         String empresaMaeNome,
         boolean ativo,
+        boolean exibirNoSeletor,
         LocalDate dtInativacao
 ) {}

@@ -39,6 +39,11 @@ public class Empresa {
     @Builder.Default
     private boolean ativo = true;
 
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(name = "exibir_no_seletor", nullable = false, length = 1)
+    @Builder.Default
+    private boolean exibirNoSeletor = true;
+
     @Column(name = "dt_inativacao")
     private LocalDate dtInativacao;
 }

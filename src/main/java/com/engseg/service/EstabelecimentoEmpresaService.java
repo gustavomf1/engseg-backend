@@ -38,6 +38,7 @@ public class EstabelecimentoEmpresaService {
                             e.getEmpresaMae() != null ? e.getEmpresaMae().getId() : null,
                             e.getEmpresaMae() != null ? e.getEmpresaMae().getRazaoSocial() : null,
                             e.isAtivo(),
+                            e.isExibirNoSeletor(),
                             e.getDtInativacao()
                     );
                 })

@@ -24,9 +24,10 @@ public class EmpresaController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
     public ResponseEntity<List<EmpresaResponse>> getAll(
             @RequestParam(required = false) Boolean ativo,
-            @RequestParam(required = false) Boolean empresaMae) {
+            @RequestParam(required = false) Boolean empresaMae,
+            @RequestParam(required = false) Boolean exibirNoSeletor) {
         if (Boolean.TRUE.equals(empresaMae)) {
-            return ResponseEntity.ok(empresaService.findEmpresasMae(ativo));
+            return ResponseEntity.ok(empresaService.findEmpresasMae(ativo, exibirNoSeletor));
         }
         return ResponseEntity.ok(empresaService.findAll(ativo));
     }
@@ -68,5 +69,11 @@ public class EmpresaController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EmpresaResponse> reativar(@PathVariable UUID id) {
         return ResponseEntity.ok(empresaService.reativar(id));
+    }
+
+    @PutMapping("/{id}/seletor")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EmpresaResponse> toggleSeletor(@PathVariable UUID id) {
+        return ResponseEntity.ok(empresaService.toggleExibirNoSeletor(id));
     }
 }

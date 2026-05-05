@@ -28,10 +28,15 @@ public class EmpresaService {
                 .toList();
     }
 
-    public List<EmpresaResponse> findEmpresasMae(Boolean ativo) {
-        List<Empresa> empresas = (ativo != null)
-                ? empresaRepository.findAllByEmpresaMaeIsNullAndAtivo(ativo)
-                : empresaRepository.findAllByEmpresaMaeIsNull();
+    public List<EmpresaResponse> findEmpresasMae(Boolean ativo, Boolean exibirNoSeletor) {
+        List<Empresa> empresas;
+        if (ativo != null && exibirNoSeletor != null) {
+            empresas = empresaRepository.findAllByEmpresaMaeIsNullAndAtivoAndExibirNoSeletor(ativo, exibirNoSeletor);
+        } else if (ativo != null) {
+            empresas = empresaRepository.findAllByEmpresaMaeIsNullAndAtivo(ativo);
+        } else {
+            empresas = empresaRepository.findAllByEmpresaMaeIsNull();
+        }
         return empresas.stream()
                 .map(this::toResponse)
                 .toList();
@@ -68,6 +73,7 @@ public class EmpresaService {
                 .telefone(request.telefone())
                 .empresaMae(empresaMae)
                 .ativo(true)
+                .exibirNoSeletor(request.exibirNoSeletor() != null ? request.exibirNoSeletor() : true)
                 .build();
         return toResponse(empresaRepository.save(empresa));
     }
@@ -89,6 +95,9 @@ public class EmpresaService {
         empresa.setEmail(request.email());
         empresa.setTelefone(request.telefone());
         empresa.setEmpresaMae(empresaMae);
+        if (request.exibirNoSeletor() != null) {
+            empresa.setExibirNoSeletor(request.exibirNoSeletor());
+        }
 
         return toResponse(empresaRepository.save(empresa));
     }
@@ -111,6 +120,14 @@ public class EmpresaService {
         return toResponse(empresaRepository.save(empresa));
     }
 
+    @Transactional
+    public EmpresaResponse toggleExibirNoSeletor(UUID id) {
+        Empresa empresa = empresaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Empresa não encontrada: " + id));
+        empresa.setExibirNoSeletor(!empresa.isExibirNoSeletor());
+        return toResponse(empresaRepository.save(empresa));
+    }
+
     private EmpresaResponse toResponse(Empresa empresa) {
         return new EmpresaResponse(
                 empresa.getId(),
@@ -122,6 +139,7 @@ public class EmpresaService {
                 empresa.getEmpresaMae() != null ? empresa.getEmpresaMae().getId() : null,
                 empresa.getEmpresaMae() != null ? empresa.getEmpresaMae().getRazaoSocial() : null,
                 empresa.isAtivo(),
+                empresa.isExibirNoSeletor(),
                 empresa.getDtInativacao()
         );
     }

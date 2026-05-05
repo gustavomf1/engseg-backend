@@ -1,0 +1,1 @@
+ALTER TABLE empresa ADD COLUMN exibir_no_seletor VARCHAR(1) NOT NULL DEFAULT 'S';

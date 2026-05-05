@@ -10,5 +10,6 @@ public record EmpresaRequest(
         String nomeFantasia,
         @Size(max = 100) String email,
         @Size(max = 20) String telefone,
-        UUID empresaMaeId
+        UUID empresaMaeId,
+        Boolean exibirNoSeletor
 ) {}
