@@ -1,6 +1,7 @@
 package com.engseg.event;
 
 import com.engseg.entity.*;
+import com.engseg.event.kafka.NcKafkaEvent;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.NaoConformidadeRepository;
 import com.engseg.service.NcEmailSender;
@@ -11,12 +12,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class NcEmailListenerTest {
@@ -24,6 +29,7 @@ class NcEmailListenerTest {
     @Mock NaoConformidadeRepository ncRepository;
     @Mock EmailPadraoRepository emailPadraoRepository;
     @Mock NcEmailSender sender;
+    @Mock KafkaTemplate<String, NcKafkaEvent> kafkaTemplate;
     @InjectMocks NcEmailListener listener;
 
     private NaoConformidade nc;
@@ -136,5 +142,41 @@ class NcEmailListenerTest {
         verify(sender).enviarTemplateB(any(), any(), any(), captor.capture(), eq("investigação submetida"));
         verify(emailPadraoRepository, never()).findByEstabelecimentoIdAndEmpresaId(any(), any());
         assertThat(captor.getValue()).contains("eng@construtora.com", "manual@empresa.com");
+    }
+
+    @Test
+    void devePublicarKafkaNC_CRIADA_quandoStatusAberta() {
+        UUID ncId = UUID.randomUUID();
+        nc.setId(ncId);
+        nc.setEngResponsavelConstrutora(engConstrutora);
+        when(ncRepository.findById(ncId)).thenReturn(Optional.of(nc));
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(any(), any()))
+                .thenReturn(List.of());
+
+        NcEmailEvent event = new NcEmailEvent(this, ncId,
+                null, StatusNaoConformidade.ABERTA,
+                List.of(), List.of(), null);
+        listener.onNcEmail(event);
+
+        verify(kafkaTemplate, times(1)).send(
+                eq("engseg.nc.events"),
+                argThat((NcKafkaEvent e) -> "NC_CRIADA".equals(e.tipo())));
+    }
+
+    @Test
+    void devePublicarKafkaNC_STATUS_ALTERADO_quandoStatusNaoAberta() {
+        UUID ncId = UUID.randomUUID();
+        nc.setId(ncId);
+        nc.setEngResponsavelConstrutora(engConstrutora);
+        when(ncRepository.findById(ncId)).thenReturn(Optional.of(nc));
+
+        NcEmailEvent event = new NcEmailEvent(this, ncId,
+                StatusNaoConformidade.ABERTA, StatusNaoConformidade.EM_TRATAMENTO,
+                List.of(), List.of(), null);
+        listener.onNcEmail(event);
+
+        verify(kafkaTemplate, times(1)).send(
+                eq("engseg.nc.events"),
+                argThat((NcKafkaEvent e) -> "NC_STATUS_ALTERADO".equals(e.tipo())));
     }
 }

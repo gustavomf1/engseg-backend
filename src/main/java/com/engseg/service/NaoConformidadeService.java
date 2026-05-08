@@ -852,7 +852,7 @@ public class NaoConformidadeService {
                         .collect(Collectors.groupingBy(
                                 e -> e.getAtividadePlanoAcao().getId(),
                                 Collectors.mapping(
-                                        e -> new EvidenciaResponse(e.getId(), e.getNomeArquivo(), e.getUrlArquivo(), e.getDataUpload(), e.getTipoEvidencia() != null ? e.getTipoEvidencia().name() : null),
+                                        e -> new EvidenciaResponse(e.getId(), e.getNomeArquivo(), e.getUrlArquivo(), e.getDataUpload(), e.getTipoEvidencia() != null ? e.getTipoEvidencia().name() : null, e.getLatitude(), e.getLongitude(), e.getCapturedAt(), e.getOrigem(), e.getCidade()),
                                         Collectors.toList()
                                 )
                         ));
@@ -899,7 +899,7 @@ public class NaoConformidadeService {
                                 s.getId(), s.getDescricaoExecucao(),
                                 s.getDataSubmissao(), s.getStatus(), s.getComentarioRevisao(),
                                 s.getEvidencias().stream()
-                                        .map(e -> new EvidenciaResponse(e.getId(), e.getNomeArquivo(), e.getUrlArquivo(), e.getDataUpload(), e.getTipoEvidencia() != null ? e.getTipoEvidencia().name() : null))
+                                        .map(e -> new EvidenciaResponse(e.getId(), e.getNomeArquivo(), e.getUrlArquivo(), e.getDataUpload(), e.getTipoEvidencia() != null ? e.getTipoEvidencia().name() : null, e.getLatitude(), e.getLongitude(), e.getCapturedAt(), e.getOrigem(), e.getCidade()))
                                         .toList(),
                                 s.getAtividades()
                         )).toList();

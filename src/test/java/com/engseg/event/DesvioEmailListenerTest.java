@@ -1,6 +1,7 @@
 package com.engseg.event;
 
 import com.engseg.entity.*;
+import com.engseg.event.kafka.DesvioKafkaEvent;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.service.DesvioEmailSender;
@@ -11,12 +12,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class DesvioEmailListenerTest {
@@ -24,6 +28,7 @@ class DesvioEmailListenerTest {
     @Mock DesvioRepository desvioRepository;
     @Mock EmailPadraoRepository emailPadraoRepository;
     @Mock DesvioEmailSender sender;
+    @Mock KafkaTemplate<String, DesvioKafkaEvent> kafkaTemplate;
     @InjectMocks DesvioEmailListener listener;
 
     private Desvio desvio;
@@ -162,5 +167,19 @@ class DesvioEmailListenerTest {
                 captor.capture(), eq("Tratativa 1: motivo da reprovação"));
         verifyNoInteractions(emailPadraoRepository);
         assertThat(captor.getValue()).doesNotContain("diretor@empresa.com");
+    }
+
+    @Test
+    void devePublicarKafkaDesvio_quandoEventoProcessado() {
+        UUID desvioId = UUID.randomUUID();
+        desvio.setId(desvioId);
+        when(desvioRepository.findById(desvioId)).thenReturn(Optional.of(desvio));
+
+        DesvioEmailEvent event = new DesvioEmailEvent(this, desvioId,
+                null, StatusDesvio.AGUARDANDO_TRATATIVA,
+                List.of(), List.of(), null, empresa.getId());
+        listener.onDesvioEmail(event);
+
+        verify(kafkaTemplate, times(1)).send(eq("engseg.desvio.events"), any(DesvioKafkaEvent.class));
     }
 }

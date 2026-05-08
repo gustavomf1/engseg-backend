@@ -3,6 +3,7 @@ package com.engseg.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -49,4 +50,19 @@ public class Evidencia {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "atividade_plano_acao_id")
     private AtividadePlanoAcao atividadePlanoAcao;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    @Column(name = "captured_at")
+    private OffsetDateTime capturedAt;
+
+    @Column(name = "origem", length = 10)
+    private String origem;
+
+    @Column(name = "cidade", length = 150)
+    private String cidade;
 }

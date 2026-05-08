@@ -4,6 +4,7 @@ com/engseg/entity/Evidencia.class
 com/engseg/exception/BusinessException.class
 com/engseg/controller/LocalizacaoController.class
 com/engseg/entity/ConviteUsuario$ConviteUsuarioBuilder.class
+com/engseg/dto/request/SyncItemRequest.class
 com/engseg/repository/UsuarioRepository.class
 com/engseg/entity/Desvio.class
 com/engseg/dto/response/HistoricoDesvioResponse.class
@@ -13,7 +14,6 @@ com/engseg/dto/response/NcResumoResponse.class
 com/engseg/entity/Devolutiva.class
 com/engseg/repository/AtividadePlanoAcaoRepository.class
 com/engseg/dto/request/ExecucaoAcaoRequest.class
-com/engseg/entity/TipoEmailPadrao.class
 com/engseg/entity/Norma.class
 com/engseg/dto/request/ValidacaoRequest.class
 com/engseg/util/MatrizRisco.class
@@ -99,10 +99,12 @@ com/engseg/repository/NaoConformidadeRepository.class
 com/engseg/repository/DevolutivaRepository.class
 com/engseg/repository/EstabelecimentoEmpresaRepository.class
 com/engseg/dto/request/LocalizacaoRequest.class
+com/engseg/service/BrevoEmailService.class
 com/engseg/entity/TipoAcaoHistorico.class
 com/engseg/entity/ExecucaoAcao.class
 com/engseg/dto/response/AtividadeResponse.class
 com/engseg/controller/DesvioController.class
+com/engseg/event/kafka/NcKafkaEvent.class
 com/engseg/entity/AtividadePlanoAcao.class
 com/engseg/exception/GlobalExceptionHandler$ErrorResponse.class
 com/engseg/repository/EmailPadraoRepository.class
@@ -126,12 +128,15 @@ com/engseg/service/DashboardService.class
 com/engseg/service/EmailPadraoService.class
 com/engseg/service/EmpresaService.class
 com/engseg/config/AsyncConfig.class
+com/engseg/scheduler/NcExpiryScheduler.class
+com/engseg/dto/request/SyncBatchRequest.class
 com/engseg/dto/response/BuscarTrechoResponse.class
 com/engseg/event/DesvioEmailListener.class
 com/engseg/dto/response/ConviteResponse.class
 com/engseg/controller/EstabelecimentoController.class
 com/engseg/config/RestTemplateConfig.class
 com/engseg/dto/request/InvestigacaoRequest.class
+com/engseg/service/SyncService.class
 com/engseg/repository/HistoricoDesvioRepository.class
 com/engseg/service/ConviteService.class
 com/engseg/dto/request/RejeitarRequest.class
@@ -162,8 +167,11 @@ com/engseg/dto/response/NcTrechoNormaResponse.class
 com/engseg/event/NcEmailListener.class
 com/engseg/service/DesvioEmailSender.class
 com/engseg/dto/request/InvestigacaoRequest$PorqueItem.class
+com/engseg/event/kafka/ExpiryAlertEvent.class
 com/engseg/dto/request/LoginRequest.class
+com/engseg/dto/response/SyncBatchResponse.class
 com/engseg/repository/HistoricoNcRepository.class
+com/engseg/controller/SyncController.class
 com/engseg/dto/response/ValidacaoResponse.class
 com/engseg/dto/request/SubmeterExecucaoRequest$AtividadeExecucao.class
 com/engseg/controller/NaoConformidadeController.class
@@ -182,8 +190,10 @@ com/engseg/dto/request/NaoConformidadeRequest.class
 com/engseg/dto/request/InvestigacaoRequest$AtividadeItem.class
 com/engseg/dto/response/InvestigacaoSnapshotResponse.class
 com/engseg/entity/InvestigacaoSnapshot$InvestigacaoSnapshotBuilder.class
+com/engseg/event/kafka/DesvioKafkaEvent.class
 com/engseg/entity/TipoEvidencia.class
 com/engseg/entity/Localizacao.class
+com/engseg/dto/response/SyncItemResult.class
 com/engseg/service/ClaudeService.class
 com/engseg/entity/Estabelecimento$EstabelecimentoBuilder.class
 com/engseg/dto/request/AdicionarTrativaRequest.class

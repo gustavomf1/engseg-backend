@@ -38,4 +38,9 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
     List<NaoConformidade> findByNcAnteriorId(UUID ncAnteriorId);
 
     List<NaoConformidade> findTop10ByOrderByDataRegistroDesc();
+
+    @Query("SELECT n FROM NaoConformidade n WHERE n.dataLimiteResolucao = :data " +
+           "AND n.status <> com.engseg.entity.StatusNaoConformidade.CONCLUIDO")
+    List<NaoConformidade> findAtivasByDataLimiteResolucao(
+            @Param("data") java.time.LocalDate data);
 }

@@ -111,7 +111,12 @@ public class EvidenciaController {
                 e.getNomeArquivo(),
                 e.getUrlArquivo(),
                 e.getDataUpload(),
-                e.getTipoEvidencia() != null ? e.getTipoEvidencia().name() : null
+                e.getTipoEvidencia() != null ? e.getTipoEvidencia().name() : null,
+                e.getLatitude(),
+                e.getLongitude(),
+                e.getCapturedAt(),
+                e.getOrigem(),
+                e.getCidade()
         );
     }
 }

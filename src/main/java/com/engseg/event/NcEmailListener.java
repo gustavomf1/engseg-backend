@@ -1,13 +1,13 @@
 package com.engseg.event;
 
-import com.engseg.entity.EmailPadrao;
-import com.engseg.entity.NaoConformidade;
-import com.engseg.entity.StatusNaoConformidade;
+import com.engseg.entity.*;
+import com.engseg.event.kafka.NcKafkaEvent;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.NaoConformidadeRepository;
 import com.engseg.service.NcEmailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -22,9 +22,12 @@ import java.util.*;
 @RequiredArgsConstructor
 public class NcEmailListener {
 
+    private static final String TOPIC = "engseg.nc.events";
+
     private final NaoConformidadeRepository naoConformidadeRepository;
     private final EmailPadraoRepository emailPadraoRepository;
     private final NcEmailSender ncEmailSender;
+    private final KafkaTemplate<String, NcKafkaEvent> kafkaTemplate;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
@@ -32,10 +35,15 @@ public class NcEmailListener {
     public void onNcEmail(NcEmailEvent event) {
         NaoConformidade nc = naoConformidadeRepository.findById(event.getNcId()).orElse(null);
         if (nc == null) {
-            log.warn("NcEmailListener: NC {} não encontrada, email ignorado", event.getNcId());
+            log.warn("NcEmailListener: NC {} não encontrada, ignorado", event.getNcId());
             return;
         }
 
+        enviarEmail(nc, event);
+        publicarKafka(nc, event);
+    }
+
+    private void enviarEmail(NaoConformidade nc, NcEmailEvent event) {
         Set<String> dinamicos = new LinkedHashSet<>();
         if (nc.getUsuarioCriacao() != null && nc.getUsuarioCriacao().getEmail() != null)
             dinamicos.add(nc.getUsuarioCriacao().getEmail());
@@ -74,5 +82,24 @@ public class NcEmailListener {
                         dinamicos, event.getComentario());
             }
         }
+    }
+
+    private void publicarKafka(NaoConformidade nc, NcEmailEvent event) {
+        String tipo = (event.getStatusAnterior() == null) ? "NC_CRIADA" : "NC_STATUS_ALTERADO";
+        UUID responsavelId = nc.getEngResponsavelConstrutora() != null
+                ? nc.getEngResponsavelConstrutora().getId() : null;
+        UUID responsavelTrativaId = nc.getEngResponsavelVerificacao() != null
+                ? nc.getEngResponsavelVerificacao().getId() : null;
+        UUID criadorId = nc.getUsuarioCriacao() != null
+                ? nc.getUsuarioCriacao().getId() : null;
+
+        NcKafkaEvent kafkaEvent = new NcKafkaEvent(
+                tipo, nc.getId(), nc.getTitulo(),
+                nc.getStatus().name(),
+                responsavelId, responsavelTrativaId, criadorId,
+                nc.getDataLimiteResolucao()
+        );
+        kafkaTemplate.send(TOPIC, kafkaEvent);
+        log.info("NcEmailListener: Kafka {} publicado para NC {}", tipo, nc.getId());
     }
 }
