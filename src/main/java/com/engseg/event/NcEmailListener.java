@@ -44,20 +44,22 @@ public class NcEmailListener {
     }
 
     private void enviarEmail(NaoConformidade nc, NcEmailEvent event) {
+        boolean isCriacao = event.getStatusAnterior() == null;
+
         Set<String> dinamicos = new LinkedHashSet<>();
         if (nc.getUsuarioCriacao() != null && nc.getUsuarioCriacao().getEmail() != null)
             dinamicos.add(nc.getUsuarioCriacao().getEmail());
         if (nc.getEngResponsavelConstrutora() != null && nc.getEngResponsavelConstrutora().getEmail() != null)
             dinamicos.add(nc.getEngResponsavelConstrutora().getEmail());
-        if (nc.getEngResponsavelVerificacao() != null && nc.getEngResponsavelVerificacao().getEmail() != null)
+        // responsável pela tratativa só recebe a partir de AGUARDANDO_APROVACAO_PLANO, não na abertura
+        if (!isCriacao && nc.getEngResponsavelVerificacao() != null && nc.getEngResponsavelVerificacao().getEmail() != null)
             dinamicos.add(nc.getEngResponsavelVerificacao().getEmail());
         if (nc.getEmailsManuais() != null)
             nc.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
         event.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
 
         StatusNaoConformidade statusNovo = event.getStatusNovo();
-        boolean isAbertaOuConcluida = statusNovo == StatusNaoConformidade.ABERTA
-                || statusNovo == StatusNaoConformidade.CONCLUIDO;
+        boolean isAbertaOuConcluida = isCriacao || statusNovo == StatusNaoConformidade.CONCLUIDO;
 
         if (isAbertaOuConcluida) {
             Set<String> padraoEfetivo = new LinkedHashSet<>();

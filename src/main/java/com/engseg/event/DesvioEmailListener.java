@@ -46,19 +46,21 @@ public class DesvioEmailListener {
     }
 
     private void enviarEmail(Desvio desvio, DesvioEmailEvent event) {
+        boolean isCriacao = event.getStatusAnterior() == null;
+
         Set<String> dinamicos = new LinkedHashSet<>();
         if (desvio.getUsuarioCriacao() != null && desvio.getUsuarioCriacao().getEmail() != null)
             dinamicos.add(desvio.getUsuarioCriacao().getEmail());
         if (desvio.getResponsavelDesvio() != null && desvio.getResponsavelDesvio().getEmail() != null)
             dinamicos.add(desvio.getResponsavelDesvio().getEmail());
-        if (desvio.getResponsavelTratativa() != null && desvio.getResponsavelTratativa().getEmail() != null)
+        // responsável pela tratativa só recebe a partir de AGUARDANDO_TRATATIVA, não na abertura
+        if (!isCriacao && desvio.getResponsavelTratativa() != null && desvio.getResponsavelTratativa().getEmail() != null)
             dinamicos.add(desvio.getResponsavelTratativa().getEmail());
         if (desvio.getEmailsManuais() != null)
             desvio.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
         event.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
 
-        boolean isCriacaoOuConclusao = event.getStatusAnterior() == null
-                || event.getStatusNovo() == StatusDesvio.CONCLUIDO;
+        boolean isCriacaoOuConclusao = isCriacao || event.getStatusNovo() == StatusDesvio.CONCLUIDO;
 
         if (isCriacaoOuConclusao) {
             Set<String> padraoEfetivo = new LinkedHashSet<>();

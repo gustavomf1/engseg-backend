@@ -89,8 +89,39 @@ class DesvioEmailListenerTest {
         ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass(Set.class);
         verify(sender).enviarTemplateA(eq(desvio), eq(StatusDesvio.AGUARDANDO_TRATATIVA), captor.capture());
         assertThat(captor.getValue()).contains(
-                "criador@engseg.com", "resp.desvio@construtora.com",
-                "resp.tratativa@construtora.com", "diretor@empresa.com");
+                "criador@engseg.com", "resp.desvio@construtora.com", "diretor@empresa.com");
+        assertThat(captor.getValue()).doesNotContain("resp.tratativa@construtora.com");
+    }
+
+    @Test
+    void abertura_nao_envia_para_responsavel_tratativa() {
+        when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(any(), any()))
+                .thenReturn(List.of());
+
+        DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
+                null, StatusDesvio.AGUARDANDO_TRATATIVA, List.of(), List.of(), null, empresa.getId());
+        listener.onDesvioEmail(event);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass(Set.class);
+        verify(sender).enviarTemplateA(any(), any(), captor.capture());
+        assertThat(captor.getValue()).doesNotContain("resp.tratativa@construtora.com");
+    }
+
+    @Test
+    void transicao_para_aguardando_tratativa_envia_para_responsavel_tratativa() {
+        when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
+
+        DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
+                StatusDesvio.ABERTO, StatusDesvio.AGUARDANDO_TRATATIVA,
+                List.of(), List.of(), null, empresa.getId());
+        listener.onDesvioEmail(event);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass(Set.class);
+        verify(sender).enviarTemplateB(any(), any(), any(), captor.capture(), any());
+        assertThat(captor.getValue()).contains("resp.tratativa@construtora.com");
     }
 
     @Test
