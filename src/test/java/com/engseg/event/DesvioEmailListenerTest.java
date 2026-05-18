@@ -110,6 +110,28 @@ class DesvioEmailListenerTest {
     }
 
     @Test
+    void abertura_nao_envia_para_responsavel_tratativa_mesmo_quando_e_email_padrao() {
+        // se o email do responsável pela tratativa também estiver cadastrado como padrão,
+        // ainda assim não deve receber na abertura
+        EmailPadrao padraoTratativa = new EmailPadrao();
+        padraoTratativa.setEmail("resp.tratativa@construtora.com");
+
+        when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(
+                estabelecimento.getId(), empresa.getId()))
+                .thenReturn(List.of(padraoTratativa));
+
+        DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
+                null, StatusDesvio.AGUARDANDO_TRATATIVA, List.of(), List.of(), null, empresa.getId());
+        listener.onDesvioEmail(event);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass(Set.class);
+        verify(sender).enviarTemplateA(any(), any(), captor.capture());
+        assertThat(captor.getValue()).doesNotContain("resp.tratativa@construtora.com");
+    }
+
+    @Test
     void transicao_para_aguardando_tratativa_envia_para_responsavel_tratativa() {
         when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
 

@@ -66,6 +66,9 @@ public class NcEmailListener {
             if (nc.getEngResponsavelConstrutora() != null) {
                 UUID empresaId = nc.getEngResponsavelConstrutora().getEmpresa().getId();
                 Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
+                // na criação, engResponsavelVerificacao não está em dinamicos mas também não deve receber via padrão
+                if (isCriacao && nc.getEngResponsavelVerificacao() != null && nc.getEngResponsavelVerificacao().getEmail() != null)
+                    excluidos.add(nc.getEngResponsavelVerificacao().getEmail());
                 emailPadraoRepository
                         .findByEstabelecimentoIdAndEmpresaId(nc.getEstabelecimento().getId(), empresaId)
                         .stream()

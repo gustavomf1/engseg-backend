@@ -67,6 +67,9 @@ public class DesvioEmailListener {
             UUID empresaContratadaId = event.getEmpresaContratadaId();
             if (empresaContratadaId != null) {
                 Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
+                // na criação, responsavelTratativa não está em dinamicos mas também não deve receber via padrão
+                if (isCriacao && desvio.getResponsavelTratativa() != null && desvio.getResponsavelTratativa().getEmail() != null)
+                    excluidos.add(desvio.getResponsavelTratativa().getEmail());
                 emailPadraoRepository
                         .findByEstabelecimentoIdAndEmpresaId(desvio.getEstabelecimento().getId(), empresaContratadaId)
                         .stream()
