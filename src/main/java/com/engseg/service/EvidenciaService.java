@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,8 @@ public class EvidenciaService {
         return usuario != null && usuario.getPerfil() == PerfilUsuario.TECNICO;
     }
 
-    public Evidencia uploadParaNaoConformidade(UUID naoConformidadeId, MultipartFile file, TipoEvidencia tipo) throws IOException {
+    public Evidencia uploadParaNaoConformidade(UUID naoConformidadeId, MultipartFile file, TipoEvidencia tipo,
+            Double latitude, Double longitude, OffsetDateTime capturedAt, String origem, String cidade) throws IOException {
         NaoConformidade nc = naoConformidadeRepository.findById(naoConformidadeId)
                 .orElseThrow(() -> new EntityNotFoundException("Não conformidade não encontrada"));
 
@@ -53,6 +55,11 @@ public class EvidenciaService {
                 .dataUpload(LocalDateTime.now())
                 .tipoEvidencia(tipo)
                 .naoConformidade(nc)
+                .latitude(latitude)
+                .longitude(longitude)
+                .capturedAt(capturedAt)
+                .origem(origem)
+                .cidade(cidade)
                 .build();
 
         return evidenciaRepository.save(evidencia);
@@ -65,7 +72,8 @@ public class EvidenciaService {
         return evidenciaRepository.findByNaoConformidadeId(naoConformidadeId);
     }
 
-    public Evidencia uploadParaDesvio(UUID desvioId, MultipartFile file, TipoEvidencia tipo) throws IOException {
+    public Evidencia uploadParaDesvio(UUID desvioId, MultipartFile file, TipoEvidencia tipo,
+            Double latitude, Double longitude, OffsetDateTime capturedAt, String origem, String cidade) throws IOException {
         Desvio desvio = desvioRepository.findById(desvioId)
                 .orElseThrow(() -> new EntityNotFoundException("Desvio não encontrado"));
 
@@ -81,12 +89,18 @@ public class EvidenciaService {
                 .dataUpload(LocalDateTime.now())
                 .tipoEvidencia(tipo)
                 .desvio(desvio)
+                .latitude(latitude)
+                .longitude(longitude)
+                .capturedAt(capturedAt)
+                .origem(origem)
+                .cidade(cidade)
                 .build();
 
         return evidenciaRepository.save(evidencia);
     }
 
-    public Evidencia uploadParaAtividade(UUID atividadeId, MultipartFile file, TipoEvidencia tipo) throws IOException {
+    public Evidencia uploadParaAtividade(UUID atividadeId, MultipartFile file, TipoEvidencia tipo,
+            Double latitude, Double longitude, OffsetDateTime capturedAt, String origem, String cidade) throws IOException {
         AtividadePlanoAcao atividade = atividadePlanoAcaoRepository.findById(atividadeId)
                 .orElseThrow(() -> new EntityNotFoundException("Atividade não encontrada"));
 
@@ -98,6 +112,11 @@ public class EvidenciaService {
                 .dataUpload(LocalDateTime.now())
                 .tipoEvidencia(tipo)
                 .atividadePlanoAcao(atividade)
+                .latitude(latitude)
+                .longitude(longitude)
+                .capturedAt(capturedAt)
+                .origem(origem)
+                .cidade(cidade)
                 .build();
 
         return evidenciaRepository.save(evidencia);

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,8 +29,13 @@ public class EvidenciaController {
     public ResponseEntity<EvidenciaResponse> upload(
             @PathVariable UUID ncId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "tipo", defaultValue = "OCORRENCIA") TipoEvidencia tipo) throws IOException {
-        Evidencia evidencia = evidenciaService.uploadParaNaoConformidade(ncId, file, tipo);
+            @RequestParam(value = "tipo", defaultValue = "OCORRENCIA") TipoEvidencia tipo,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
+            @RequestParam(value = "capturedAt", required = false) OffsetDateTime capturedAt,
+            @RequestParam(value = "origem", required = false) String origem,
+            @RequestParam(value = "cidade", required = false) String cidade) throws IOException {
+        Evidencia evidencia = evidenciaService.uploadParaNaoConformidade(ncId, file, tipo, latitude, longitude, capturedAt, origem, cidade);
         return ResponseEntity.ok(toResponse(evidencia));
     }
 
@@ -50,8 +56,13 @@ public class EvidenciaController {
     public ResponseEntity<EvidenciaResponse> uploadDesvio(
             @PathVariable UUID desvioId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "tipo", defaultValue = "OCORRENCIA") TipoEvidencia tipo) throws IOException {
-        Evidencia evidencia = evidenciaService.uploadParaDesvio(desvioId, file, tipo);
+            @RequestParam(value = "tipo", defaultValue = "OCORRENCIA") TipoEvidencia tipo,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
+            @RequestParam(value = "capturedAt", required = false) OffsetDateTime capturedAt,
+            @RequestParam(value = "origem", required = false) String origem,
+            @RequestParam(value = "cidade", required = false) String cidade) throws IOException {
+        Evidencia evidencia = evidenciaService.uploadParaDesvio(desvioId, file, tipo, latitude, longitude, capturedAt, origem, cidade);
         return ResponseEntity.ok(toResponse(evidencia));
     }
 
@@ -72,8 +83,13 @@ public class EvidenciaController {
     public ResponseEntity<EvidenciaResponse> uploadAtividade(
             @PathVariable UUID atividadeId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "tipo", defaultValue = "TRATATIVA") TipoEvidencia tipo) throws IOException {
-        Evidencia evidencia = evidenciaService.uploadParaAtividade(atividadeId, file, tipo);
+            @RequestParam(value = "tipo", defaultValue = "TRATATIVA") TipoEvidencia tipo,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
+            @RequestParam(value = "capturedAt", required = false) OffsetDateTime capturedAt,
+            @RequestParam(value = "origem", required = false) String origem,
+            @RequestParam(value = "cidade", required = false) String cidade) throws IOException {
+        Evidencia evidencia = evidenciaService.uploadParaAtividade(atividadeId, file, tipo, latitude, longitude, capturedAt, origem, cidade);
         return ResponseEntity.ok(toResponse(evidencia));
     }
 
