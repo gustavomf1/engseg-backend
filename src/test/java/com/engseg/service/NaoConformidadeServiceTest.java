@@ -113,7 +113,7 @@ class NaoConformidadeServiceTest {
 
     @Test
     void submeterInvestigacao_quandoAberta_transicionaParaAguardandoAprovacaoPlano() {
-        NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
+        NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
         mockToResponseDeps(nc);
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc)); // segunda chamada
@@ -145,14 +145,14 @@ class NaoConformidadeServiceTest {
 
         assertThatThrownBy(() -> service.submeterInvestigacao(ncId, buildInvestigacaoRequest()))
                 .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("ABERTA ou EM_AJUSTE_PELO_EXTERNO");
+                .hasMessageContaining("AGUARDANDO_TRATATIVA ou EM_AJUSTE_PELO_EXTERNO");
 
         verify(naoConformidadeRepository, never()).save(any());
     }
 
     @Test
     void submeterInvestigacao_substituiAtividadesAnteriores() {
-        NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
+        NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
         nc.getAtividades().add(new AtividadePlanoAcao()); // atividade prévia
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
         mockToResponseDeps(nc);
