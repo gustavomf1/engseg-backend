@@ -298,14 +298,14 @@ public class NaoConformidadeService {
             throw new BusinessException("Apenas o criador da NC ou um administrador pode enviar para plano de ação");
         }
 
-        nc.setStatus(StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
+        nc.setStatus(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
         NaoConformidade saved = naoConformidadeRepository.save(nc);
 
         registrarHistorico(saved, usuarioLogado, TipoAcaoHistorico.SUBMISSAO_INVESTIGACAO,
-                null, StatusNaoConformidade.ABERTA, StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
+                null, StatusNaoConformidade.ABERTA, StatusNaoConformidade.AGUARDANDO_TRATATIVA);
 
         eventPublisher.publishEvent(new NcEmailEvent(this, saved.getId(),
-                StatusNaoConformidade.ABERTA, StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO,
+                StatusNaoConformidade.ABERTA, StatusNaoConformidade.AGUARDANDO_TRATATIVA,
                 List.of(), List.of(), null));
 
         return toResponse(naoConformidadeRepository.findById(saved.getId()).orElseThrow());
@@ -315,8 +315,8 @@ public class NaoConformidadeService {
     public NaoConformidadeResponse submeterInvestigacao(UUID id, InvestigacaoRequest request) {
         NaoConformidade nc = findNcOrThrow(id);
 
-        if (nc.getStatus() != StatusNaoConformidade.ABERTA && nc.getStatus() != StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO) {
-            throw new BusinessException("Investigação só pode ser submetida quando NC está ABERTA ou EM_AJUSTE_PELO_EXTERNO");
+        if (nc.getStatus() != StatusNaoConformidade.AGUARDANDO_TRATATIVA && nc.getStatus() != StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO) {
+            throw new BusinessException("Investigação só pode ser submetida quando NC está AGUARDANDO_TRATATIVA ou EM_AJUSTE_PELO_EXTERNO");
         }
 
         List<InvestigacaoRequest.PorqueItem> porques = request.porques();
@@ -352,7 +352,7 @@ public class NaoConformidadeService {
                 nc.getAtividades().add(atividade);
             }
         } else {
-            // ABERTA: substitui tudo
+            // AGUARDANDO_TRATATIVA: substitui tudo
             nc.getAtividades().clear();
             for (int i = 0; i < request.atividades().size(); i++) {
                 var item = request.atividades().get(i);

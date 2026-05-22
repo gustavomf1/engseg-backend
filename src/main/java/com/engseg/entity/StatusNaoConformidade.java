@@ -3,6 +3,7 @@ package com.engseg.entity;
 public enum StatusNaoConformidade {
     // Fluxo atual
     ABERTA,
+    AGUARDANDO_TRATATIVA,
     AGUARDANDO_APROVACAO_PLANO,
     EM_AJUSTE_PELO_EXTERNO,
     EM_EXECUCAO,
