@@ -1,6 +1,7 @@
 package com.engseg.config;
 
 import com.engseg.security.JwtFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +47,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/convites/*/registrar").permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"error\":\"Nao autenticado\"}");
+                }))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

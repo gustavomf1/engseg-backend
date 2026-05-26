@@ -34,16 +34,22 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (jwtService.validateToken(token)) {
-            String email = jwtService.extractEmail(token);
-            var userDetails = userDetailsService.loadUserByUsername(email);
-
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
-            );
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        if (!jwtService.validateToken(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"error\":\"Token expirado ou invalido\"}");
+            return;
         }
+
+        String email = jwtService.extractEmail(token);
+        var userDetails = userDetailsService.loadUserByUsername(email);
+
+        var authToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
     }

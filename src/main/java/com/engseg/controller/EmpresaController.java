@@ -21,7 +21,7 @@ public class EmpresaController {
     private final EmpresaService empresaService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO', 'EXTERNO')")
     public ResponseEntity<List<EmpresaResponse>> getAll(
             @RequestParam(required = false) Boolean ativo,
             @RequestParam(required = false) Boolean empresaMae,

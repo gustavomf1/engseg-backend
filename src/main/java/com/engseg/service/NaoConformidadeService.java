@@ -447,6 +447,10 @@ public class NaoConformidadeService {
                 .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
                 .ifPresent(s -> { s.setStatus("REPROVADO"); s.setComentarioRevisao(request.motivo()); investigacaoSnapshotRepository.save(s); });
 
+        nc.getAtividades().stream()
+                .filter(a -> "PENDENTE".equals(a.getStatus()))
+                .forEach(a -> a.setStatus("REJEITADA"));
+
         nc.setStatus(StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO);
         eventPublisher.publishEvent(new NcEmailEvent(this, id,
                 StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO, StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO,
@@ -476,9 +480,10 @@ public class NaoConformidadeService {
             atividadePlanoAcaoRepository.save(atividade);
         }
 
-        // Determina novo status: se TODAS as atividades da NC são APROVADA → EM_EXECUCAO
+        // Determina novo status: se TODAS as atividades são APROVADA e nenhum porquê foi rejeitado → EM_EXECUCAO
         boolean todasAprovadas = nc.getAtividades().stream()
-                .allMatch(a -> "APROVADA".equals(a.getStatus()));
+                .allMatch(a -> "APROVADA".equals(a.getStatus()))
+                && !Boolean.TRUE.equals(request.porqueRejeitado());
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var usuario = usuarioRepository.findByEmail(email).orElse(null);
@@ -560,16 +565,24 @@ public class NaoConformidadeService {
         execSnapshot.setDescricaoExecucao("");
         execSnapshot.setDataSubmissao(LocalDateTime.now());
         execSnapshot.setStatus("PENDENTE");
-        // Store per-activity execution data with evidence IDs
-        execSnapshot.setAtividades(nc.getAtividades().stream()
-                .map(a -> {
-                    String desc = a.getDescricaoExecucao() != null ? a.getDescricaoExecucao() : "";
-                    List<Evidencia> evs = evidenciaRepository.findByAtividadePlanoAcaoId(a.getId());
-                    String evIds = evs.stream().map(e -> e.getId().toString()).collect(java.util.stream.Collectors.joining(","));
-                    return a.getTitulo() + " — " + desc + (evIds.isEmpty() ? "" : " §§ " + evIds);
+        // Snapshot apenas das atividades enviadas na requisição (não todas da NC)
+        execSnapshot.setAtividades(request.atividades().stream()
+                .map(item -> {
+                    AtividadePlanoAcao a = atividadePlanoAcaoRepository.findById(item.atividadeId()).orElse(null);
+                    if (a == null) return item.descricaoExecucao() != null ? item.descricaoExecucao() : "";
+                    String desc = item.descricaoExecucao() != null ? item.descricaoExecucao() : "";
+                    return a.getTitulo() + " — " + desc;
                 })
                 .collect(java.util.stream.Collectors.toCollection(ArrayList::new)));
         execucaoSnapshotRepository.save(execSnapshot);
+
+        // Linka as evidências das atividades submetidas ao snapshot
+        List<Evidencia> evidenciasDoSnapshot = new ArrayList<>();
+        for (var item : request.atividades()) {
+            evidenciasDoSnapshot.addAll(evidenciaRepository.findByAtividadePlanoAcaoId(item.atividadeId()));
+        }
+        evidenciasDoSnapshot.forEach(e -> e.setExecucaoSnapshot(execSnapshot));
+        evidenciaRepository.saveAll(evidenciasDoSnapshot);
 
         nc.setStatus(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
         eventPublisher.publishEvent(new NcEmailEvent(this, id,

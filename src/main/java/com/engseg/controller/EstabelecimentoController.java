@@ -26,7 +26,7 @@ public class EstabelecimentoController {
     private final EstabelecimentoEmpresaService estabelecimentoEmpresaService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO', 'EXTERNO')")
     public ResponseEntity<List<EstabelecimentoResponse>> getAll(
             @RequestParam(required = false) Boolean ativo,
             @RequestParam(required = false) UUID empresaId) {
@@ -34,7 +34,7 @@ public class EstabelecimentoController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO', 'EXTERNO')")
     public ResponseEntity<EstabelecimentoResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(estabelecimentoService.findById(id));
     }
@@ -67,7 +67,7 @@ public class EstabelecimentoController {
     // -- Empresas vinculadas ao estabelecimento --
 
     @GetMapping("/{id}/empresas")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO', 'EXTERNO')")
     public ResponseEntity<List<EmpresaResponse>> getEmpresas(@PathVariable UUID id) {
         return ResponseEntity.ok(estabelecimentoEmpresaService.findEmpresasByEstabelecimento(id));
     }
