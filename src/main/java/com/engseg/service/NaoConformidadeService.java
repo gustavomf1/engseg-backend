@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -61,12 +62,16 @@ public class NaoConformidadeService {
                 return (status != null
                         ? naoConformidadeRepository.findByStatusAndEstabelecimentoId(status, estabelecimentoId)
                         : naoConformidadeRepository.findByEstabelecimentoId(estabelecimentoId))
-                        .stream().map(this::toResponse).toList();
+                        .stream()
+                        .sorted(Comparator.comparing(NaoConformidade::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
+                        .map(this::toResponse).toList();
             }
             return (status != null
                     ? naoConformidadeRepository.findByStatusAndEstabelecimentoIdIn(status, permitidos)
                     : naoConformidadeRepository.findByEstabelecimentoIdIn(permitidos))
-                    .stream().map(this::toResponse).toList();
+                    .stream()
+                    .sorted(Comparator.comparing(NaoConformidade::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
+                    .map(this::toResponse).toList();
         }
 
         // ENGENHEIRO / TECNICO / ADMIN: filtra por empresa e/ou estabelecimento se informado
@@ -85,15 +90,10 @@ public class NaoConformidadeService {
             list = naoConformidadeRepository.findAll();
         }
 
-        if (securityHelper.isTecnico()) {
-            var usuarioLogado = securityHelper.getUsuarioLogado();
-            UUID uid = usuarioLogado.getId();
-            list = list.stream()
-                    .filter(nc -> nc.getUsuarioCriacao() != null && nc.getUsuarioCriacao().getId().equals(uid))
-                    .toList();
-        }
-
-        return list.stream().map(this::toResponse).toList();
+        return list.stream()
+                .sorted(Comparator.comparing(NaoConformidade::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(this::toResponse)
+                .toList();
     }
 
     public NaoConformidadeResponse findById(UUID id) {

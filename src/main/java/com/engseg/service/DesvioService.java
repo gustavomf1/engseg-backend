@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,10 +43,12 @@ public class DesvioService {
             if (estabelecimentoId != null) {
                 return desvioRepository.findByEstabelecimentoId(estabelecimentoId).stream()
                         .filter(d -> permitidos.contains(d.getEstabelecimento().getId()))
+                        .sorted(Comparator.comparing(Desvio::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
                         .map(this::toResponse)
                         .toList();
             }
             return desvioRepository.findByEstabelecimentoIdIn(permitidos).stream()
+                    .sorted(Comparator.comparing(Desvio::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
                     .map(this::toResponse)
                     .toList();
         }
@@ -69,7 +72,9 @@ public class DesvioService {
                     .toList();
         }
 
-        return list.stream().map(this::toResponse).toList();
+        return list.stream()
+                .sorted(Comparator.comparing(Desvio::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(this::toResponse).toList();
     }
 
     public DesvioResponse findById(UUID id) {
