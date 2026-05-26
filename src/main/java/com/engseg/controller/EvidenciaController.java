@@ -114,8 +114,15 @@ public class EvidenciaController {
                 .body(data);
     }
 
+    @PatchMapping("/{id}/desvincular-atividade")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    public ResponseEntity<Void> desvincularAtividade(@PathVariable UUID id) {
+        evidenciaService.desvincularAtividade(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         evidenciaService.deletar(id);
         return ResponseEntity.noContent().build();

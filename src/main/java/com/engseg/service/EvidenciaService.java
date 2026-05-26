@@ -143,6 +143,13 @@ public class EvidenciaService {
         return s3StorageService.download(evidencia.getUrlArquivo());
     }
 
+    public void desvincularAtividade(UUID evidenciaId) {
+        Evidencia evidencia = buscarPorId(evidenciaId);
+        // Apenas remove o vínculo com a atividade — preserva o arquivo no bucket e nos snapshots históricos
+        evidencia.setAtividadePlanoAcao(null);
+        evidenciaRepository.save(evidencia);
+    }
+
     public void deletar(UUID evidenciaId) {
         Evidencia evidencia = buscarPorId(evidenciaId);
 
