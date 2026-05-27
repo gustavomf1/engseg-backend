@@ -1,6 +1,7 @@
 package com.engseg.controller;
 
 import com.engseg.dto.request.EmailPadraoRequest;
+import com.engseg.dto.response.EmailPadraoEscopoResponse;
 import com.engseg.dto.response.EmailPadraoResponse;
 import com.engseg.service.EmailPadraoService;
 import jakarta.validation.Valid;
@@ -19,6 +20,12 @@ import java.util.UUID;
 public class EmailPadraoController {
 
     private final EmailPadraoService service;
+
+    @GetMapping("/escopos")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<EmailPadraoEscopoResponse>> listarEscopos() {
+        return ResponseEntity.ok(service.listarEscopos());
+    }
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")

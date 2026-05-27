@@ -1,6 +1,7 @@
 package com.engseg.service;
 
 import com.engseg.dto.request.EmailPadraoRequest;
+import com.engseg.dto.response.EmailPadraoEscopoResponse;
 import com.engseg.dto.response.EmailPadraoResponse;
 import com.engseg.entity.EmailPadrao;
 import com.engseg.exception.ResourceNotFoundException;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +23,30 @@ public class EmailPadraoService {
     private final EmailPadraoRepository repository;
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final EmpresaRepository empresaRepository;
+
+    @Transactional(readOnly = true)
+    public List<EmailPadraoEscopoResponse> listarEscopos() {
+        var agrupado = new LinkedHashMap<String, EmailPadraoEscopoResponse>();
+        repository.findAllFetched().forEach(e -> {
+            String chave = e.getEstabelecimento().getId() + "|" + e.getEmpresa().getId();
+            agrupado.merge(chave,
+                    new EmailPadraoEscopoResponse(
+                            e.getEstabelecimento().getId(),
+                            e.getEstabelecimento().getNome(),
+                            e.getEmpresa().getId(),
+                            e.getEmpresa().getNomeFantasia() != null
+                                    ? e.getEmpresa().getNomeFantasia()
+                                    : e.getEmpresa().getRazaoSocial(),
+                            1),
+                    (existing, novo) -> new EmailPadraoEscopoResponse(
+                            existing.estabelecimentoId(),
+                            existing.estabelecimentoNome(),
+                            existing.empresaId(),
+                            existing.empresaNome(),
+                            existing.emailCount() + 1));
+        });
+        return List.copyOf(agrupado.values());
+    }
 
     @Transactional(readOnly = true)
     public List<EmailPadraoResponse> listar(UUID estabelecimentoId, UUID empresaId) {
