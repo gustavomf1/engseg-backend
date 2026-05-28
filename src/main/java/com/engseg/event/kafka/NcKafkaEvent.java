@@ -8,8 +8,8 @@ public record NcKafkaEvent(
         UUID ncId,
         String titulo,
         String status,
-        UUID responsavelId,         // engResponsavelConstrutora
-        UUID responsavelTrativaId,  // engResponsavelVerificacao
+        UUID responsavelId,         // responsavelTratativa
+        UUID responsavelTrativaId,  // responsavelNc
         UUID criadorId,
         LocalDate dataLimite
 ) {}

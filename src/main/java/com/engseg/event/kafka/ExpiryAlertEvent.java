@@ -6,5 +6,5 @@ public record ExpiryAlertEvent(
         UUID ncId,
         String titulo,
         int diasRestantes,
-        UUID responsavelId   // engResponsavelVerificacao (responsável pela tratativa)
+        UUID responsavelId   // responsavelTratativa
 ) {}
