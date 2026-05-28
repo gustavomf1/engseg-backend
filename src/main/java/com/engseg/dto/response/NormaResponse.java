@@ -1,6 +1,7 @@
 package com.engseg.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record NormaResponse(
@@ -9,5 +10,11 @@ public record NormaResponse(
         String descricao,
         String conteudo,
         boolean ativo,
-        LocalDate dtInativacao
+        LocalDate dtInativacao,
+        LocalDateTime criadoEm,
+        String criadoPorNome,
+        LocalDateTime atualizadoEm,
+        String atualizadoPorNome,
+        long totalOcorrencias,
+        long totalNcsAtivas
 ) {}

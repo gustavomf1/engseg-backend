@@ -5,15 +5,19 @@ import com.engseg.dto.request.NormaRequest;
 import com.engseg.dto.response.BuscarTrechoResponse;
 import com.engseg.dto.response.NormaResponse;
 import com.engseg.entity.Norma;
+import com.engseg.entity.Usuario;
 import com.engseg.exception.BusinessException;
 import com.engseg.exception.ResourceNotFoundException;
+import com.engseg.repository.NaoConformidadeRepository;
 import com.engseg.repository.NormaRepository;
+import com.engseg.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +27,9 @@ import java.util.UUID;
 public class NormaService {
 
     private final NormaRepository normaRepository;
+    private final NaoConformidadeRepository naoConformidadeRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final SecurityHelper securityHelper;
     private final ClaudeService claudeService;
 
     public List<NormaResponse> findAll(Boolean ativo) {
@@ -42,10 +49,17 @@ public class NormaService {
 
     @Transactional
     public NormaResponse create(NormaRequest request) {
+        Usuario usuario = securityHelper.getUsuarioLogado();
+        LocalDateTime now = LocalDateTime.now();
+
         Norma norma = Norma.builder()
                 .titulo(request.titulo())
                 .descricao(request.descricao())
                 .conteudo(request.conteudo())
+                .criadoEm(now)
+                .criadoPorId(usuario.getId())
+                .atualizadoEm(now)
+                .atualizadoPorId(usuario.getId())
                 .build();
         return toResponse(normaRepository.save(norma));
     }
@@ -57,6 +71,7 @@ public class NormaService {
         norma.setTitulo(request.titulo());
         norma.setDescricao(request.descricao());
         norma.setConteudo(request.conteudo());
+        marcarAtualizacao(norma);
         return toResponse(normaRepository.save(norma));
     }
 
@@ -65,6 +80,7 @@ public class NormaService {
         Norma norma = normaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Norma não encontrada: " + id));
         norma.setConteudo(conteudo);
+        marcarAtualizacao(norma);
         return toResponse(normaRepository.save(norma));
     }
 
@@ -97,6 +113,7 @@ public class NormaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Norma não encontrada: " + id));
         norma.setAtivo(false);
         norma.setDtInativacao(LocalDate.now());
+        marcarAtualizacao(norma);
         normaRepository.save(norma);
     }
 
@@ -106,10 +123,43 @@ public class NormaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Norma não encontrada: " + id));
         norma.setAtivo(true);
         norma.setDtInativacao(null);
+        marcarAtualizacao(norma);
         return toResponse(normaRepository.save(norma));
     }
 
     public NormaResponse toResponse(Norma n) {
-        return new NormaResponse(n.getId(), n.getTitulo(), n.getDescricao(), n.getConteudo(), n.isAtivo(), n.getDtInativacao());
+        UUID normaId = n.getId();
+        long totalOcorrencias = normaId == null ? 0 : naoConformidadeRepository.countByNormaId(normaId);
+        long totalNcsAtivas = normaId == null ? 0 : naoConformidadeRepository.countAtivasByNormaId(normaId);
+
+        return new NormaResponse(
+                n.getId(),
+                n.getTitulo(),
+                n.getDescricao(),
+                n.getConteudo(),
+                n.isAtivo(),
+                n.getDtInativacao(),
+                n.getCriadoEm(),
+                resolveUsuarioNome(n.getCriadoPorId()),
+                n.getAtualizadoEm(),
+                resolveUsuarioNome(n.getAtualizadoPorId()),
+                totalOcorrencias,
+                totalNcsAtivas
+        );
+    }
+
+    private void marcarAtualizacao(Norma norma) {
+        Usuario usuario = securityHelper.getUsuarioLogado();
+        norma.setAtualizadoEm(LocalDateTime.now());
+        norma.setAtualizadoPorId(usuario.getId());
+    }
+
+    private String resolveUsuarioNome(UUID usuarioId) {
+        if (usuarioId == null) {
+            return null;
+        }
+        return usuarioRepository.findById(usuarioId)
+                .map(Usuario::getNome)
+                .orElse(null);
     }
 }

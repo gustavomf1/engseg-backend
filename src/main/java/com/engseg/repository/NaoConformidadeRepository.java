@@ -35,6 +35,13 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
 
     long countByRegraDeOuro(boolean regraDeOuro);
 
+    @Query("SELECT COUNT(nc) FROM NaoConformidade nc JOIN nc.normas norma WHERE norma.id = :normaId")
+    long countByNormaId(@Param("normaId") UUID normaId);
+
+    @Query("SELECT COUNT(nc) FROM NaoConformidade nc JOIN nc.normas norma " +
+           "WHERE norma.id = :normaId AND nc.status <> com.engseg.entity.StatusNaoConformidade.CONCLUIDO")
+    long countAtivasByNormaId(@Param("normaId") UUID normaId);
+
     List<NaoConformidade> findByNcAnteriorId(UUID ncAnteriorId);
 
     List<NaoConformidade> findTop10ByOrderByDataRegistroDesc();

@@ -853,9 +853,7 @@ public class NaoConformidadeService {
 
     private NaoConformidadeResponse toResponse(NaoConformidade nc) {
         List<NormaResponse> normas = nc.getNormas() == null ? List.of() :
-                nc.getNormas().stream().map(n -> new NormaResponse(
-                        n.getId(), n.getTitulo(), n.getDescricao(), n.getConteudo(), n.isAtivo(), n.getDtInativacao()
-                )).toList();
+                nc.getNormas().stream().map(this::toNormaResponse).toList();
 
         // Bulk fetch de evidências por atividade (evita N+1)
         List<UUID> atividadeIds = nc.getAtividades() == null ? List.of() :
@@ -973,6 +971,36 @@ public class NaoConformidadeService {
                 normas,
                 nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getId() : null
         );
+    }
+
+    private NormaResponse toNormaResponse(Norma n) {
+        UUID normaId = n.getId();
+        long totalOcorrencias = normaId == null ? 0 : naoConformidadeRepository.countByNormaId(normaId);
+        long totalNcsAtivas = normaId == null ? 0 : naoConformidadeRepository.countAtivasByNormaId(normaId);
+
+        return new NormaResponse(
+                n.getId(),
+                n.getTitulo(),
+                n.getDescricao(),
+                n.getConteudo(),
+                n.isAtivo(),
+                n.getDtInativacao(),
+                n.getCriadoEm(),
+                resolveUsuarioNome(n.getCriadoPorId()),
+                n.getAtualizadoEm(),
+                resolveUsuarioNome(n.getAtualizadoPorId()),
+                totalOcorrencias,
+                totalNcsAtivas
+        );
+    }
+
+    private String resolveUsuarioNome(UUID usuarioId) {
+        if (usuarioId == null) {
+            return null;
+        }
+        return usuarioRepository.findById(usuarioId)
+                .map(Usuario::getNome)
+                .orElse(null);
     }
 
     private List<NcResumoResponse> buildCadeiaReincidencias(NaoConformidade nc) {

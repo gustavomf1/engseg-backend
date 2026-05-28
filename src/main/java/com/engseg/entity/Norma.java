@@ -3,6 +3,7 @@ package com.engseg.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -33,4 +34,16 @@ public class Norma {
 
     @Column(name = "dt_inativacao")
     private LocalDate dtInativacao;
+
+    @Column(name = "criado_em", nullable = false, updatable = false)
+    private LocalDateTime criadoEm;
+
+    @Column(name = "criado_por_id", updatable = false)
+    private UUID criadoPorId;
+
+    @Column(name = "atualizado_em", nullable = false)
+    private LocalDateTime atualizadoEm;
+
+    @Column(name = "atualizado_por_id")
+    private UUID atualizadoPorId;
 }
