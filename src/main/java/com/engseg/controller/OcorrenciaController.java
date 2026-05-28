@@ -102,11 +102,11 @@ public class OcorrenciaController {
                     case REGISTRANTE -> userId.equals(item.get("usuarioCriacaoId"));
                     case RESPONSAVEL_NC -> {
                         if (!"NAO_CONFORMIDADE".equals(item.get("tipo"))) yield false;
-                        yield userId.equals(item.get("engResponsavelVerificacaoId"));
+                        yield userId.equals(item.get("responsavelNcId"));
                     }
                     case RESPONSAVEL_TRATATIVA_NC -> {
                         if (!"NAO_CONFORMIDADE".equals(item.get("tipo"))) yield false;
-                        yield userId.equals(item.get("engResponsavelConstrutoraId"));
+                        yield userId.equals(item.get("responsavelTrativaId"));
                     }
                     case RESPONSAVEL_DESVIO -> {
                         if (!"DESVIO".equals(item.get("tipo"))) yield false;
