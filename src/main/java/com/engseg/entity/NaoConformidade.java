@@ -30,12 +30,12 @@ public class NaoConformidade extends Ocorrencia {
     private NivelRisco nivelRisco;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "eng_responsavel_construtora_id")
-    private Usuario engResponsavelConstrutora;
+    @JoinColumn(name = "responsavel_tratativa_id")
+    private Usuario responsavelTratativa;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "eng_responsavel_verificacao_id")
-    private Usuario engResponsavelVerificacao;
+    @JoinColumn(name = "responsavel_nc_id")
+    private Usuario responsavelNc;
 
     @Column(name = "data_limite_resolucao")
     private LocalDate dataLimiteResolucao;
