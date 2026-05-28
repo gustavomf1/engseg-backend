@@ -34,7 +34,8 @@ class NcEmailListenerTest {
 
     private NaoConformidade nc;
     private Estabelecimento estabelecimento;
-    private Usuario engConstrutora;
+    private Usuario responsavelTratativa;
+    private Usuario responsavelNc;
     private Empresa empresa;
 
     @BeforeEach
@@ -48,16 +49,22 @@ class NcEmailListenerTest {
         estabelecimento.setNome("Obra Alpha");
         estabelecimento.setCodigo("OBR-001");
 
-        engConstrutora = new Usuario();
-        engConstrutora.setId(UUID.randomUUID());
-        engConstrutora.setEmail("eng@construtora.com");
-        engConstrutora.setEmpresa(empresa);
+        responsavelTratativa = new Usuario();
+        responsavelTratativa.setId(UUID.randomUUID());
+        responsavelTratativa.setEmail("tratativa@construtora.com");
+        responsavelTratativa.setEmpresa(empresa);
+
+        responsavelNc = new Usuario();
+        responsavelNc.setId(UUID.randomUUID());
+        responsavelNc.setEmail("eng@construtora.com");
+        responsavelNc.setEmpresa(empresa);
 
         nc = new NaoConformidade();
         nc.setId(UUID.randomUUID());
         nc.setTitulo("NC Teste");
         nc.setEstabelecimento(estabelecimento);
-        nc.setEngResponsavelConstrutora(engConstrutora);
+        nc.setResponsavelTratativa(responsavelTratativa);
+        nc.setResponsavelNc(responsavelNc);
     }
 
     @Test
@@ -148,7 +155,7 @@ class NcEmailListenerTest {
     void devePublicarKafkaNC_CRIADA_quandoStatusAberta() {
         UUID ncId = UUID.randomUUID();
         nc.setId(ncId);
-        nc.setEngResponsavelConstrutora(engConstrutora);
+        nc.setResponsavelTratativa(responsavelTratativa);
         when(ncRepository.findById(ncId)).thenReturn(Optional.of(nc));
         when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(any(), any()))
                 .thenReturn(List.of());
@@ -167,7 +174,7 @@ class NcEmailListenerTest {
     void devePublicarKafkaNC_STATUS_ALTERADO_quandoStatusNaoAberta() {
         UUID ncId = UUID.randomUUID();
         nc.setId(ncId);
-        nc.setEngResponsavelConstrutora(engConstrutora);
+        nc.setResponsavelTratativa(responsavelTratativa);
         when(ncRepository.findById(ncId)).thenReturn(Optional.of(nc));
 
         NcEmailEvent event = new NcEmailEvent(this, ncId,

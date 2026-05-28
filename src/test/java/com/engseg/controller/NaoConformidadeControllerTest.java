@@ -275,8 +275,8 @@ class NaoConformidadeControllerTest {
                 2,                                                       // severidade
                 2,                                                       // probabilidade
                 com.engseg.entity.NivelRisco.BAIXO,                     // nivelRisco
-                null, null, null, null,                                  // engConstrutora id/nome/email/perfil
-                null, null, null, null,                                  // engVerificacao id/nome/email/perfil
+                null, null, null, null,                                  // responsavelTratativa id/nome/email/perfil
+                null, null, null, null,                                  // responsavelNc id/nome/email/perfil
                 java.time.LocalDate.now().plusDays(30),                  // dataLimiteResolucao
                 null, null,                                              // usuarioCriacao nome/email
                 com.engseg.entity.StatusNaoConformidade.ABERTA,         // status
