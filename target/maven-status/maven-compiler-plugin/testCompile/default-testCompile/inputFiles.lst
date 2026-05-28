@@ -1,4 +1,5 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/EmailPadraoServiceTest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/NormaServiceTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/controller/EmpresaControllerSecurityTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/DashboardServiceTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/event/NcEmailListenerTest.java

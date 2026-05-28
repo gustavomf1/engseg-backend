@@ -108,8 +108,8 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/UsuarioRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/DevolutivaRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/EvidenciaRepository.java
-/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/EmailPadraoService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/DesvioEmailSender.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/EmailPadraoService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/EmailPadraoController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EmpresaResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/InvestigacaoSnapshotResponse.java
@@ -151,6 +151,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EstabelecimentoEmpresaResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/BuscarTrechoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/ParecerValidacao.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EmailPadraoEscopoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RevisarExecucaoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/LoginRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/NcTrechoNorma.java
