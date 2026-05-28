@@ -107,14 +107,14 @@ public class NaoConformidadeService {
         var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + request.estabelecimentoId()));
 
-        var engConstrutora = request.engResponsavelConstrutoraId() != null
-                ? usuarioRepository.findById(request.engResponsavelConstrutoraId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Engenheiro (construtora) não encontrado: " + request.engResponsavelConstrutoraId()))
+        var responsavelTratativa = request.responsavelTrativaId() != null
+                ? usuarioRepository.findById(request.responsavelTrativaId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Responsável pela tratativa não encontrado: " + request.responsavelTrativaId()))
                 : null;
 
-        var engVerificacao = request.engResponsavelVerificacaoId() != null
-                ? usuarioRepository.findById(request.engResponsavelVerificacaoId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Engenheiro (verificação) não encontrado: " + request.engResponsavelVerificacaoId()))
+        var responsavelNc = request.responsavelNcId() != null
+                ? usuarioRepository.findById(request.responsavelNcId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Responsável pela NC não encontrado: " + request.responsavelNcId()))
                 : null;
 
         var localizacao = request.localizacaoId() != null
@@ -139,8 +139,8 @@ public class NaoConformidadeService {
         nc.setSeveridade(request.severidade());
         nc.setProbabilidade(request.probabilidade());
         nc.setNivelRisco(MatrizRisco.calcular(request.severidade(), request.probabilidade()));
-        if (engConstrutora != null) nc.setEngResponsavelConstrutora(engConstrutora);
-        if (engVerificacao != null) nc.setEngResponsavelVerificacao(engVerificacao);
+        if (responsavelTratativa != null) nc.setResponsavelTratativa(responsavelTratativa);
+        if (responsavelNc != null) nc.setResponsavelNc(responsavelNc);
         nc.setDataLimiteResolucao(now.toLocalDate().plusDays(30));
         nc.setStatus(StatusNaoConformidade.ABERTA);
         nc.setAtividades(new ArrayList<>());
@@ -195,14 +195,14 @@ public class NaoConformidadeService {
         var estabelecimento = estabelecimentoRepository.findById(request.estabelecimentoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado: " + request.estabelecimentoId()));
 
-        var engConstrutora = request.engResponsavelConstrutoraId() != null
-                ? usuarioRepository.findById(request.engResponsavelConstrutoraId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Engenheiro (construtora) não encontrado: " + request.engResponsavelConstrutoraId()))
+        var responsavelTratativa = request.responsavelTrativaId() != null
+                ? usuarioRepository.findById(request.responsavelTrativaId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Responsável pela tratativa não encontrado: " + request.responsavelTrativaId()))
                 : null;
 
-        var engVerificacao = request.engResponsavelVerificacaoId() != null
-                ? usuarioRepository.findById(request.engResponsavelVerificacaoId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Engenheiro (verificação) não encontrado: " + request.engResponsavelVerificacaoId()))
+        var responsavelNc = request.responsavelNcId() != null
+                ? usuarioRepository.findById(request.responsavelNcId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Responsável pela NC não encontrado: " + request.responsavelNcId()))
                 : null;
 
         var localizacao = request.localizacaoId() != null
@@ -218,8 +218,8 @@ public class NaoConformidadeService {
         nc.setSeveridade(request.severidade());
         nc.setProbabilidade(request.probabilidade());
         nc.setNivelRisco(MatrizRisco.calcular(request.severidade(), request.probabilidade()));
-        nc.setEngResponsavelConstrutora(engConstrutora);
-        nc.setEngResponsavelVerificacao(engVerificacao);
+        nc.setResponsavelTratativa(responsavelTratativa);
+        nc.setResponsavelNc(responsavelNc);
 
         if (request.normaIds() != null) {
             nc.setNormas(request.normaIds().isEmpty() ? new ArrayList<>() : normaRepository.findAllById(request.normaIds()));
@@ -929,14 +929,14 @@ public class NaoConformidadeService {
                 nc.getSeveridade(),
                 nc.getProbabilidade(),
                 nc.getNivelRisco(),
-                nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getId() : null,
-                nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getNome() : null,
-                nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getEmail() : null,
-                nc.getEngResponsavelConstrutora() != null ? nc.getEngResponsavelConstrutora().getPerfil().name() : null,
-                nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getId() : null,
-                nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getNome() : null,
-                nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getEmail() : null,
-                nc.getEngResponsavelVerificacao() != null ? nc.getEngResponsavelVerificacao().getPerfil().name() : null,
+                nc.getResponsavelTratativa() != null ? nc.getResponsavelTratativa().getId() : null,
+                nc.getResponsavelTratativa() != null ? nc.getResponsavelTratativa().getNome() : null,
+                nc.getResponsavelTratativa() != null ? nc.getResponsavelTratativa().getEmail() : null,
+                nc.getResponsavelTratativa() != null ? nc.getResponsavelTratativa().getPerfil().name() : null,
+                nc.getResponsavelNc() != null ? nc.getResponsavelNc().getId() : null,
+                nc.getResponsavelNc() != null ? nc.getResponsavelNc().getNome() : null,
+                nc.getResponsavelNc() != null ? nc.getResponsavelNc().getEmail() : null,
+                nc.getResponsavelNc() != null ? nc.getResponsavelNc().getPerfil().name() : null,
                 nc.getDataLimiteResolucao(),
                 nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getNome() : null,
                 nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getEmail() : null,

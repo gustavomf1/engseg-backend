@@ -104,8 +104,8 @@ public class NcEmailSender {
     }
 
     private String resolverNomeEmpresa(NaoConformidade nc) {
-        if (nc.getEngResponsavelConstrutora() == null) return "—";
-        var emp = nc.getEngResponsavelConstrutora().getEmpresa();
+        if (nc.getResponsavelNc() == null) return "—";
+        var emp = nc.getResponsavelNc().getEmpresa();
         if (emp == null) return "—";
         return emp.getNomeFantasia() != null ? emp.getNomeFantasia() : emp.getRazaoSocial();
     }

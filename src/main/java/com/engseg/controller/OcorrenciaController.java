@@ -75,8 +75,8 @@ public class OcorrenciaController {
             item.put("severidade", nc.severidade());
             item.put("probabilidade", nc.probabilidade());
             item.put("estabelecimentoNome", nc.estabelecimentoNome());
-            item.put("engResponsavelConstrutoraId", nc.engResponsavelConstrutoraId());
-            item.put("engResponsavelVerificacaoId", nc.engResponsavelVerificacaoId());
+            item.put("responsavelNcId", nc.responsavelNcId());
+            item.put("responsavelTrativaId", nc.responsavelTrativaId());
             item.put("usuarioCriacaoEmail", nc.usuarioCriacaoEmail());
             item.put("usuarioCriacaoId", nc.usuarioCriacaoId());
             item.put("vencida", nc.vencida());

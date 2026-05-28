@@ -49,11 +49,11 @@ public class NcEmailListener {
         Set<String> dinamicos = new LinkedHashSet<>();
         if (nc.getUsuarioCriacao() != null && nc.getUsuarioCriacao().getEmail() != null)
             dinamicos.add(nc.getUsuarioCriacao().getEmail());
-        if (nc.getEngResponsavelConstrutora() != null && nc.getEngResponsavelConstrutora().getEmail() != null)
-            dinamicos.add(nc.getEngResponsavelConstrutora().getEmail());
+        if (nc.getResponsavelNc() != null && nc.getResponsavelNc().getEmail() != null)
+            dinamicos.add(nc.getResponsavelNc().getEmail());
         // responsável pela tratativa só recebe a partir de AGUARDANDO_APROVACAO_PLANO, não na abertura
-        if (!isCriacao && nc.getEngResponsavelVerificacao() != null && nc.getEngResponsavelVerificacao().getEmail() != null)
-            dinamicos.add(nc.getEngResponsavelVerificacao().getEmail());
+        if (!isCriacao && nc.getResponsavelTratativa() != null && nc.getResponsavelTratativa().getEmail() != null)
+            dinamicos.add(nc.getResponsavelTratativa().getEmail());
         if (nc.getEmailsManuais() != null)
             nc.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
         event.getEmailsManuais().stream().filter(Objects::nonNull).forEach(dinamicos::add);
@@ -63,12 +63,12 @@ public class NcEmailListener {
 
         if (isAbertaOuConcluida) {
             Set<String> padraoEfetivo = new LinkedHashSet<>();
-            if (nc.getEngResponsavelConstrutora() != null) {
-                UUID empresaId = nc.getEngResponsavelConstrutora().getEmpresa().getId();
+            if (nc.getResponsavelNc() != null) {
+                UUID empresaId = nc.getResponsavelNc().getEmpresa().getId();
                 Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
-                // na criação, engResponsavelVerificacao não está em dinamicos mas também não deve receber via padrão
-                if (isCriacao && nc.getEngResponsavelVerificacao() != null && nc.getEngResponsavelVerificacao().getEmail() != null)
-                    excluidos.add(nc.getEngResponsavelVerificacao().getEmail());
+                // na criação, responsavelTratativa não está em dinamicos mas também não deve receber via padrão
+                if (isCriacao && nc.getResponsavelTratativa() != null && nc.getResponsavelTratativa().getEmail() != null)
+                    excluidos.add(nc.getResponsavelTratativa().getEmail());
                 emailPadraoRepository
                         .findByEstabelecimentoIdAndEmpresaId(nc.getEstabelecimento().getId(), empresaId)
                         .stream()
@@ -91,10 +91,10 @@ public class NcEmailListener {
 
     private void publicarKafka(NaoConformidade nc, NcEmailEvent event) {
         String tipo = (event.getStatusAnterior() == null) ? "NC_CRIADA" : "NC_STATUS_ALTERADO";
-        UUID responsavelId = nc.getEngResponsavelConstrutora() != null
-                ? nc.getEngResponsavelConstrutora().getId() : null;
-        UUID responsavelTrativaId = nc.getEngResponsavelVerificacao() != null
-                ? nc.getEngResponsavelVerificacao().getId() : null;
+        UUID responsavelId = nc.getResponsavelNc() != null
+                ? nc.getResponsavelNc().getId() : null;
+        UUID responsavelTrativaId = nc.getResponsavelTratativa() != null
+                ? nc.getResponsavelTratativa().getId() : null;
         UUID criadorId = nc.getUsuarioCriacao() != null
                 ? nc.getUsuarioCriacao().getId() : null;
 

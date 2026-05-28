@@ -31,8 +31,8 @@ public class NcExpiryScheduler {
         log.info("NcExpiryScheduler: {} NCs vencendo em {} dias", ncs.size(), DIAS_ANTECEDENCIA);
 
         for (NaoConformidade nc : ncs) {
-            UUID responsavelId = nc.getEngResponsavelVerificacao() != null
-                    ? nc.getEngResponsavelVerificacao().getId() : null;
+            UUID responsavelId = nc.getResponsavelTratativa() != null
+                    ? nc.getResponsavelTratativa().getId() : null;
             ExpiryAlertEvent event = new ExpiryAlertEvent(
                     nc.getId(), nc.getTitulo(), DIAS_ANTECEDENCIA, responsavelId);
             kafkaTemplate.send(TOPIC, event);
