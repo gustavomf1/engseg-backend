@@ -91,7 +91,7 @@ public class NcEmailListener {
 
     private void publicarKafka(NaoConformidade nc, NcEmailEvent event) {
         String tipo = (event.getStatusAnterior() == null) ? "NC_CRIADA" : "NC_STATUS_ALTERADO";
-        UUID responsavelId = nc.getResponsavelNc() != null
+        UUID responsavelNcId = nc.getResponsavelNc() != null
                 ? nc.getResponsavelNc().getId() : null;
         UUID responsavelTrativaId = nc.getResponsavelTratativa() != null
                 ? nc.getResponsavelTratativa().getId() : null;
@@ -101,7 +101,7 @@ public class NcEmailListener {
         NcKafkaEvent kafkaEvent = new NcKafkaEvent(
                 tipo, nc.getId(), nc.getTitulo(),
                 nc.getStatus().name(),
-                responsavelId, responsavelTrativaId, criadorId,
+                responsavelNcId, responsavelTrativaId, criadorId,
                 nc.getDataLimiteResolucao()
         );
         kafkaTemplate.send(TOPIC, kafkaEvent);
