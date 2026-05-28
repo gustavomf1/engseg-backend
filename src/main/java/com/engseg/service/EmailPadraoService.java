@@ -7,45 +7,47 @@ import com.engseg.entity.EmailPadrao;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.repository.EmpresaRepository;
+import com.engseg.repository.EstabelecimentoEmpresaRepository;
 import com.engseg.repository.EstabelecimentoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class EmailPadraoService {
 
     private final EmailPadraoRepository repository;
+    private final EstabelecimentoEmpresaRepository estabelecimentoEmpresaRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final EmpresaRepository empresaRepository;
 
     @Transactional(readOnly = true)
     public List<EmailPadraoEscopoResponse> listarEscopos() {
-        var agrupado = new LinkedHashMap<String, EmailPadraoEscopoResponse>();
-        repository.findAllFetched().forEach(e -> {
-            String chave = e.getEstabelecimento().getId() + "|" + e.getEmpresa().getId();
-            agrupado.merge(chave,
-                    new EmailPadraoEscopoResponse(
-                            e.getEstabelecimento().getId(),
-                            e.getEstabelecimento().getNome(),
-                            e.getEmpresa().getId(),
-                            e.getEmpresa().getNomeFantasia() != null
-                                    ? e.getEmpresa().getNomeFantasia()
-                                    : e.getEmpresa().getRazaoSocial(),
-                            1),
-                    (existing, novo) -> new EmailPadraoEscopoResponse(
-                            existing.estabelecimentoId(),
-                            existing.estabelecimentoNome(),
-                            existing.empresaId(),
-                            existing.empresaNome(),
-                            existing.emailCount() + 1));
-        });
-        return List.copyOf(agrupado.values());
+        Map<String, Long> emailCounts = repository.findAllFetched().stream()
+                .collect(Collectors.groupingBy(
+                        e -> e.getEstabelecimento().getId() + "|" + e.getEmpresa().getId(),
+                        Collectors.counting()));
+
+        return estabelecimentoEmpresaRepository.findAllAtivoFetched().stream()
+                .map(ee -> {
+                    String chave = ee.getEstabelecimento().getId() + "|" + ee.getEmpresa().getId();
+                    String nomeEmpresa = ee.getEmpresa().getNomeFantasia() != null
+                            ? ee.getEmpresa().getNomeFantasia()
+                            : ee.getEmpresa().getRazaoSocial();
+                    return new EmailPadraoEscopoResponse(
+                            ee.getEstabelecimento().getId(),
+                            ee.getEstabelecimento().getNome(),
+                            ee.getEmpresa().getId(),
+                            nomeEmpresa,
+                            emailCounts.getOrDefault(chave, 0L).intValue());
+                })
+                .toList();
     }
 
     @Transactional(readOnly = true)
