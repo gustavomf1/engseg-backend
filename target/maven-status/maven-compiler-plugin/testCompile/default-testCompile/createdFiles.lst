@@ -12,6 +12,7 @@ com/engseg/service/UsuarioServiceTest.class
 com/engseg/service/UsuarioServiceDiretoTest.class
 com/engseg/controller/EmpresaControllerSecurityTest.class
 com/engseg/security/UserDetailsServiceImplTest.class
+com/engseg/service/SenhaResetServiceTest.class
 com/engseg/service/DashboardServiceTest.class
 com/engseg/service/EmailPadraoServiceTest.class
 com/engseg/scheduler/NcExpirySchedulerTest.class

@@ -18,11 +18,13 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/NcTrechoNormaRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/NormaRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/event/kafka/DesvioKafkaEvent.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/SenhaResetToken.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/EvidenciaService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/EmailPadraoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RegistrarViaConviteRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Devolutiva.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/StatusNaoConformidade.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RedefinirSenhaRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Usuario.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/InvestigacaoSnapshot.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/EvidenciaController.java
@@ -65,6 +67,8 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/NcEmailSender.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/SyncController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/AuthController.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/VerificarOtpRequest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/PasswordResetEmailSender.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/NcResumoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/SyncBatchRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/StatusTratativaDesvio.java
@@ -91,6 +95,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/CriarUsuarioDiretoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/DesvioRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/ValidacaoResponse.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/PasswordResetController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/SubmeterEvidenciasRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/MeuPapelFiltro.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/EstabelecimentoEmpresa.java
@@ -115,6 +120,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/InvestigacaoSnapshotResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EmailPadraoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/DevolutivaRepository.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/SenhaResetService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/UsuarioController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/EstabelecimentoRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/NaoConformidadeRepository.java
@@ -130,10 +136,12 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/Ocorrencia.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/security/JwtFilter.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/TrativaDesvioRepository.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/SenhaResetTokenRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/scheduler/NcExpiryScheduler.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/StatusDesvio.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/NormaService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/SyncItemRequest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/VerificarOtpResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/NaoConformidade.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/HistoricoNc.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/NaoConformidadeRequest.java
@@ -157,6 +165,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/NcTrechoNorma.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/PerfilUsuario.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RevisarAtividadesRequest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/SolicitarResetRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/DesvioService.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/EstabelecimentoResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/exception/BusinessException.java
