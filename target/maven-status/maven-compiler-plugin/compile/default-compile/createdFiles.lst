@@ -19,6 +19,7 @@ com/engseg/dto/request/ValidacaoRequest.class
 com/engseg/util/MatrizRisco.class
 com/engseg/repository/EmpresaRepository.class
 com/engseg/entity/TrativaDesvio$TrativaDesvioBuilder.class
+com/engseg/repository/SenhaResetTokenRepository.class
 com/engseg/controller/DashboardController.class
 com/engseg/repository/LocalizacaoRepository.class
 com/engseg/entity/HistoricoDesvio.class
@@ -49,6 +50,7 @@ com/engseg/entity/ExecucaoAcao$ExecucaoAcaoBuilder.class
 com/engseg/dto/request/RejeitarAtividadesRequest.class
 com/engseg/controller/NcTrechoNormaController.class
 com/engseg/entity/NcTrechoNorma.class
+com/engseg/entity/SenhaResetToken.class
 com/engseg/service/NaoConformidadeService.class
 com/engseg/dto/request/SubmeterTrativaRequest.class
 com/engseg/dto/request/SubmeterTrativaDesvioRequest.class
@@ -81,7 +83,9 @@ com/engseg/dto/request/RejeitarAtividadesRequest$ItemRejeicao.class
 com/engseg/entity/NaoConformidade$NaoConformidadeBuilder.class
 com/engseg/entity/ParecerValidacao.class
 com/engseg/entity/Validacao.class
+com/engseg/dto/request/SolicitarResetRequest.class
 com/engseg/repository/NcTrechoNormaRepository.class
+com/engseg/dto/request/VerificarOtpRequest.class
 com/engseg/dto/response/NaoConformidadeResponse.class
 com/engseg/entity/Desvio$DesvioBuilder.class
 com/engseg/controller/UsuarioController.class
@@ -139,6 +143,7 @@ com/engseg/dto/request/InvestigacaoRequest.class
 com/engseg/service/SyncService.class
 com/engseg/repository/HistoricoDesvioRepository.class
 com/engseg/service/ConviteService.class
+com/engseg/dto/request/RedefinirSenhaRequest.class
 com/engseg/dto/request/RejeitarRequest.class
 com/engseg/dto/request/DesvioRequest.class
 com/engseg/controller/AuthController.class
@@ -151,19 +156,23 @@ com/engseg/dto/request/RevisarAtividadesRequest$DecisaoAtividade.class
 com/engseg/dto/request/EstabelecimentoEmpresaRequest.class
 com/engseg/entity/NcTrechoNorma$NcTrechoNormaBuilder.class
 com/engseg/service/NcEmailSender.class
+com/engseg/controller/PasswordResetController.class
 com/engseg/repository/ConviteRepository.class
 com/engseg/dto/response/EstabelecimentoEmpresaResponse.class
 com/engseg/dto/request/NormaRequest.class
+com/engseg/dto/response/VerificarOtpResponse.class
 com/engseg/dto/request/ConviteRequest.class
 com/engseg/service/NormaService.class
 com/engseg/entity/NaoConformidade$NaoConformidadeBuilderImpl.class
 com/engseg/controller/EvidenciaController.class
 com/engseg/service/EstabelecimentoEmpresaService.class
 com/engseg/repository/ExecucaoAcaoRepository.class
+com/engseg/service/PasswordResetEmailSender.class
 com/engseg/controller/EmpresaController.class
 com/engseg/repository/TrativaDesvioRepository.class
 com/engseg/EngSegApplication.class
 com/engseg/dto/response/NcTrechoNormaResponse.class
+com/engseg/service/SenhaResetService.class
 com/engseg/event/NcEmailListener.class
 com/engseg/service/DesvioEmailSender.class
 com/engseg/dto/request/InvestigacaoRequest$PorqueItem.class
@@ -204,3 +213,4 @@ com/engseg/dto/request/EmpresaRequest.class
 com/engseg/entity/TipoAcaoHistoricoDesvio.class
 com/engseg/entity/EmailPadrao$EmailPadraoBuilder.class
 com/engseg/dto/request/SubmeterEvidenciasRequest.class
+com/engseg/entity/SenhaResetToken$SenhaResetTokenBuilder.class
