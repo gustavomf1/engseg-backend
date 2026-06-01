@@ -45,6 +45,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,  "/api/convites/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/convites/*/registrar").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/reset/solicitar").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/reset/verificar").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/reset/redefinir").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
