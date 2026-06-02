@@ -26,7 +26,7 @@ class SyncServiceTest {
     void deveRetornarCRIADO_quandoNcProcessadaComSucesso() {
         NaoConformidadeRequest ncReq = new NaoConformidadeRequest(
                 UUID.randomUUID(), "Titulo", null, "Desc", 3, 2,
-                null, null, false, List.of(), false, null, List.of(), List.of());
+                null, null, false, List.of(), false, null, List.of(), List.of(), null);
         SyncItemRequest item = new SyncItemRequest("local-1", "NC", ncReq, null);
         SyncBatchRequest batch = new SyncBatchRequest(List.of(item));
 
@@ -46,7 +46,7 @@ class SyncServiceTest {
     void deveRetornarERRO_quandoNcLancaExcecao() {
         NaoConformidadeRequest ncReq = new NaoConformidadeRequest(
                 UUID.randomUUID(), "Titulo", null, "Desc", 3, 2,
-                null, null, false, List.of(), false, null, List.of(), List.of());
+                null, null, false, List.of(), false, null, List.of(), List.of(), null);
         SyncItemRequest item = new SyncItemRequest("local-2", "NC", ncReq, null);
         SyncBatchRequest batch = new SyncBatchRequest(List.of(item));
 
