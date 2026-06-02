@@ -3,6 +3,7 @@ com/engseg/entity/UsuarioTest.class
 com/engseg/controller/NaoConformidadeControllerTest.class
 com/engseg/scheduler/NcSchedulerTest.class
 com/engseg/service/NaoConformidadeServiceTest.class
+com/engseg/service/NormaServiceTest.class
 com/engseg/event/DesvioEmailListenerTest.class
 com/engseg/service/SyncServiceTest.class
 com/engseg/util/MatrizRiscoTest.class

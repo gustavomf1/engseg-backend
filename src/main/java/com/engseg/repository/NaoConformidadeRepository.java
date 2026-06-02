@@ -58,4 +58,30 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
     long countByStatusAndEmpresaContratadaId(StatusNaoConformidade status, UUID empresaContratadaId);
 
     long countByRegraDeOuroAndEmpresaContratadaId(boolean regraDeOuro, UUID empresaContratadaId);
+
+    @Query("SELECT COUNT(nc) FROM NaoConformidade nc WHERE " +
+           "(:empresaContratadaId IS NULL OR nc.empresaContratada.id = :empresaContratadaId) AND " +
+           "(:estabelecimentoId IS NULL OR nc.estabelecimento.id = :estabelecimentoId) AND " +
+           "(:empresaId IS NULL OR nc.estabelecimento.empresa.id = :empresaId)")
+    long countFiltered(@Param("empresaContratadaId") UUID empresaContratadaId,
+                       @Param("estabelecimentoId") UUID estabelecimentoId,
+                       @Param("empresaId") UUID empresaId);
+
+    @Query("SELECT COUNT(nc) FROM NaoConformidade nc WHERE nc.status = :status AND " +
+           "(:empresaContratadaId IS NULL OR nc.empresaContratada.id = :empresaContratadaId) AND " +
+           "(:estabelecimentoId IS NULL OR nc.estabelecimento.id = :estabelecimentoId) AND " +
+           "(:empresaId IS NULL OR nc.estabelecimento.empresa.id = :empresaId)")
+    long countByStatusFiltered(@Param("status") StatusNaoConformidade status,
+                               @Param("empresaContratadaId") UUID empresaContratadaId,
+                               @Param("estabelecimentoId") UUID estabelecimentoId,
+                               @Param("empresaId") UUID empresaId);
+
+    @Query("SELECT COUNT(nc) FROM NaoConformidade nc WHERE nc.regraDeOuro = :regraDeOuro AND " +
+           "(:empresaContratadaId IS NULL OR nc.empresaContratada.id = :empresaContratadaId) AND " +
+           "(:estabelecimentoId IS NULL OR nc.estabelecimento.id = :estabelecimentoId) AND " +
+           "(:empresaId IS NULL OR nc.estabelecimento.empresa.id = :empresaId)")
+    long countByRegraDeOuroFiltered(@Param("regraDeOuro") boolean regraDeOuro,
+                                    @Param("empresaContratadaId") UUID empresaContratadaId,
+                                    @Param("estabelecimentoId") UUID estabelecimentoId,
+                                    @Param("empresaId") UUID empresaId);
 }

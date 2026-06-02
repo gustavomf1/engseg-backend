@@ -28,26 +28,16 @@ public class DashboardController {
             @RequestParam(required = false) UUID empresaId,
             @RequestParam(required = false) UUID estabelecimentoId,
             @RequestParam(required = false) UUID empresaContratadaId) {
-        long totalNCs, abertas, emTratamento, concluidas, naoResolvidas, totalRegraDeOuro;
 
-        if (empresaContratadaId != null) {
-            totalNCs         = naoConformidadeRepository.countByEmpresaContratadaId(empresaContratadaId);
-            abertas          = naoConformidadeRepository.countByStatusAndEmpresaContratadaId(StatusNaoConformidade.ABERTA, empresaContratadaId);
-            emTratamento     = naoConformidadeRepository.countByStatusAndEmpresaContratadaId(StatusNaoConformidade.EM_TRATAMENTO, empresaContratadaId);
-            concluidas       = naoConformidadeRepository.countByStatusAndEmpresaContratadaId(StatusNaoConformidade.CONCLUIDO, empresaContratadaId);
-            naoResolvidas    = naoConformidadeRepository.countByStatusAndEmpresaContratadaId(StatusNaoConformidade.NAO_RESOLVIDA, empresaContratadaId);
-            totalRegraDeOuro = naoConformidadeRepository.countByRegraDeOuroAndEmpresaContratadaId(true, empresaContratadaId);
-        } else {
-            totalNCs         = naoConformidadeRepository.count();
-            abertas          = naoConformidadeRepository.countByStatus(StatusNaoConformidade.ABERTA);
-            emTratamento     = naoConformidadeRepository.countByStatus(StatusNaoConformidade.EM_TRATAMENTO);
-            concluidas       = naoConformidadeRepository.countByStatus(StatusNaoConformidade.CONCLUIDO);
-            naoResolvidas    = naoConformidadeRepository.countByStatus(StatusNaoConformidade.NAO_RESOLVIDA);
-            totalRegraDeOuro = naoConformidadeRepository.countByRegraDeOuro(true);
-        }
+        long totalNCs         = naoConformidadeRepository.countFiltered(empresaContratadaId, estabelecimentoId, empresaId);
+        long abertas          = naoConformidadeRepository.countByStatusFiltered(StatusNaoConformidade.ABERTA, empresaContratadaId, estabelecimentoId, empresaId);
+        long emTratamento     = naoConformidadeRepository.countByStatusFiltered(StatusNaoConformidade.EM_TRATAMENTO, empresaContratadaId, estabelecimentoId, empresaId);
+        long concluidas       = naoConformidadeRepository.countByStatusFiltered(StatusNaoConformidade.CONCLUIDO, empresaContratadaId, estabelecimentoId, empresaId);
+        long naoResolvidas    = naoConformidadeRepository.countByStatusFiltered(StatusNaoConformidade.NAO_RESOLVIDA, empresaContratadaId, estabelecimentoId, empresaId);
+        long totalRegraDeOuro = naoConformidadeRepository.countByRegraDeOuroFiltered(true, empresaContratadaId, estabelecimentoId, empresaId);
 
-        long totalDesvios           = desvioRepository.count();
-        long totalDesviosConcluidos = desvioRepository.countByStatus(StatusDesvio.CONCLUIDO);
+        long totalDesvios           = desvioRepository.countFiltered(empresaContratadaId, estabelecimentoId, empresaId);
+        long totalDesviosConcluidos = desvioRepository.countByStatusFiltered(StatusDesvio.CONCLUIDO, empresaContratadaId, estabelecimentoId, empresaId);
         long totalOcorrencias       = totalDesvios + totalNCs;
 
         return ResponseEntity.ok(new DashboardStatsResponse(

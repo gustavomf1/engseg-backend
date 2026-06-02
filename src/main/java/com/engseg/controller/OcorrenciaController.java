@@ -62,7 +62,9 @@ public class OcorrenciaController {
             item.put("usuarioCriacaoEmail", d.usuarioCriacaoEmail());
             item.put("usuarioCriacaoId", d.usuarioCriacaoId());
             item.put("responsavelDesvioId", d.responsavelDesvioId());
+            item.put("responsavelDesvioNome", d.responsavelDesvioNome());
             item.put("responsavelTratativaId", d.responsavelTratativaId());
+            item.put("responsavelTrativaNome", d.responsavelTrativaNome());
             item.put("empresaContratadaId", d.empresaContratadaId());
             item.put("empresaContratadaNome", d.empresaContratadaNome());
             putPrimeiraEvidencia(item, evidenciaRepository.findByDesvioId(d.id()));
@@ -85,10 +87,13 @@ public class OcorrenciaController {
             item.put("probabilidade", nc.probabilidade());
             item.put("estabelecimentoNome", nc.estabelecimentoNome());
             item.put("responsavelNcId", nc.responsavelNcId());
+            item.put("responsavelNcNome", nc.responsavelNcNome());
             item.put("responsavelTrativaId", nc.responsavelTrativaId());
+            item.put("responsavelTrativaNome", nc.responsavelTrativaNome());
             item.put("usuarioCriacaoEmail", nc.usuarioCriacaoEmail());
             item.put("usuarioCriacaoId", nc.usuarioCriacaoId());
             item.put("vencida", nc.vencida());
+            item.put("reincidencia", nc.reincidencia());
             item.put("quantidadeAtividades", nc.atividades() != null ? nc.atividades().size() : 0);
             item.put("quantidadeHistorico", nc.historico() != null ? nc.historico().size() : 0);
             item.put("empresaContratadaId", nc.empresaContratadaId());

@@ -100,6 +100,7 @@ com/engseg/entity/Usuario$UsuarioBuilder.class
 com/engseg/entity/StatusNaoConformidade.class
 com/engseg/repository/ExecucaoSnapshotRepository.class
 com/engseg/repository/NaoConformidadeRepository.class
+com/engseg/dto/response/EmailPadraoEscopoResponse.class
 com/engseg/repository/DevolutivaRepository.class
 com/engseg/repository/EstabelecimentoEmpresaRepository.class
 com/engseg/dto/request/LocalizacaoRequest.class
