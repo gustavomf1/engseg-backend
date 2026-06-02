@@ -505,7 +505,13 @@ public class DesvioService {
                 d.getEvidenciaTratativa() != null ? d.getEvidenciaTratativa().getUrlArquivo() : null,
                 historico,
                 tratativas,
-                d.getUsuarioCriacao() != null ? d.getUsuarioCriacao().getId() : null
+                d.getUsuarioCriacao() != null ? d.getUsuarioCriacao().getId() : null,
+                d.getEmpresaContratada() != null ? d.getEmpresaContratada().getId() : null,
+                d.getEmpresaContratada() != null
+                        ? (d.getEmpresaContratada().getNomeFantasia() != null
+                                ? d.getEmpresaContratada().getNomeFantasia()
+                                : d.getEmpresaContratada().getRazaoSocial())
+                        : null
         );
     }
 

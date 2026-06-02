@@ -39,10 +39,17 @@ public class OcorrenciaController {
     public ResponseEntity<List<Map<String, Object>>> listarTodas(
             @RequestParam(required = false) UUID estabelecimentoId,
             @RequestParam(required = false) UUID empresaId,
+            @RequestParam(required = false) UUID empresaContratadaId,
             @RequestParam(required = false) MeuPapelFiltro meuPapel) {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
-        for (DesvioResponse d : desvioService.findAll(estabelecimentoId, empresaId)) {
+        List<DesvioResponse> desviosList = desvioService.findAll(estabelecimentoId, empresaId);
+        if (empresaContratadaId != null) {
+            desviosList = desviosList.stream()
+                    .filter(d -> empresaContratadaId.equals(d.empresaContratadaId()))
+                    .toList();
+        }
+        for (DesvioResponse d : desviosList) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "DESVIO");
             item.put("id", d.id());
@@ -56,11 +63,13 @@ public class OcorrenciaController {
             item.put("usuarioCriacaoId", d.usuarioCriacaoId());
             item.put("responsavelDesvioId", d.responsavelDesvioId());
             item.put("responsavelTratativaId", d.responsavelTratativaId());
+            item.put("empresaContratadaId", d.empresaContratadaId());
+            item.put("empresaContratadaNome", d.empresaContratadaNome());
             putPrimeiraEvidencia(item, evidenciaRepository.findByDesvioId(d.id()));
             resultado.add(item);
         }
 
-        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, estabelecimentoId, empresaId, null)) {
+        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, estabelecimentoId, empresaId, empresaContratadaId)) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "NAO_CONFORMIDADE");
             item.put("id", nc.id());
@@ -82,6 +91,8 @@ public class OcorrenciaController {
             item.put("vencida", nc.vencida());
             item.put("quantidadeAtividades", nc.atividades() != null ? nc.atividades().size() : 0);
             item.put("quantidadeHistorico", nc.historico() != null ? nc.historico().size() : 0);
+            item.put("empresaContratadaId", nc.empresaContratadaId());
+            item.put("empresaContratadaNome", nc.empresaContratadaNome());
             putPrimeiraEvidencia(item,
                     evidenciaRepository.findByNaoConformidadeIdAndTipoEvidencia(
                             nc.id(), TipoEvidencia.OCORRENCIA));
