@@ -18,5 +18,6 @@ public record NaoConformidadeRequest(
         boolean reincidencia,
         UUID ncAnteriorId,
         List<String> emailsManuais,
-        List<String> emailsPadraoExcluidos
+        List<String> emailsPadraoExcluidos,
+        @NotNull UUID empresaContratadaId
 ) {}

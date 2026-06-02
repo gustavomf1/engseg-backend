@@ -34,8 +34,9 @@ public class NaoConformidadeController {
     public ResponseEntity<List<NaoConformidadeResponse>> getAll(
             @RequestParam(required = false) StatusNaoConformidade status,
             @RequestParam(required = false) UUID estabelecimentoId,
-            @RequestParam(required = false) UUID empresaId) {
-        return ResponseEntity.ok(naoConformidadeService.findAll(status, estabelecimentoId, empresaId));
+            @RequestParam(required = false) UUID empresaId,
+            @RequestParam(required = false) UUID empresaContratadaId) {
+        return ResponseEntity.ok(naoConformidadeService.findAll(status, estabelecimentoId, empresaId, empresaContratadaId));
     }
 
     @GetMapping("/{id}")

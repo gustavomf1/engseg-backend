@@ -49,27 +49,33 @@ public class NaoConformidadeService {
     private final InvestigacaoSnapshotRepository investigacaoSnapshotRepository;
     private final ExecucaoSnapshotRepository execucaoSnapshotRepository;
     private final AtividadePlanoAcaoRepository atividadePlanoAcaoRepository;
+    private final EmpresaRepository empresaRepository;
     private final SecurityHelper securityHelper;
     private final ApplicationEventPublisher eventPublisher;
 
-    public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId, UUID empresaId) {
+    public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId, UUID empresaId, UUID empresaContratadaId) {
         // EXTERNO: restrito aos estabelecimentos vinculados à sua empresa
         if (securityHelper.isExterno()) {
             List<UUID> permitidos = securityHelper.getEstabelecimentosDoExterno();
             if (permitidos.isEmpty()) return List.of();
+            List<NaoConformidade> extList;
             if (estabelecimentoId != null) {
                 if (!permitidos.contains(estabelecimentoId)) return List.of();
-                return (status != null
+                extList = status != null
                         ? naoConformidadeRepository.findByStatusAndEstabelecimentoId(status, estabelecimentoId)
-                        : naoConformidadeRepository.findByEstabelecimentoId(estabelecimentoId))
-                        .stream()
-                        .sorted(Comparator.comparing(NaoConformidade::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
-                        .map(this::toResponse).toList();
+                        : naoConformidadeRepository.findByEstabelecimentoId(estabelecimentoId);
+            } else {
+                extList = status != null
+                        ? naoConformidadeRepository.findByStatusAndEstabelecimentoIdIn(status, permitidos)
+                        : naoConformidadeRepository.findByEstabelecimentoIdIn(permitidos);
             }
-            return (status != null
-                    ? naoConformidadeRepository.findByStatusAndEstabelecimentoIdIn(status, permitidos)
-                    : naoConformidadeRepository.findByEstabelecimentoIdIn(permitidos))
-                    .stream()
+            if (empresaContratadaId != null) {
+                extList = extList.stream()
+                        .filter(nc -> nc.getEmpresaContratada() != null
+                                && empresaContratadaId.equals(nc.getEmpresaContratada().getId()))
+                        .toList();
+            }
+            return extList.stream()
                     .sorted(Comparator.comparing(NaoConformidade::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
                     .map(this::toResponse).toList();
         }
@@ -88,6 +94,13 @@ public class NaoConformidadeService {
             list = naoConformidadeRepository.findByStatus(status);
         } else {
             list = naoConformidadeRepository.findAll();
+        }
+
+        if (empresaContratadaId != null) {
+            list = list.stream()
+                    .filter(nc -> nc.getEmpresaContratada() != null
+                            && empresaContratadaId.equals(nc.getEmpresaContratada().getId()))
+                    .toList();
         }
 
         return list.stream()
@@ -122,6 +135,10 @@ public class NaoConformidadeService {
                         .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + request.localizacaoId()))
                 : null;
 
+        var empresaContratada = empresaRepository.findById(request.empresaContratadaId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Empresa contratada não encontrada: " + request.empresaContratadaId()));
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var tecnico = usuarioRepository.findByEmail(email).orElse(null);
 
@@ -141,6 +158,7 @@ public class NaoConformidadeService {
         nc.setNivelRisco(MatrizRisco.calcular(request.severidade(), request.probabilidade()));
         if (responsavelTratativa != null) nc.setResponsavelTratativa(responsavelTratativa);
         if (responsavelNc != null) nc.setResponsavelNc(responsavelNc);
+        nc.setEmpresaContratada(empresaContratada);
         nc.setDataLimiteResolucao(now.toLocalDate().plusDays(30));
         nc.setStatus(StatusNaoConformidade.ABERTA);
         nc.setAtividades(new ArrayList<>());
@@ -210,6 +228,10 @@ public class NaoConformidadeService {
                         .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + request.localizacaoId()))
                 : null;
 
+        var empresaContratada = empresaRepository.findById(request.empresaContratadaId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Empresa contratada não encontrada: " + request.empresaContratadaId()));
+
         nc.setEstabelecimento(estabelecimento);
         nc.setTitulo(request.titulo());
         nc.setLocalizacao(localizacao);
@@ -220,6 +242,7 @@ public class NaoConformidadeService {
         nc.setNivelRisco(MatrizRisco.calcular(request.severidade(), request.probabilidade()));
         nc.setResponsavelTratativa(responsavelTratativa);
         nc.setResponsavelNc(responsavelNc);
+        nc.setEmpresaContratada(empresaContratada);
 
         if (request.normaIds() != null) {
             nc.setNormas(request.normaIds().isEmpty() ? new ArrayList<>() : normaRepository.findAllById(request.normaIds()));
@@ -969,7 +992,13 @@ public class NaoConformidadeService {
                 List.of(),
                 List.of(),
                 normas,
-                nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getId() : null
+                nc.getUsuarioCriacao() != null ? nc.getUsuarioCriacao().getId() : null,
+                nc.getEmpresaContratada() != null ? nc.getEmpresaContratada().getId() : null,
+                nc.getEmpresaContratada() != null
+                        ? (nc.getEmpresaContratada().getNomeFantasia() != null
+                                ? nc.getEmpresaContratada().getNomeFantasia()
+                                : nc.getEmpresaContratada().getRazaoSocial())
+                        : null
         );
     }
 

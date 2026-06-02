@@ -60,7 +60,7 @@ public class OcorrenciaController {
             resultado.add(item);
         }
 
-        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, estabelecimentoId, empresaId)) {
+        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, estabelecimentoId, empresaId, null)) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "NAO_CONFORMIDADE");
             item.put("id", nc.id());

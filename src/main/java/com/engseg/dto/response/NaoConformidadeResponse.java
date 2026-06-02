@@ -59,5 +59,7 @@ public record NaoConformidadeResponse(
         List<ExecucaoAcaoResponse> execucoes,
         List<ValidacaoResponse> validacoes,
         List<NormaResponse> normas,
-        UUID usuarioCriacaoId
+        UUID usuarioCriacaoId,
+        UUID empresaContratadaId,
+        String empresaContratadaNome
 ) {}
