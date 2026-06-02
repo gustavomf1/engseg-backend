@@ -50,4 +50,12 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
            "AND n.status <> com.engseg.entity.StatusNaoConformidade.CONCLUIDO")
     List<NaoConformidade> findAtivasByDataLimiteResolucao(
             @Param("data") java.time.LocalDate data);
+
+    List<NaoConformidade> findByEmpresaContratadaId(UUID empresaContratadaId);
+
+    long countByEmpresaContratadaId(UUID empresaContratadaId);
+
+    long countByStatusAndEmpresaContratadaId(StatusNaoConformidade status, UUID empresaContratadaId);
+
+    long countByRegraDeOuroAndEmpresaContratadaId(boolean regraDeOuro, UUID empresaContratadaId);
 }

@@ -44,6 +44,10 @@ public class NaoConformidade extends Ocorrencia {
     @JoinColumn(name = "usuario_criacao_id")
     private Usuario usuarioCriacao;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_contratada_id")
+    private Empresa empresaContratada;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
