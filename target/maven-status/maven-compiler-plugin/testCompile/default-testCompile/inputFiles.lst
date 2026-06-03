@@ -4,6 +4,8 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/controller/EmpresaControllerSecurityTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/DashboardServiceTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/event/NcEmailListenerTest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/RelatorioServiceTest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/controller/RelatorioControllerTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/util/MatrizRiscoTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/SyncServiceTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/scheduler/NcExpirySchedulerTest.java
@@ -12,6 +14,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/security/UserDetailsServiceImplTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/UsuarioServiceDiretoTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/controller/NaoConformidadeControllerTest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/util/ExcelBuilderTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/UsuarioServiceTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/event/DesvioEmailListenerTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/NaoConformidadeServiceTest.java

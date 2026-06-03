@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -84,4 +85,30 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
                                     @Param("empresaContratadaId") UUID empresaContratadaId,
                                     @Param("estabelecimentoId") UUID estabelecimentoId,
                                     @Param("empresaId") UUID empresaId);
+
+    @Query("SELECT nc FROM NaoConformidade nc WHERE " +
+           "nc.dataRegistro >= :dataInicio AND " +
+           "nc.dataRegistro <= :dataFim AND " +
+           "(:estabelecimentoId IS NULL OR nc.estabelecimento.id = :estabelecimentoId) AND " +
+           "(:empresaContratadaId IS NULL OR nc.empresaContratada.id = :empresaContratadaId) AND " +
+           "(:status IS NULL OR nc.status = :status) " +
+           "ORDER BY nc.dataRegistro DESC")
+    List<NaoConformidade> findParaRelatorio(
+        @Param("dataInicio") LocalDateTime dataInicio,
+        @Param("dataFim") LocalDateTime dataFim,
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("empresaContratadaId") UUID empresaContratadaId,
+        @Param("status") StatusNaoConformidade status);
+
+    @Query("SELECT nc FROM NaoConformidade nc WHERE " +
+           "nc.dataLimiteResolucao IS NOT NULL AND " +
+           "nc.dataLimiteResolucao <= :dataLimite AND " +
+           "nc.status <> com.engseg.entity.StatusNaoConformidade.CONCLUIDO AND " +
+           "(:estabelecimentoId IS NULL OR nc.estabelecimento.id = :estabelecimentoId) AND " +
+           "(:empresaContratadaId IS NULL OR nc.empresaContratada.id = :empresaContratadaId) " +
+           "ORDER BY nc.dataLimiteResolucao ASC")
+    List<NaoConformidade> findVencidasOuAVencer(
+        @Param("dataLimite") LocalDate dataLimite,
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("empresaContratadaId") UUID empresaContratadaId);
 }

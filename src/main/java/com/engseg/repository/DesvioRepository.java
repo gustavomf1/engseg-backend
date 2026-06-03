@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -39,4 +40,18 @@ public interface DesvioRepository extends JpaRepository<Desvio, UUID> {
     List<Desvio> findByEstabelecimento_EmpresaId(UUID empresaId);
 
     List<Desvio> findTop10ByOrderByDataRegistroDesc();
+
+    @Query("SELECT d FROM Desvio d WHERE " +
+           "d.dataRegistro >= :dataInicio AND " +
+           "d.dataRegistro <= :dataFim AND " +
+           "(:estabelecimentoId IS NULL OR d.estabelecimento.id = :estabelecimentoId) AND " +
+           "(:empresaContratadaId IS NULL OR d.empresaContratada.id = :empresaContratadaId) AND " +
+           "(:status IS NULL OR d.status = :status) " +
+           "ORDER BY d.dataRegistro DESC")
+    List<Desvio> findParaRelatorio(
+        @Param("dataInicio") LocalDateTime dataInicio,
+        @Param("dataFim") LocalDateTime dataFim,
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("empresaContratadaId") UUID empresaContratadaId,
+        @Param("status") StatusDesvio status);
 }

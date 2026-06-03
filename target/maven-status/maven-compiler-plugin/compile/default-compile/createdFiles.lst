@@ -35,6 +35,7 @@ com/engseg/dto/response/DevolutivaResponse.class
 com/engseg/entity/EstabelecimentoEmpresa.class
 com/engseg/entity/MeuPapelFiltro.class
 com/engseg/service/DesvioService.class
+com/engseg/controller/RelatorioController.class
 com/engseg/entity/ConviteUsuario.class
 com/engseg/dto/request/DevolutivaRequest.class
 com/engseg/security/UserDetailsServiceImpl.class
@@ -79,6 +80,7 @@ com/engseg/dto/request/BuscarTrechoRequest.class
 com/engseg/entity/Localizacao$LocalizacaoBuilder.class
 com/engseg/dto/response/TrativaDesvioResponse$EvidenciaInfo.class
 com/engseg/entity/Devolutiva$DevolutivaBuilder.class
+com/engseg/service/RelatorioService.class
 com/engseg/dto/request/RejeitarAtividadesRequest$ItemRejeicao.class
 com/engseg/entity/NaoConformidade$NaoConformidadeBuilder.class
 com/engseg/entity/ParecerValidacao.class
@@ -100,6 +102,7 @@ com/engseg/entity/Usuario$UsuarioBuilder.class
 com/engseg/entity/StatusNaoConformidade.class
 com/engseg/repository/ExecucaoSnapshotRepository.class
 com/engseg/repository/NaoConformidadeRepository.class
+com/engseg/service/RelatorioService$1.class
 com/engseg/dto/response/EmailPadraoEscopoResponse.class
 com/engseg/repository/DevolutivaRepository.class
 com/engseg/repository/EstabelecimentoEmpresaRepository.class
@@ -123,6 +126,7 @@ com/engseg/entity/StatusDesvio.class
 com/engseg/entity/Usuario.class
 com/engseg/dto/request/CriarUsuarioDiretoRequest.class
 com/engseg/entity/Estabelecimento.class
+com/engseg/dto/request/RelatorioFiltroRequest.class
 com/engseg/entity/InvestigacaoSnapshot.class
 com/engseg/entity/HistoricoNc$HistoricoNcBuilder.class
 com/engseg/repository/EvidenciaRepository.class
@@ -169,6 +173,7 @@ com/engseg/controller/EvidenciaController.class
 com/engseg/service/EstabelecimentoEmpresaService.class
 com/engseg/repository/ExecucaoAcaoRepository.class
 com/engseg/service/PasswordResetEmailSender.class
+com/engseg/util/ExcelBuilder.class
 com/engseg/controller/EmpresaController.class
 com/engseg/repository/TrativaDesvioRepository.class
 com/engseg/EngSegApplication.class
