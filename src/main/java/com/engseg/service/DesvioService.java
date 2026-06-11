@@ -40,14 +40,18 @@ public class DesvioService {
         if (securityHelper.isExterno()) {
             List<UUID> permitidos = securityHelper.getEstabelecimentosDoExterno();
             if (permitidos.isEmpty()) return List.of();
+            UUID usuarioId = securityHelper.getUsuarioLogado().getId();
+            List<Desvio> extList;
             if (estabelecimentoId != null) {
-                return desvioRepository.findByEstabelecimentoId(estabelecimentoId).stream()
+                extList = desvioRepository.findByEstabelecimentoId(estabelecimentoId).stream()
                         .filter(d -> permitidos.contains(d.getEstabelecimento().getId()))
-                        .sorted(Comparator.comparing(Desvio::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
-                        .map(this::toResponse)
                         .toList();
+            } else {
+                extList = desvioRepository.findByEstabelecimentoIdIn(permitidos);
             }
-            return desvioRepository.findByEstabelecimentoIdIn(permitidos).stream()
+            return extList.stream()
+                    .filter(d -> d.getResponsavelTratativa() != null
+                            && usuarioId.equals(d.getResponsavelTratativa().getId()))
                     .sorted(Comparator.comparing(Desvio::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
                     .map(this::toResponse)
                     .toList();

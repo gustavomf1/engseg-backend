@@ -58,6 +58,7 @@ public class NaoConformidadeService {
         if (securityHelper.isExterno()) {
             List<UUID> permitidos = securityHelper.getEstabelecimentosDoExterno();
             if (permitidos.isEmpty()) return List.of();
+            UUID usuarioId = securityHelper.getUsuarioLogado().getId();
             List<NaoConformidade> extList;
             if (estabelecimentoId != null) {
                 if (!permitidos.contains(estabelecimentoId)) return List.of();
@@ -76,6 +77,8 @@ public class NaoConformidadeService {
                         .toList();
             }
             return extList.stream()
+                    .filter(nc -> nc.getResponsavelTratativa() != null
+                            && usuarioId.equals(nc.getResponsavelTratativa().getId()))
                     .sorted(Comparator.comparing(NaoConformidade::getDataRegistro, Comparator.nullsLast(Comparator.reverseOrder())))
                     .map(this::toResponse).toList();
         }
@@ -110,9 +113,15 @@ public class NaoConformidadeService {
     }
 
     public NaoConformidadeResponse findById(UUID id) {
-        return naoConformidadeRepository.findById(id)
-                .map(this::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Não conformidade não encontrada: " + id));
+        NaoConformidade nc = findNcOrThrow(id);
+        if (securityHelper.isExterno()) {
+            var usuarioLogado = securityHelper.getUsuarioLogado();
+            if (nc.getResponsavelTratativa() == null ||
+                    !nc.getResponsavelTratativa().getId().equals(usuarioLogado.getId())) {
+                throw new BusinessException("Acesso negado a esta não conformidade");
+            }
+        }
+        return toResponse(nc);
     }
 
     @Transactional

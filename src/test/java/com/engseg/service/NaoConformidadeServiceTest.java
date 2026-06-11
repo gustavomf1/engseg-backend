@@ -109,6 +109,88 @@ class NaoConformidadeServiceTest {
         );
     }
 
+    // ─── findAll (EXTERNO) ──────────────────────────────────────────────────────
+
+    @Test
+    void findAll_quandoExterno_retornaApenasNcsOndeEhResponsavelTratativa() {
+        UUID estId = UUID.randomUUID();
+        Usuario externo = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.EXTERNO).build();
+        Usuario outroUsuario = Usuario.builder().id(UUID.randomUUID()).build();
+
+        NaoConformidade ncDoExterno = buildNc(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
+        ncDoExterno.setId(UUID.randomUUID());
+        ncDoExterno.getEstabelecimento().setId(estId);
+        ncDoExterno.setResponsavelTratativa(externo);
+
+        NaoConformidade ncDeOutroResponsavel = buildNc(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
+        ncDeOutroResponsavel.setId(UUID.randomUUID());
+        ncDeOutroResponsavel.getEstabelecimento().setId(estId);
+        ncDeOutroResponsavel.setResponsavelTratativa(outroUsuario);
+
+        NaoConformidade ncSemResponsavel = buildNc(StatusNaoConformidade.ABERTA);
+        ncSemResponsavel.setId(UUID.randomUUID());
+        ncSemResponsavel.getEstabelecimento().setId(estId);
+
+        when(securityHelper.isExterno()).thenReturn(true);
+        when(securityHelper.getEstabelecimentosDoExterno()).thenReturn(List.of(estId));
+        when(securityHelper.getUsuarioLogado()).thenReturn(externo);
+        when(naoConformidadeRepository.findByEstabelecimentoIdIn(List.of(estId)))
+                .thenReturn(List.of(ncDoExterno, ncDeOutroResponsavel, ncSemResponsavel));
+        mockToResponseDeps(ncDoExterno);
+
+        List<NaoConformidadeResponse> result = service.findAll(null, null, null, null);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).id()).isEqualTo(ncDoExterno.getId());
+    }
+
+    @Test
+    void findAll_quandoExternoSemEstabelecimentosPermitidos_retornaListaVazia() {
+        when(securityHelper.isExterno()).thenReturn(true);
+        when(securityHelper.getEstabelecimentosDoExterno()).thenReturn(List.of());
+
+        List<NaoConformidadeResponse> result = service.findAll(null, null, null, null);
+
+        assertThat(result).isEmpty();
+        verify(naoConformidadeRepository, never()).findByEstabelecimentoIdIn(any());
+    }
+
+    // ─── findById (EXTERNO) ─────────────────────────────────────────────────────
+
+    @Test
+    void findById_quandoExternoNaoEhResponsavelTratativa_lancaBusinessException() {
+        Usuario externo = Usuario.builder().id(UUID.randomUUID()).build();
+        Usuario outroUsuario = Usuario.builder().id(UUID.randomUUID()).build();
+
+        NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
+        nc.setResponsavelTratativa(outroUsuario);
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+
+        when(securityHelper.isExterno()).thenReturn(true);
+        when(securityHelper.getUsuarioLogado()).thenReturn(externo);
+
+        assertThatThrownBy(() -> service.findById(ncId))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Acesso negado");
+    }
+
+    @Test
+    void findById_quandoExternoEhResponsavelTratativa_retornaNc() {
+        Usuario externo = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.EXTERNO).build();
+
+        NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
+        nc.setResponsavelTratativa(externo);
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+        mockToResponseDeps(nc);
+
+        when(securityHelper.isExterno()).thenReturn(true);
+        when(securityHelper.getUsuarioLogado()).thenReturn(externo);
+
+        NaoConformidadeResponse result = service.findById(ncId);
+
+        assertThat(result.id()).isEqualTo(ncId);
+    }
+
     // ─── submeterInvestigacao ──────────────────────────────────────────────────
 
     @Test
