@@ -8,6 +8,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/controller/RelatorioControllerTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/util/MatrizRiscoTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/SyncServiceTest.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/DesvioServiceTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/scheduler/NcExpirySchedulerTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/service/AuthServiceTest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/test/java/com/engseg/scheduler/NcSchedulerTest.java

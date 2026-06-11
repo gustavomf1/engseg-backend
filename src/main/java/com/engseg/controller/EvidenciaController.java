@@ -52,7 +52,7 @@ public class EvidenciaController {
     }
 
     @PostMapping("/desvio/{desvioId}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<EvidenciaResponse> uploadDesvio(
             @PathVariable UUID desvioId,
             @RequestParam("file") MultipartFile file,
@@ -67,7 +67,7 @@ public class EvidenciaController {
     }
 
     @GetMapping("/desvio/{desvioId}")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<List<EvidenciaResponse>> listarDesvio(
             @PathVariable UUID desvioId,
             @RequestParam(value = "tipo", required = false) TipoEvidencia tipo) {

@@ -1,5 +1,7 @@
 package com.engseg.service;
 
+import com.engseg.dto.request.AprovarDesvioRequest;
+import com.engseg.dto.request.ReprovarTrativasDesvioRequest;
 import com.engseg.dto.response.DesvioResponse;
 import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
@@ -160,5 +162,55 @@ class DesvioServiceTest {
         DesvioResponse result = service.findById(desvioId);
 
         assertThat(result.id()).isEqualTo(desvioId);
+    }
+
+    // ─── aprovar/reprovar ───────────────────────────────────────────────────────
+
+    @Test
+    void aprovar_quandoUsuarioNaoEhResponsavelDesvio_lancaBusinessExceptionMesmoSendoAdmin() {
+        Usuario admin = Usuario.builder().id(UUID.randomUUID()).admin(true).build();
+        Usuario responsavelDesvio = Usuario.builder().id(UUID.randomUUID()).build();
+
+        Desvio desvio = buildDesvio(StatusDesvio.AGUARDANDO_APROVACAO);
+        desvio.setResponsavelDesvio(responsavelDesvio);
+        when(desvioRepository.findById(desvioId)).thenReturn(Optional.of(desvio));
+        when(securityHelper.getUsuarioLogado()).thenReturn(admin);
+
+        assertThatThrownBy(() -> service.aprovar(desvioId, new AprovarDesvioRequest(null, List.of())))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Apenas o responsável pelo desvio pode aprovar");
+    }
+
+    @Test
+    void aprovar_quandoResponsavelDesvio_aprovaComSucesso() {
+        Usuario responsavelDesvio = Usuario.builder().id(UUID.randomUUID()).build();
+
+        Desvio desvio = buildDesvio(StatusDesvio.AGUARDANDO_APROVACAO);
+        desvio.setResponsavelDesvio(responsavelDesvio);
+        when(desvioRepository.findById(desvioId)).thenReturn(Optional.of(desvio));
+        when(securityHelper.getUsuarioLogado()).thenReturn(responsavelDesvio);
+        when(trativaDesvioRepository.findByDesvioIdAndStatus(any(), any())).thenReturn(List.of());
+        when(desvioRepository.save(any())).thenReturn(desvio);
+        mockToResponseDeps(desvio);
+
+        DesvioResponse result = service.aprovar(desvioId, new AprovarDesvioRequest(null, List.of()));
+
+        assertThat(result.id()).isEqualTo(desvioId);
+        assertThat(desvio.getStatus()).isEqualTo(StatusDesvio.CONCLUIDO);
+    }
+
+    @Test
+    void reprovar_quandoUsuarioNaoEhResponsavelDesvio_lancaBusinessExceptionMesmoSendoAdmin() {
+        Usuario admin = Usuario.builder().id(UUID.randomUUID()).admin(true).build();
+        Usuario responsavelDesvio = Usuario.builder().id(UUID.randomUUID()).build();
+
+        Desvio desvio = buildDesvio(StatusDesvio.AGUARDANDO_APROVACAO);
+        desvio.setResponsavelDesvio(responsavelDesvio);
+        when(desvioRepository.findById(desvioId)).thenReturn(Optional.of(desvio));
+        when(securityHelper.getUsuarioLogado()).thenReturn(admin);
+
+        assertThatThrownBy(() -> service.reprovar(desvioId, new ReprovarTrativasDesvioRequest(List.of(), List.of())))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Apenas o responsável pelo desvio pode reprovar");
     }
 }

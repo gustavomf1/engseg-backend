@@ -323,7 +323,7 @@ public class DesvioService {
         var usuarioLogado = securityHelper.getUsuarioLogado();
         boolean isResponsavel = desvio.getResponsavelDesvio() != null &&
                 desvio.getResponsavelDesvio().getId().equals(usuarioLogado.getId());
-        if (!isResponsavel && !usuarioLogado.isAdmin()) {
+        if (!isResponsavel) {
             throw new BusinessException("Apenas o responsável pelo desvio pode aprovar");
         }
 
@@ -366,7 +366,7 @@ public class DesvioService {
         var usuarioLogado = securityHelper.getUsuarioLogado();
         boolean isResponsavel = desvio.getResponsavelDesvio() != null &&
                 desvio.getResponsavelDesvio().getId().equals(usuarioLogado.getId());
-        if (!isResponsavel && !usuarioLogado.isAdmin()) {
+        if (!isResponsavel) {
             throw new BusinessException("Apenas o responsável pelo desvio pode reprovar");
         }
 
