@@ -38,6 +38,10 @@ public class SenhaResetToken {
     @Builder.Default
     private boolean usado = false;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private int tentativas = 0;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

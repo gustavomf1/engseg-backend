@@ -6,6 +6,7 @@ import com.engseg.entity.PerfilUsuario;
 import com.engseg.entity.Usuario;
 import com.engseg.repository.UsuarioRepository;
 import com.engseg.security.JwtService;
+import com.engseg.security.LoginAttemptService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +27,8 @@ class AuthServiceTest {
     @Mock AuthenticationManager authenticationManager;
     @Mock UsuarioRepository usuarioRepository;
     @Mock JwtService jwtService;
+    @Mock LoginAttemptService loginAttemptService;
+    @Mock RefreshTokenService refreshTokenService;
     @InjectMocks AuthService authService;
 
     private Usuario buildUsuario(boolean admin) {
@@ -44,7 +47,7 @@ class AuthServiceTest {
     void login_adminUser_responseContainsIsAdminTrue() {
         when(authenticationManager.authenticate(any())).thenReturn(null);
         when(usuarioRepository.findByEmail("admin@eng.com")).thenReturn(Optional.of(buildUsuario(true)));
-        when(jwtService.generateToken(any(), any())).thenReturn("jwt-token");
+        when(jwtService.generateToken(any(), any(), any())).thenReturn("jwt-token");
 
         var response = authService.login(new LoginRequest("admin@eng.com", "senha"));
 
@@ -55,7 +58,7 @@ class AuthServiceTest {
     void login_nonAdminUser_responseContainsIsAdminFalse() {
         when(authenticationManager.authenticate(any())).thenReturn(null);
         when(usuarioRepository.findByEmail("admin@eng.com")).thenReturn(Optional.of(buildUsuario(false)));
-        when(jwtService.generateToken(any(), any())).thenReturn("jwt-token");
+        when(jwtService.generateToken(any(), any(), any())).thenReturn("jwt-token");
 
         var response = authService.login(new LoginRequest("admin@eng.com", "senha"));
 

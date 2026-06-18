@@ -7,6 +7,7 @@ import java.util.UUID;
 public record LoginResponse(
         UUID id,
         String token,
+        String refreshToken,
         String nome,
         String email,
         PerfilUsuario perfil,

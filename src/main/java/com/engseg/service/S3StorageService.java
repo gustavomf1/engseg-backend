@@ -43,8 +43,15 @@ public class S3StorageService {
     }
 
     public String upload(MultipartFile file, String pasta) throws IOException {
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("Arquivo vazio.");
+        }
+
+        byte[] bytes = file.getBytes();
+
+        // Valida o TIPO REAL pelos magic bytes — não confia no Content-Type do cliente (M3)
+        String detected = detectContentType(bytes);
+        if (detected == null || !ALLOWED_CONTENT_TYPES.contains(detected)) {
             throw new BusinessException("Tipo de arquivo não permitido. Envie imagens (JPEG, PNG, GIF, WebP) ou PDF.");
         }
 
@@ -57,13 +64,36 @@ public class S3StorageService {
                 PutObjectRequest.builder()
                         .bucket(bucket)
                         .key(key)
-                        .contentType(file.getContentType())
+                        .contentType(detected) // usa o tipo detectado, não o informado pelo cliente
                         .build(),
-                RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+                RequestBody.fromBytes(bytes)
         );
 
-        log.info("Arquivo '{}' enviado para o bucket '{}'", key, bucket);
+        log.info("Arquivo '{}' ({}) enviado para o bucket '{}'", key, detected, bucket);
         return key;
+    }
+
+    /** Detecta o MIME real pelos primeiros bytes (file signature). Retorna null se desconhecido. */
+    private String detectContentType(byte[] b) {
+        if (b.length >= 3 && (b[0] & 0xFF) == 0xFF && (b[1] & 0xFF) == 0xD8 && (b[2] & 0xFF) == 0xFF) {
+            return "image/jpeg";
+        }
+        if (b.length >= 8 && (b[0] & 0xFF) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G'
+                && (b[4] & 0xFF) == 0x0D && (b[5] & 0xFF) == 0x0A && (b[6] & 0xFF) == 0x1A && (b[7] & 0xFF) == 0x0A) {
+            return "image/png";
+        }
+        if (b.length >= 6 && b[0] == 'G' && b[1] == 'I' && b[2] == 'F' && b[3] == '8'
+                && (b[4] == '7' || b[4] == '9') && b[5] == 'a') {
+            return "image/gif";
+        }
+        if (b.length >= 12 && b[0] == 'R' && b[1] == 'I' && b[2] == 'F' && b[3] == 'F'
+                && b[8] == 'W' && b[9] == 'E' && b[10] == 'B' && b[11] == 'P') {
+            return "image/webp";
+        }
+        if (b.length >= 5 && b[0] == '%' && b[1] == 'P' && b[2] == 'D' && b[3] == 'F' && b[4] == '-') {
+            return "application/pdf";
+        }
+        return null;
     }
 
     public byte[] download(String key) {
