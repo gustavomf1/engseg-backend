@@ -21,6 +21,7 @@ com/engseg/repository/EmpresaRepository.class
 com/engseg/entity/TrativaDesvio$TrativaDesvioBuilder.class
 com/engseg/repository/SenhaResetTokenRepository.class
 com/engseg/controller/DashboardController.class
+com/engseg/security/LoginAttemptService.class
 com/engseg/repository/LocalizacaoRepository.class
 com/engseg/entity/HistoricoDesvio.class
 com/engseg/controller/OcorrenciaController.class
@@ -30,7 +31,9 @@ com/engseg/entity/NaoConformidade.class
 com/engseg/dto/response/DesvioResponse.class
 com/engseg/dto/response/EmpresaResponse.class
 com/engseg/entity/Ocorrencia.class
+com/engseg/security/LoginAttemptService$Tentativa.class
 com/engseg/entity/HistoricoNc.class
+com/engseg/security/RateLimitFilter$Janela.class
 com/engseg/dto/response/DevolutivaResponse.class
 com/engseg/entity/EstabelecimentoEmpresa.class
 com/engseg/entity/MeuPapelFiltro.class
@@ -49,6 +52,7 @@ com/engseg/dto/response/HistoricoNcResponse.class
 com/engseg/security/JwtService.class
 com/engseg/entity/ExecucaoAcao$ExecucaoAcaoBuilder.class
 com/engseg/dto/request/RejeitarAtividadesRequest.class
+com/engseg/dto/response/RefreshResponse.class
 com/engseg/controller/NcTrechoNormaController.class
 com/engseg/entity/NcTrechoNorma.class
 com/engseg/entity/SenhaResetToken.class
@@ -56,6 +60,7 @@ com/engseg/service/NaoConformidadeService.class
 com/engseg/dto/request/SubmeterTrativaRequest.class
 com/engseg/dto/request/SubmeterTrativaDesvioRequest.class
 com/engseg/dto/request/RevisarAtividadesRequest.class
+com/engseg/security/RateLimitFilter.class
 com/engseg/dto/request/EmailPadraoRequest.class
 com/engseg/entity/HistoricoDesvio$HistoricoDesvioBuilder.class
 com/engseg/entity/Desvio$DesvioBuilderImpl.class
@@ -101,6 +106,7 @@ com/engseg/service/NcTrechoNormaService.class
 com/engseg/entity/Usuario$UsuarioBuilder.class
 com/engseg/entity/StatusNaoConformidade.class
 com/engseg/repository/ExecucaoSnapshotRepository.class
+com/engseg/service/RefreshTokenService.class
 com/engseg/repository/NaoConformidadeRepository.class
 com/engseg/service/RelatorioService$1.class
 com/engseg/dto/response/EmailPadraoEscopoResponse.class
@@ -121,6 +127,7 @@ com/engseg/exception/ResourceNotFoundException.class
 com/engseg/entity/Empresa$EmpresaBuilder.class
 com/engseg/entity/EstabelecimentoEmpresa$EstabelecimentoEmpresaBuilder.class
 com/engseg/controller/EmailPadraoController.class
+com/engseg/entity/RefreshToken.class
 com/engseg/service/UsuarioService.class
 com/engseg/entity/StatusDesvio.class
 com/engseg/entity/Usuario.class
@@ -131,6 +138,7 @@ com/engseg/entity/InvestigacaoSnapshot.class
 com/engseg/entity/HistoricoNc$HistoricoNcBuilder.class
 com/engseg/repository/EvidenciaRepository.class
 com/engseg/entity/EmailPadrao.class
+com/engseg/repository/RefreshTokenRepository.class
 com/engseg/config/S3Config.class
 com/engseg/entity/TrativaDesvio.class
 com/engseg/service/DashboardService.class
@@ -148,12 +156,14 @@ com/engseg/dto/request/InvestigacaoRequest.class
 com/engseg/service/SyncService.class
 com/engseg/repository/HistoricoDesvioRepository.class
 com/engseg/service/ConviteService.class
-com/engseg/dto/request/RedefinirSenhaRequest.class
-com/engseg/dto/request/RejeitarRequest.class
+com/engseg/entity/RefreshToken$RefreshTokenBuilder.class
 com/engseg/dto/request/DesvioRequest.class
+com/engseg/dto/request/RejeitarRequest.class
+com/engseg/dto/request/RedefinirSenhaRequest.class
 com/engseg/controller/AuthController.class
 com/engseg/service/EstabelecimentoService.class
 com/engseg/entity/ExecucaoSnapshot.class
+com/engseg/service/RefreshTokenService$Rotacao.class
 com/engseg/entity/Validacao$ValidacaoBuilder.class
 com/engseg/dto/response/NormaResponse.class
 com/engseg/controller/OcorrenciaController$1.class
@@ -165,6 +175,7 @@ com/engseg/controller/PasswordResetController.class
 com/engseg/repository/ConviteRepository.class
 com/engseg/dto/response/EstabelecimentoEmpresaResponse.class
 com/engseg/dto/request/NormaRequest.class
+com/engseg/dto/request/RefreshRequest.class
 com/engseg/dto/response/VerificarOtpResponse.class
 com/engseg/dto/request/ConviteRequest.class
 com/engseg/service/NormaService.class

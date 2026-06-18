@@ -15,6 +15,9 @@ public interface SenhaResetTokenRepository extends JpaRepository<SenhaResetToken
     Optional<SenhaResetToken> findByUsuarioIdAndOtpAndUsadoFalseAndOtpExpiresAtAfter(
             UUID usuarioId, String otp, LocalDateTime agora);
 
+    Optional<SenhaResetToken> findFirstByUsuarioIdAndUsadoFalseAndOtpExpiresAtAfter(
+            UUID usuarioId, LocalDateTime agora);
+
     Optional<SenhaResetToken> findByResetTokenAndUsadoFalseAndResetTokenExpiresAtAfter(
             UUID resetToken, LocalDateTime agora);
 }

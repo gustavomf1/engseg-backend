@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: engseg
       POSTGRES_USER: engseg
-      POSTGRES_PASSWORD: F
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD obrigatorio}
     ports:
       - "5432:5432"
     volumes:
@@ -23,8 +23,8 @@ services:
     image: minio/minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?S3_ACCESS_KEY obrigatorio}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?S3_SECRET_KEY obrigatorio}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -62,11 +62,11 @@ services:
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/engseg
       DB_USERNAME: engseg
-      DB_PASSWORD: F
-      JWT_SECRET: engseg-secret-key-2026-very-long-and-secure-key-for-jwt-token-authentication
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD obrigatorio}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET obrigatorio}
       S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?S3_ACCESS_KEY obrigatorio}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?S3_SECRET_KEY obrigatorio}
       S3_BUCKET: engseg-evidencias
       CLAUDE_API_KEY: ${CLAUDE_API_KEY}
       BREVO_API_KEY: ${BREVO_API_KEY}

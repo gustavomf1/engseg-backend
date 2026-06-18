@@ -1,6 +1,7 @@
 package com.engseg.config;
 
 import com.engseg.security.JwtFilter;
+import com.engseg.security.RateLimitFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET,  "/api/convites/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/convites/*/registrar").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/reset/solicitar").permitAll()
@@ -57,7 +60,8 @@ public class SecurityConfig {
                     response.getWriter().write("{\"error\":\"Nao autenticado\"}");
                 }))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new RateLimitFilter(), JwtFilter.class);
 
         return http.build();
     }

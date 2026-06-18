@@ -24,6 +24,7 @@ public class SenhaResetService {
     private final PasswordResetEmailSender emailSender;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final int MAX_TENTATIVAS_OTP = 5;
 
     @Transactional
     public void solicitarReset(String email) {
@@ -46,11 +47,25 @@ public class SenhaResetService {
         var usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException("Código inválido ou expirado."));
 
-        var token = tokenRepository
+        var tokenOpt = tokenRepository
                 .findByUsuarioIdAndOtpAndUsadoFalseAndOtpExpiresAtAfter(
-                        usuario.getId(), otp, LocalDateTime.now())
-                .orElseThrow(() -> new BusinessException("Código inválido ou expirado."));
+                        usuario.getId(), otp, LocalDateTime.now());
 
+        if (tokenOpt.isEmpty()) {
+            // OTP errado/expirado: conta a tentativa no código ativo e invalida após o limite
+            tokenRepository
+                    .findFirstByUsuarioIdAndUsadoFalseAndOtpExpiresAtAfter(usuario.getId(), LocalDateTime.now())
+                    .ifPresent(ativo -> {
+                        ativo.setTentativas(ativo.getTentativas() + 1);
+                        if (ativo.getTentativas() >= MAX_TENTATIVAS_OTP) {
+                            ativo.setUsado(true);
+                        }
+                        tokenRepository.save(ativo);
+                    });
+            throw new BusinessException("Código inválido ou expirado.");
+        }
+
+        var token = tokenOpt.get();
         UUID resetToken = UUID.randomUUID();
         token.setResetToken(resetToken);
         token.setResetTokenExpiresAt(LocalDateTime.now().plusMinutes(10));
