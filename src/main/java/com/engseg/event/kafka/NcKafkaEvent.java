@@ -1,15 +1,13 @@
 package com.engseg.event.kafka;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public record NcKafkaEvent(
-        String tipo,                // "NC_CRIADA" | "NC_STATUS_ALTERADO"
+        UUID eventId,
+        String tipo,
         UUID ncId,
+        List<UUID> destinatarios,
         String titulo,
-        String status,
-        UUID responsavelId,         // responsavelTratativa
-        UUID responsavelTrativaId,  // responsavelNc
-        UUID criadorId,
-        LocalDate dataLimite
+        String corpo
 ) {}

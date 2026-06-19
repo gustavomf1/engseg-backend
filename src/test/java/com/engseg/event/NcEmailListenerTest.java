@@ -30,6 +30,7 @@ class NcEmailListenerTest {
     @Mock EmailPadraoRepository emailPadraoRepository;
     @Mock NcEmailSender sender;
     @Mock KafkaTemplate<String, NcKafkaEvent> kafkaTemplate;
+    @Mock NcPushMessageBuilder pushMessageBuilder;
     @InjectMocks NcEmailListener listener;
 
     private NaoConformidade nc;
@@ -152,38 +153,31 @@ class NcEmailListenerTest {
     }
 
     @Test
-    void devePublicarKafkaNC_CRIADA_quandoStatusAberta() {
-        UUID ncId = UUID.randomUUID();
-        nc.setId(ncId);
-        nc.setResponsavelTratativa(responsavelTratativa);
-        when(ncRepository.findById(ncId)).thenReturn(Optional.of(nc));
-        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(any(), any()))
-                .thenReturn(List.of());
+    void quandoBuilderRetornaEvento_publicaNoKafka() {
+        NcKafkaEvent kafkaEvent = new NcKafkaEvent(UUID.randomUUID(), "NC_ATIVADA", nc.getId(),
+                List.of(responsavelTratativa.getId()), "EngSeg — NC Teste", "corpo");
+        when(ncRepository.findById(nc.getId())).thenReturn(Optional.of(nc));
+        when(pushMessageBuilder.resolver(nc, StatusNaoConformidade.ABERTA,
+                StatusNaoConformidade.AGUARDANDO_TRATATIVA, null)).thenReturn(kafkaEvent);
 
-        NcEmailEvent event = new NcEmailEvent(this, ncId,
-                null, StatusNaoConformidade.ABERTA,
+        NcEmailEvent event = new NcEmailEvent(this, nc.getId(),
+                StatusNaoConformidade.ABERTA, StatusNaoConformidade.AGUARDANDO_TRATATIVA,
                 List.of(), List.of(), null);
         listener.onNcEmail(event);
 
-        verify(kafkaTemplate, times(1)).send(
-                eq("engseg.nc.events"),
-                argThat((NcKafkaEvent e) -> "NC_CRIADA".equals(e.tipo())));
+        verify(kafkaTemplate, times(1)).send(eq("engseg.nc.events"), eq(kafkaEvent));
     }
 
     @Test
-    void devePublicarKafkaNC_STATUS_ALTERADO_quandoStatusNaoAberta() {
-        UUID ncId = UUID.randomUUID();
-        nc.setId(ncId);
-        nc.setResponsavelTratativa(responsavelTratativa);
-        when(ncRepository.findById(ncId)).thenReturn(Optional.of(nc));
+    void quandoBuilderRetornaNull_naoPublicaNoKafka() {
+        when(ncRepository.findById(nc.getId())).thenReturn(Optional.of(nc));
+        when(pushMessageBuilder.resolver(any(), any(), any(), any())).thenReturn(null);
 
-        NcEmailEvent event = new NcEmailEvent(this, ncId,
+        NcEmailEvent event = new NcEmailEvent(this, nc.getId(),
                 StatusNaoConformidade.ABERTA, StatusNaoConformidade.EM_TRATAMENTO,
                 List.of(), List.of(), null);
         listener.onNcEmail(event);
 
-        verify(kafkaTemplate, times(1)).send(
-                eq("engseg.nc.events"),
-                argThat((NcKafkaEvent e) -> "NC_STATUS_ALTERADO".equals(e.tipo())));
+        verify(kafkaTemplate, never()).send(any(), any());
     }
 }
