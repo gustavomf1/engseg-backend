@@ -90,6 +90,9 @@ public class NcEmailListener {
     }
 
     private void publicarKafka(NaoConformidade nc, NcEmailEvent event) {
+        // TODO: Tarefa 2 — integrar com NcPushMessageBuilder para produzir novo NcKafkaEvent
+        // Por enquanto, desativado para evitar conflito com novo contrato NcKafkaEvent
+        /*
         String tipo = (event.getStatusAnterior() == null) ? "NC_CRIADA" : "NC_STATUS_ALTERADO";
         UUID responsavelNcId = nc.getResponsavelNc() != null
                 ? nc.getResponsavelNc().getId() : null;
@@ -106,5 +109,6 @@ public class NcEmailListener {
         );
         kafkaTemplate.send(TOPIC, kafkaEvent);
         log.info("NcEmailListener: Kafka {} publicado para NC {}", tipo, nc.getId());
+        */
     }
 }
