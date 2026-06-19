@@ -28,6 +28,7 @@ public class NcEmailListener {
     private final EmailPadraoRepository emailPadraoRepository;
     private final NcEmailSender ncEmailSender;
     private final KafkaTemplate<String, NcKafkaEvent> kafkaTemplate;
+    private final NcPushMessageBuilder pushMessageBuilder;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
@@ -90,25 +91,13 @@ public class NcEmailListener {
     }
 
     private void publicarKafka(NaoConformidade nc, NcEmailEvent event) {
-        // TODO: Tarefa 2 — integrar com NcPushMessageBuilder para produzir novo NcKafkaEvent
-        // Por enquanto, desativado para evitar conflito com novo contrato NcKafkaEvent
-        /*
-        String tipo = (event.getStatusAnterior() == null) ? "NC_CRIADA" : "NC_STATUS_ALTERADO";
-        UUID responsavelNcId = nc.getResponsavelNc() != null
-                ? nc.getResponsavelNc().getId() : null;
-        UUID responsavelTrativaId = nc.getResponsavelTratativa() != null
-                ? nc.getResponsavelTratativa().getId() : null;
-        UUID criadorId = nc.getUsuarioCriacao() != null
-                ? nc.getUsuarioCriacao().getId() : null;
-
-        NcKafkaEvent kafkaEvent = new NcKafkaEvent(
-                tipo, nc.getId(), nc.getTitulo(),
-                nc.getStatus().name(),
-                responsavelNcId, responsavelTrativaId, criadorId,
-                nc.getDataLimiteResolucao()
-        );
+        NcKafkaEvent kafkaEvent = pushMessageBuilder.resolver(
+                nc, event.getStatusAnterior(), event.getStatusNovo(), event.getComentario());
+        if (kafkaEvent == null) {
+            log.debug("NcEmailListener: par de status sem mapeamento de push, Kafka não publicado para NC {}", nc.getId());
+            return;
+        }
         kafkaTemplate.send(TOPIC, kafkaEvent);
-        log.info("NcEmailListener: Kafka {} publicado para NC {}", tipo, nc.getId());
-        */
+        log.info("NcEmailListener: Kafka {} publicado para NC {}", kafkaEvent.tipo(), nc.getId());
     }
 }
