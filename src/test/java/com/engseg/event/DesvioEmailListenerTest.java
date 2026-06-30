@@ -1,6 +1,7 @@
 package com.engseg.event;
 
 import com.engseg.entity.*;
+import com.engseg.event.DesvioPushMessageBuilder;
 import com.engseg.event.kafka.DesvioKafkaEvent;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EmailPadraoRepository;
@@ -29,6 +30,7 @@ class DesvioEmailListenerTest {
     @Mock EmailPadraoRepository emailPadraoRepository;
     @Mock DesvioEmailSender sender;
     @Mock KafkaTemplate<String, DesvioKafkaEvent> kafkaTemplate;
+    @Mock DesvioPushMessageBuilder pushMessageBuilder;
     @InjectMocks DesvioEmailListener listener;
 
     private Desvio desvio;
@@ -223,16 +225,36 @@ class DesvioEmailListenerTest {
     }
 
     @Test
-    void devePublicarKafkaDesvio_quandoEventoProcessado() {
-        UUID desvioId = UUID.randomUUID();
-        desvio.setId(desvioId);
-        when(desvioRepository.findById(desvioId)).thenReturn(Optional.of(desvio));
+    void criacao_nao_publica_kafka() {
+        when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
+        when(emailPadraoRepository.findByEstabelecimentoIdAndEmpresaId(any(), any())).thenReturn(List.of());
 
-        DesvioEmailEvent event = new DesvioEmailEvent(this, desvioId,
-                null, StatusDesvio.AGUARDANDO_TRATATIVA,
+        DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
+                null, StatusDesvio.AGUARDANDO_TRATATIVA, List.of(), List.of(), null, empresa.getId());
+        listener.onDesvioEmail(event);
+
+        verify(kafkaTemplate, never()).send(any(), any(DesvioKafkaEvent.class));
+    }
+
+    @Test
+    void enviar_para_tratativa_publica_kafka_DESVIO_ATIVADO() {
+        DesvioKafkaEvent kafkaEvent = new DesvioKafkaEvent(
+                UUID.randomUUID(), "DESVIO_ATIVADO", desvio.getId(),
+                List.of(responsavelTratativa.getId(), responsavelDesvio.getId()),
+                "EngSeg — Desvio ativado", "\"Desvio Teste\" está aguardando sua tratativa.");
+        when(desvioRepository.findById(desvio.getId())).thenReturn(Optional.of(desvio));
+        when(pushMessageBuilder.resolver(desvio, StatusDesvio.ABERTO, StatusDesvio.AGUARDANDO_TRATATIVA))
+                .thenReturn(kafkaEvent);
+
+        DesvioEmailEvent event = new DesvioEmailEvent(this, desvio.getId(),
+                StatusDesvio.ABERTO, StatusDesvio.AGUARDANDO_TRATATIVA,
                 List.of(), List.of(), null, empresa.getId());
         listener.onDesvioEmail(event);
 
-        verify(kafkaTemplate, times(1)).send(eq("engseg.desvio.events"), any(DesvioKafkaEvent.class));
+        ArgumentCaptor<DesvioKafkaEvent> captor = ArgumentCaptor.forClass(DesvioKafkaEvent.class);
+        verify(kafkaTemplate).send(eq("engseg.desvio.events"), captor.capture());
+        assertThat(captor.getValue().tipo()).isEqualTo("DESVIO_ATIVADO");
+        assertThat(captor.getValue().destinatarios()).isNotEmpty();
+        assertThat(captor.getValue().eventId()).isNotNull();
     }
 }

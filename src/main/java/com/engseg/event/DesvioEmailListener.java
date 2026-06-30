@@ -2,6 +2,7 @@ package com.engseg.event;
 
 import com.engseg.entity.*;
 import com.engseg.event.kafka.DesvioKafkaEvent;
+import com.engseg.event.DesvioPushMessageBuilder;
 import com.engseg.repository.DesvioRepository;
 import com.engseg.repository.EmailPadraoRepository;
 import com.engseg.service.DesvioEmailSender;
@@ -28,6 +29,7 @@ public class DesvioEmailListener {
     private final EmailPadraoRepository emailPadraoRepository;
     private final DesvioEmailSender desvioEmailSender;
     private final KafkaTemplate<String, DesvioKafkaEvent> kafkaTemplate;
+    private final DesvioPushMessageBuilder pushMessageBuilder;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
@@ -91,20 +93,13 @@ public class DesvioEmailListener {
     }
 
     private void publicarKafka(Desvio desvio, DesvioEmailEvent event) {
-        String tipo = (event.getStatusAnterior() == null) ? "DESVIO_CRIADO" : "DESVIO_STATUS_ALTERADO";
-        UUID responsavelId = desvio.getResponsavelDesvio() != null
-                ? desvio.getResponsavelDesvio().getId() : null;
-        UUID responsavelTrativaId = desvio.getResponsavelTratativa() != null
-                ? desvio.getResponsavelTratativa().getId() : null;
-        UUID criadorId = desvio.getUsuarioCriacao() != null
-                ? desvio.getUsuarioCriacao().getId() : null;
-
-        DesvioKafkaEvent kafkaEvent = new DesvioKafkaEvent(
-                tipo, desvio.getId(), desvio.getTitulo(),
-                desvio.getStatus().name(),
-                responsavelId, responsavelTrativaId, criadorId
-        );
+        DesvioKafkaEvent kafkaEvent = pushMessageBuilder.resolver(
+                desvio, event.getStatusAnterior(), event.getStatusNovo());
+        if (kafkaEvent == null) {
+            log.debug("DesvioEmailListener: par de status sem mapeamento push, Kafka não publicado para Desvio {}", desvio.getId());
+            return;
+        }
         kafkaTemplate.send(TOPIC, kafkaEvent);
-        log.info("DesvioEmailListener: Kafka {} publicado para Desvio {}", tipo, desvio.getId());
+        log.info("DesvioEmailListener: Kafka {} publicado para Desvio {}", kafkaEvent.tipo(), desvio.getId());
     }
 }
