@@ -14,6 +14,7 @@ public record UsuarioResponse(
         String empresaCnpj,
         String telefone,
         boolean ativo,
+        boolean isAdmin,
         LocalDate dtCriacao,
         LocalDate dtInativacao
 ) {}

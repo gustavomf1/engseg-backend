@@ -1,3 +1,4 @@
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/event/NcPushMessageBuilder.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/controller/LocalizacaoController.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/response/HistoricoDesvioResponse.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/InvestigacaoSnapshotRepository.java
@@ -137,6 +138,7 @@
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/service/PasswordResetEmailSender.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/SyncBatchRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/entity/StatusTratativaDesvio.java
+/home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/event/DesvioPushMessageBuilder.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/RejeitarAtividadesRequest.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/repository/EmailPadraoRepository.java
 /home/mag/Documents/Java Projects/EngSeg/engseg-api/src/main/java/com/engseg/dto/request/EstabelecimentoEmpresaRequest.java

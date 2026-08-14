@@ -122,6 +122,7 @@ com/engseg/event/kafka/NcKafkaEvent.class
 com/engseg/entity/AtividadePlanoAcao.class
 com/engseg/exception/GlobalExceptionHandler$ErrorResponse.class
 com/engseg/repository/EmailPadraoRepository.class
+com/engseg/event/NcPushMessageBuilder.class
 com/engseg/dto/request/NcTrechoNormaRequest.class
 com/engseg/exception/ResourceNotFoundException.class
 com/engseg/entity/Empresa$EmpresaBuilder.class
@@ -208,6 +209,7 @@ com/engseg/config/SecurityConfig.class
 com/engseg/dto/request/SubmeterExecucaoRequest.class
 com/engseg/dto/response/UsuarioResponse.class
 com/engseg/repository/DesvioRepository.class
+com/engseg/event/DesvioPushMessageBuilder.class
 com/engseg/dto/request/ReprovarTrativasDesvioRequest.class
 com/engseg/entity/NivelRisco.class
 com/engseg/controller/ConviteController.class

@@ -146,6 +146,7 @@ public class UsuarioService {
                 u.getEmpresa().getCnpj(),
                 u.getTelefone(),
                 u.isAtivo(),
+                u.isAdmin(),
                 u.getDtCriacao(),
                 u.getDtInativacao()
         );
