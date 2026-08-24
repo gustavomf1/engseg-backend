@@ -10,6 +10,7 @@ import com.engseg.dto.request.SubmeterEvidenciasRequest;
 import com.engseg.dto.request.SubmeterExecucaoRequest;
 import com.engseg.dto.response.HistoricoNcResponse;
 import com.engseg.dto.response.NaoConformidadeResponse;
+import com.engseg.dto.response.NcResumoResponse;
 import com.engseg.entity.StatusNaoConformidade;
 import com.engseg.service.NaoConformidadeService;
 import jakarta.validation.Valid;
@@ -43,6 +44,15 @@ public class NaoConformidadeController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
     public ResponseEntity<NaoConformidadeResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(naoConformidadeService.findById(id));
+    }
+
+    @GetMapping("/busca-reincidencia")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    public ResponseEntity<List<NcResumoResponse>> buscarParaReincidencia(
+            @RequestParam UUID estabelecimentoId,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) UUID excludeId) {
+        return ResponseEntity.ok(naoConformidadeService.searchParaReincidencia(estabelecimentoId, q, excludeId));
     }
 
     @PostMapping

@@ -3,6 +3,8 @@ package com.engseg.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -42,4 +44,8 @@ public abstract class Ocorrencia {
     @Convert(converter = BooleanToSNConverter.class)
     @Column(name = "regra_de_ouro", nullable = false, length = 1)
     private boolean regraDeOuro;
+
+    @Generated(event = EventType.INSERT)
+    @Column(name = "numero_sequencial", insertable = false, updatable = false)
+    private Long numeroSequencial;
 }

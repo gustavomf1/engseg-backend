@@ -486,6 +486,7 @@ public class DesvioService {
 
         return new DesvioResponse(
                 d.getId(),
+                formatCodigo(d.getNumeroSequencial()),
                 d.getEstabelecimento().getId(),
                 d.getEstabelecimento().getNome(),
                 d.getTitulo(),
@@ -550,5 +551,9 @@ public class DesvioService {
                 h.getSnapshotEvidenciaId(),
                 h.getDataAcao()
         );
+    }
+
+    private String formatCodigo(Long numeroSequencial) {
+        return numeroSequencial == null ? null : "DESV-" + String.format("%04d", numeroSequencial);
     }
 }

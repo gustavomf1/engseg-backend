@@ -264,6 +264,7 @@ class NaoConformidadeControllerTest {
     private NaoConformidadeResponse mockNcResponse() {
         return new NaoConformidadeResponse(
                 ncId,                                                    // id
+                "NC-0001",                                               // codigo
                 UUID.randomUUID(),                                       // estabelecimentoId
                 "Estabelecimento",                                       // estabelecimentoNome
                 "NC Teste",                                              // titulo

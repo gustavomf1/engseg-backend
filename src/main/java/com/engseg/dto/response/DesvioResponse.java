@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public record DesvioResponse(
         UUID id,
+        String codigo,
         UUID estabelecimentoId,
         String estabelecimentoNome,
         String titulo,

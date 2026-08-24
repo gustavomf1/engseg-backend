@@ -2,6 +2,7 @@ package com.engseg.repository;
 
 import com.engseg.entity.NaoConformidade;
 import com.engseg.entity.StatusNaoConformidade;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -111,4 +112,15 @@ public interface NaoConformidadeRepository extends JpaRepository<NaoConformidade
         @Param("dataLimite") LocalDate dataLimite,
         @Param("estabelecimentoId") UUID estabelecimentoId,
         @Param("empresaContratadaId") UUID empresaContratadaId);
+
+    @Query("SELECT nc FROM NaoConformidade nc WHERE nc.estabelecimento.id = :estabelecimentoId " +
+           "AND (:excludeId IS NULL OR nc.id <> :excludeId) " +
+           "AND (:pattern IS NULL OR LOWER(nc.titulo) LIKE :pattern " +
+           "     OR LOWER(CAST(nc.numeroSequencial AS string)) LIKE :pattern) " +
+           "ORDER BY nc.dataRegistro DESC")
+    List<NaoConformidade> searchParaReincidencia(
+        @Param("estabelecimentoId") UUID estabelecimentoId,
+        @Param("pattern") String pattern,
+        @Param("excludeId") UUID excludeId,
+        Pageable pageable);
 }

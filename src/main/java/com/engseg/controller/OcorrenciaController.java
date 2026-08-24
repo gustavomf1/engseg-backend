@@ -53,6 +53,7 @@ public class OcorrenciaController {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "DESVIO");
             item.put("id", d.id());
+            item.put("codigo", d.codigo());
             item.put("titulo", d.titulo());
             item.put("localizacao", d.localizacaoNome());
             item.put("descricao", d.descricao());
@@ -75,6 +76,7 @@ public class OcorrenciaController {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("tipo", "NAO_CONFORMIDADE");
             item.put("id", nc.id());
+            item.put("codigo", nc.codigo());
             item.put("titulo", nc.titulo());
             item.put("localizacao", nc.localizacaoNome());
             item.put("descricao", nc.descricao());

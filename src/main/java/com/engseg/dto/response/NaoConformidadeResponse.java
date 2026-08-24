@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public record NaoConformidadeResponse(
         UUID id,
+        String codigo,
         UUID estabelecimentoId,
         String estabelecimentoNome,
         String titulo,

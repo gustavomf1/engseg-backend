@@ -949,6 +949,7 @@ public class NaoConformidadeService {
 
         return new NaoConformidadeResponse(
                 nc.getId(),
+                formatCodigo(nc.getNumeroSequencial()),
                 nc.getEstabelecimento().getId(),
                 nc.getEstabelecimento().getNome(),
                 nc.getTitulo(),
@@ -979,7 +980,7 @@ public class NaoConformidadeService {
                 nc.getNcAnterior() != null ? nc.getNcAnterior().getTitulo() : null,
                 buildCadeiaReincidencias(nc),
                 naoConformidadeRepository.findByNcAnteriorId(nc.getId()).stream()
-                        .map(r -> new NcResumoResponse(r.getId(), r.getTitulo(), r.getDataRegistro(), r.getStatus()))
+                        .map(r -> new NcResumoResponse(r.getId(), formatCodigo(r.getNumeroSequencial()), r.getTitulo(), r.getDataRegistro(), r.getStatus()))
                         .toList(),
                 nc.getPorqueUm(),
                 nc.getPorqueUmResposta(),
@@ -1048,9 +1049,25 @@ public class NaoConformidadeService {
         NaoConformidade atual = nc.getNcAnterior();
         while (atual != null && !visited.contains(atual.getId())) {
             visited.add(atual.getId());
-            cadeia.add(0, new NcResumoResponse(atual.getId(), atual.getTitulo(), atual.getDataRegistro(), atual.getStatus()));
+            cadeia.add(0, new NcResumoResponse(atual.getId(), formatCodigo(atual.getNumeroSequencial()), atual.getTitulo(), atual.getDataRegistro(), atual.getStatus()));
             atual = atual.getNcAnterior();
         }
         return cadeia;
+    }
+
+    public List<NcResumoResponse> searchParaReincidencia(UUID estabelecimentoId, String q, UUID excludeId) {
+        if (securityHelper.isExterno() && !securityHelper.getEstabelecimentosDoExterno().contains(estabelecimentoId)) {
+            return List.of();
+        }
+        String pattern = (q == null || q.isBlank()) ? null : "%" + q.trim().toLowerCase() + "%";
+        return naoConformidadeRepository
+                .searchParaReincidencia(estabelecimentoId, pattern, excludeId, org.springframework.data.domain.PageRequest.of(0, 20))
+                .stream()
+                .map(nc -> new NcResumoResponse(nc.getId(), formatCodigo(nc.getNumeroSequencial()), nc.getTitulo(), nc.getDataRegistro(), nc.getStatus()))
+                .toList();
+    }
+
+    private String formatCodigo(Long numeroSequencial) {
+        return numeroSequencial == null ? null : "NC-" + String.format("%04d", numeroSequencial);
     }
 }
