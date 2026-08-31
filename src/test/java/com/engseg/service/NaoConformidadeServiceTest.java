@@ -8,6 +8,7 @@ import com.engseg.dto.request.SubmeterEvidenciasRequest;
 import com.engseg.dto.response.NaoConformidadeResponse;
 import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
+import com.engseg.exception.CamposObrigatoriosException;
 import com.engseg.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -463,5 +464,47 @@ class NaoConformidadeServiceTest {
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
         assertThat(captor.getValue().getStatus()).isEqualTo(StatusNaoConformidade.CONCLUIDO);
+    }
+
+    @Test
+    void ativar_quandoFaltamTodosOsCampos_lancaCamposObrigatoriosExceptionComTodosOsCodigos() {
+        Usuario criador = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.TECNICO).build();
+        NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
+        nc.setDescricao(null);
+        nc.setUsuarioCriacao(criador);
+
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+        when(securityHelper.getUsuarioLogado()).thenReturn(criador);
+
+        assertThatThrownBy(() -> service.ativar(ncId))
+                .isInstanceOf(CamposObrigatoriosException.class)
+                .satisfies(ex -> assertThat(((CamposObrigatoriosException) ex).getCamposFaltantes())
+                        .containsExactlyInAnyOrder("MATRIZ_RISCO", "RESPONSAVEL_TRATATIVA", "RESPONSAVEL_NC", "NORMA_VINCULADA", "DESCRICAO"));
+    }
+
+    @Test
+    void ativar_quandoTodosOsCamposPreenchidos_transicionaParaAguardandoTratativa() {
+        Usuario criador = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.TECNICO).build();
+        Usuario responsavel = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.ENGENHEIRO).build();
+        Norma norma = new Norma();
+        norma.setId(UUID.randomUUID());
+
+        NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
+        nc.setUsuarioCriacao(criador);
+        nc.setSeveridade(3);
+        nc.setProbabilidade(2);
+        nc.setResponsavelTratativa(responsavel);
+        nc.setResponsavelNc(responsavel);
+        nc.setNormas(List.of(norma));
+
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+        when(securityHelper.getUsuarioLogado()).thenReturn(criador);
+        mockToResponseDeps(nc);
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+
+        NaoConformidadeResponse response = service.ativar(ncId);
+
+        assertThat(response).isNotNull();
+        assertThat(nc.getStatus()).isEqualTo(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
     }
 }

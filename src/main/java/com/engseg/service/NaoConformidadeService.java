@@ -12,6 +12,7 @@ import com.engseg.dto.response.*;
 import com.engseg.entity.*;
 import com.engseg.event.NcEmailEvent;
 import com.engseg.exception.BusinessException;
+import com.engseg.exception.CamposObrigatoriosException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.*;
 import com.engseg.util.MatrizRisco;
@@ -332,6 +333,17 @@ public class NaoConformidadeService {
                 usuarioLogado.getPerfil() != PerfilUsuario.EXTERNO;
         if (!isCriador && !usuarioLogado.isAdmin()) {
             throw new BusinessException("Apenas o criador da NC ou um administrador pode enviar para plano de ação");
+        }
+
+        List<String> camposFaltantes = new ArrayList<>();
+        if (nc.getSeveridade() == null || nc.getProbabilidade() == null) camposFaltantes.add("MATRIZ_RISCO");
+        if (nc.getResponsavelTratativa() == null) camposFaltantes.add("RESPONSAVEL_TRATATIVA");
+        if (nc.getResponsavelNc() == null) camposFaltantes.add("RESPONSAVEL_NC");
+        if (nc.getNormas() == null || nc.getNormas().isEmpty()) camposFaltantes.add("NORMA_VINCULADA");
+        if (nc.getDescricao() == null || nc.getDescricao().isBlank()) camposFaltantes.add("DESCRICAO");
+        if (!camposFaltantes.isEmpty()) {
+            throw new CamposObrigatoriosException(
+                    "Preencha os campos obrigatórios antes de enviar para o Plano de Ação.", camposFaltantes);
         }
 
         nc.setStatus(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
