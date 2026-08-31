@@ -134,12 +134,22 @@ class NaoConformidadeServiceTest {
         saved.setSeveridade(null);
         saved.setProbabilidade(null);
         saved.setNivelRisco(null);
+        saved.setDescricao(null);
         mockToResponseDeps(saved);
         when(naoConformidadeRepository.findById(any())).thenReturn(Optional.of(saved));
 
         NaoConformidadeResponse response = service.create(request);
 
         assertThat(response).isNotNull();
+
+        // Verify that null values flow through to the entity passed to save()
+        ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
+        verify(naoConformidadeRepository).save(captor.capture());
+        NaoConformidade capturedNc = captor.getValue();
+        assertThat(capturedNc.getNivelRisco()).isNull();
+        assertThat(capturedNc.getDescricao()).isNull();
+        assertThat(capturedNc.getSeveridade()).isNull();
+        assertThat(capturedNc.getProbabilidade()).isNull();
     }
 
     // ─── findAll (EXTERNO) ──────────────────────────────────────────────────────

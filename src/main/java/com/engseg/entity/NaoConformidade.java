@@ -26,7 +26,7 @@ public class NaoConformidade extends Ocorrencia {
     private Integer probabilidade;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "nivel_risco", nullable = false)
+    @Column(name = "nivel_risco")
     private NivelRisco nivelRisco;
 
     @ManyToOne(fetch = FetchType.LAZY)
