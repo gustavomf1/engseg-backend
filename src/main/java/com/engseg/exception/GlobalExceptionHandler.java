@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(CamposObrigatoriosException.class)
+    public ResponseEntity<CamposObrigatoriosErrorResponse> handleCamposObrigatorios(CamposObrigatoriosException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new CamposObrigatoriosErrorResponse(
+                        HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage(), ex.getCamposFaltantes(), LocalDateTime.now()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -88,4 +96,6 @@ public class GlobalExceptionHandler {
     }
 
     public record ErrorResponse(int status, String message, LocalDateTime timestamp) {}
+
+    public record CamposObrigatoriosErrorResponse(int status, String message, List<String> camposFaltantes, LocalDateTime timestamp) {}
 }
