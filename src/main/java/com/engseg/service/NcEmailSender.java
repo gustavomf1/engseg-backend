@@ -50,7 +50,7 @@ public class NcEmailSender {
                 </body></html>
                 """,
                 corHeader, labelStatus,
-                nc.getTitulo(), nc.getId(), nc.getDescricao(),
+                nc.getTitulo(), nc.getId(), nc.getDescricao() != null ? nc.getDescricao() : "",
                 nc.getEstabelecimento().getNome(), empresaContratada,
                 frontendUrl, nc.getId()
         );
@@ -95,7 +95,7 @@ public class NcEmailSender {
                 </body></html>
                 """,
                 labelAnterior, labelNovo,
-                nc.getTitulo(), nc.getId(), nc.getDescricao(),
+                nc.getTitulo(), nc.getId(), nc.getDescricao() != null ? nc.getDescricao() : "",
                 nc.getEstabelecimento().getNome(), blocoComentario,
                 frontendUrl, nc.getId()
         );
