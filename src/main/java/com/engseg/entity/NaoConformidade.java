@@ -19,11 +19,11 @@ import java.util.UUID;
 @ToString(callSuper = true)
 public class NaoConformidade extends Ocorrencia {
 
-@Column(name = "severidade", nullable = false)
-    private int severidade;
+@Column(name = "severidade")
+    private Integer severidade;
 
-    @Column(name = "probabilidade", nullable = false)
-    private int probabilidade;
+    @Column(name = "probabilidade")
+    private Integer probabilidade;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "nivel_risco", nullable = false)

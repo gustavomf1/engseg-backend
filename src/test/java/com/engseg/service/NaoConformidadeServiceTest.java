@@ -2,6 +2,7 @@ package com.engseg.service;
 
 import com.engseg.dto.request.AprovarRejeitarRequest;
 import com.engseg.dto.request.InvestigacaoRequest;
+import com.engseg.dto.request.NaoConformidadeRequest;
 import com.engseg.dto.request.RejeitarRequest;
 import com.engseg.dto.request.SubmeterEvidenciasRequest;
 import com.engseg.dto.response.NaoConformidadeResponse;
@@ -49,6 +50,7 @@ class NaoConformidadeServiceTest {
     @Mock ExecucaoSnapshotRepository execucaoSnapshotRepository;
     @Mock SecurityHelper securityHelper;
     @Mock ApplicationEventPublisher eventPublisher;
+    @Mock EmpresaRepository empresaRepository;
 
     @InjectMocks
     NaoConformidadeService service;
@@ -107,6 +109,37 @@ class NaoConformidadeServiceTest {
                 ),
                 null
         );
+    }
+
+    // ─── create ──────────────────────────────────────────────────────────────────
+
+    @Test
+    void create_semSeveridadeProbabilidadeDescricao_criaComSucessoSemNivelRisco() {
+        UUID estId = UUID.randomUUID();
+        UUID empresaId = UUID.randomUUID();
+        Estabelecimento est = new Estabelecimento();
+        est.setId(estId);
+        Empresa empresaContratada = new Empresa();
+        empresaContratada.setId(empresaId);
+
+        NaoConformidadeRequest request = new NaoConformidadeRequest(
+                estId, "NC sem matriz", null, null, null, null,
+                null, null, false, null, false, null, List.of(), List.of(), empresaId
+        );
+
+        when(estabelecimentoRepository.findById(estId)).thenReturn(Optional.of(est));
+        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresaContratada));
+
+        NaoConformidade saved = buildNc(StatusNaoConformidade.ABERTA);
+        saved.setSeveridade(null);
+        saved.setProbabilidade(null);
+        saved.setNivelRisco(null);
+        mockToResponseDeps(saved);
+        when(naoConformidadeRepository.findById(any())).thenReturn(Optional.of(saved));
+
+        NaoConformidadeResponse response = service.create(request);
+
+        assertThat(response).isNotNull();
     }
 
     // ─── findAll (EXTERNO) ──────────────────────────────────────────────────────

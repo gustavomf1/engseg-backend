@@ -164,7 +164,9 @@ public class NaoConformidadeService {
         nc.setRegraDeOuro(request.regraDeOuro());
         nc.setSeveridade(request.severidade());
         nc.setProbabilidade(request.probabilidade());
-        nc.setNivelRisco(MatrizRisco.calcular(request.severidade(), request.probabilidade()));
+        nc.setNivelRisco(request.severidade() != null && request.probabilidade() != null
+                ? MatrizRisco.calcular(request.severidade(), request.probabilidade())
+                : null);
         if (responsavelTratativa != null) nc.setResponsavelTratativa(responsavelTratativa);
         if (responsavelNc != null) nc.setResponsavelNc(responsavelNc);
         nc.setEmpresaContratada(empresaContratada);
@@ -248,7 +250,9 @@ public class NaoConformidadeService {
         nc.setRegraDeOuro(request.regraDeOuro());
         nc.setSeveridade(request.severidade());
         nc.setProbabilidade(request.probabilidade());
-        nc.setNivelRisco(MatrizRisco.calcular(request.severidade(), request.probabilidade()));
+        nc.setNivelRisco(request.severidade() != null && request.probabilidade() != null
+                ? MatrizRisco.calcular(request.severidade(), request.probabilidade())
+                : null);
         nc.setResponsavelTratativa(responsavelTratativa);
         nc.setResponsavelNc(responsavelNc);
         nc.setEmpresaContratada(empresaContratada);
