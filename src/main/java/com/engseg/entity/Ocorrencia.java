@@ -31,7 +31,7 @@ public abstract class Ocorrencia {
     @JoinColumn(name = "localizacao_id")
     private Localizacao localizacao;
 
-    @Column(nullable = false)
+    @Column
     private String descricao;
 
     @Column(name = "data_registro", nullable = false)

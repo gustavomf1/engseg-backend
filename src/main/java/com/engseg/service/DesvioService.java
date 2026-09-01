@@ -7,6 +7,7 @@ import com.engseg.dto.response.TrativaDesvioResponse;
 import com.engseg.entity.*;
 import com.engseg.event.DesvioEmailEvent;
 import com.engseg.exception.BusinessException;
+import com.engseg.exception.CamposObrigatoriosException;
 import com.engseg.exception.ResourceNotFoundException;
 import com.engseg.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -106,15 +107,20 @@ public class DesvioService {
                         .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + request.localizacaoId()))
                 : null;
 
-        var responsavelDesvio = usuarioRepository.findById(request.responsavelDesvioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Responsável pelo desvio não encontrado: " + request.responsavelDesvioId()));
-
-        if (responsavelDesvio.getPerfil() == PerfilUsuario.EXTERNO || responsavelDesvio.getPerfil() == PerfilUsuario.TECNICO) {
-            throw new BusinessException("Responsável pelo desvio deve ter perfil ENGENHEIRO ou ser administrador");
+        Usuario responsavelDesvio = null;
+        if (request.responsavelDesvioId() != null) {
+            responsavelDesvio = usuarioRepository.findById(request.responsavelDesvioId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Responsável pelo desvio não encontrado: " + request.responsavelDesvioId()));
+            if (responsavelDesvio.getPerfil() == PerfilUsuario.EXTERNO || responsavelDesvio.getPerfil() == PerfilUsuario.TECNICO) {
+                throw new BusinessException("Responsável pelo desvio deve ter perfil ENGENHEIRO ou ser administrador");
+            }
         }
 
-        var responsavelTratativa = usuarioRepository.findById(request.responsavelTratativaId())
-                .orElseThrow(() -> new ResourceNotFoundException("Responsável pela tratativa não encontrado: " + request.responsavelTratativaId()));
+        Usuario responsavelTratativa = null;
+        if (request.responsavelTratativaId() != null) {
+            responsavelTratativa = usuarioRepository.findById(request.responsavelTratativaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Responsável pela tratativa não encontrado: " + request.responsavelTratativaId()));
+        }
 
         var usuarioLogado = securityHelper.getUsuarioLogado();
 
@@ -183,15 +189,20 @@ public class DesvioService {
                         .orElseThrow(() -> new ResourceNotFoundException("Localização não encontrada: " + request.localizacaoId()))
                 : null;
 
-        var responsavelDesvio = usuarioRepository.findById(request.responsavelDesvioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Responsável pelo desvio não encontrado: " + request.responsavelDesvioId()));
-
-        if (responsavelDesvio.getPerfil() == PerfilUsuario.EXTERNO || responsavelDesvio.getPerfil() == PerfilUsuario.TECNICO) {
-            throw new BusinessException("Responsável pelo desvio deve ter perfil ENGENHEIRO ou ser administrador");
+        Usuario responsavelDesvio = null;
+        if (request.responsavelDesvioId() != null) {
+            responsavelDesvio = usuarioRepository.findById(request.responsavelDesvioId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Responsável pelo desvio não encontrado: " + request.responsavelDesvioId()));
+            if (responsavelDesvio.getPerfil() == PerfilUsuario.EXTERNO || responsavelDesvio.getPerfil() == PerfilUsuario.TECNICO) {
+                throw new BusinessException("Responsável pelo desvio deve ter perfil ENGENHEIRO ou ser administrador");
+            }
         }
 
-        var responsavelTratativa = usuarioRepository.findById(request.responsavelTratativaId())
-                .orElseThrow(() -> new ResourceNotFoundException("Responsável pela tratativa não encontrado: " + request.responsavelTratativaId()));
+        Usuario responsavelTratativa = null;
+        if (request.responsavelTratativaId() != null) {
+            responsavelTratativa = usuarioRepository.findById(request.responsavelTratativaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Responsável pela tratativa não encontrado: " + request.responsavelTratativaId()));
+        }
 
         desvio.setEstabelecimento(estabelecimento);
         desvio.setTitulo(request.titulo());
@@ -453,6 +464,16 @@ public class DesvioService {
                 usuarioLogado.getPerfil() != PerfilUsuario.EXTERNO;
         if (!isCriador && !usuarioLogado.isAdmin()) {
             throw new BusinessException("Apenas o criador do desvio ou um administrador pode enviar para tratativa");
+        }
+
+        List<String> camposFaltantes = new ArrayList<>();
+        if (desvio.getDescricao() == null || desvio.getDescricao().isBlank()) camposFaltantes.add("DESCRICAO");
+        if (desvio.getOrientacaoRealizada() == null || desvio.getOrientacaoRealizada().isBlank()) camposFaltantes.add("ORIENTACAO_REALIZADA");
+        if (desvio.getResponsavelDesvio() == null) camposFaltantes.add("RESPONSAVEL_DESVIO");
+        if (desvio.getResponsavelTratativa() == null) camposFaltantes.add("RESPONSAVEL_TRATATIVA");
+        if (!camposFaltantes.isEmpty()) {
+            throw new CamposObrigatoriosException(
+                    "Preencha os campos obrigatórios antes de enviar para tratativa.", camposFaltantes);
         }
 
         desvio.setStatus(StatusDesvio.AGUARDANDO_TRATATIVA);

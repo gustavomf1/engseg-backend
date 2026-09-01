@@ -8,13 +8,13 @@ import java.util.UUID;
 public record DesvioRequest(
         @NotNull UUID estabelecimentoId,
         @NotBlank String titulo,
-        UUID localizacaoId,
-        @NotBlank String descricao,
-        @NotBlank String orientacaoRealizada,
+        @NotNull UUID localizacaoId,
+        String descricao,
+        String orientacaoRealizada,
         boolean regraDeOuro,
-        @NotNull UUID responsavelDesvioId,
-        @NotNull UUID responsavelTratativaId,
+        UUID responsavelDesvioId,
+        UUID responsavelTratativaId,
         List<String> emailsManuais,
         List<String> emailsPadraoExcluidos,
-        UUID empresaContratadaId
+        @NotNull UUID empresaContratadaId
 ) {}

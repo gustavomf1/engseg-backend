@@ -17,7 +17,7 @@ import java.util.List;
 @ToString(callSuper = true)
 public class Desvio extends Ocorrencia {
 
-    @Column(name = "orientacao_realizada", nullable = false)
+    @Column(name = "orientacao_realizada")
     private String orientacaoRealizada;
 
     @ManyToOne(fetch = FetchType.LAZY)

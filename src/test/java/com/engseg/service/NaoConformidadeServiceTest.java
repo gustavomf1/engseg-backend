@@ -2,11 +2,13 @@ package com.engseg.service;
 
 import com.engseg.dto.request.AprovarRejeitarRequest;
 import com.engseg.dto.request.InvestigacaoRequest;
+import com.engseg.dto.request.NaoConformidadeRequest;
 import com.engseg.dto.request.RejeitarRequest;
 import com.engseg.dto.request.SubmeterEvidenciasRequest;
 import com.engseg.dto.response.NaoConformidadeResponse;
 import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
+import com.engseg.exception.CamposObrigatoriosException;
 import com.engseg.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +51,7 @@ class NaoConformidadeServiceTest {
     @Mock ExecucaoSnapshotRepository execucaoSnapshotRepository;
     @Mock SecurityHelper securityHelper;
     @Mock ApplicationEventPublisher eventPublisher;
+    @Mock EmpresaRepository empresaRepository;
 
     @InjectMocks
     NaoConformidadeService service;
@@ -107,6 +110,47 @@ class NaoConformidadeServiceTest {
                 ),
                 null
         );
+    }
+
+    // ─── create ──────────────────────────────────────────────────────────────────
+
+    @Test
+    void create_semSeveridadeProbabilidadeDescricao_criaComSucessoSemNivelRisco() {
+        UUID estId = UUID.randomUUID();
+        UUID empresaId = UUID.randomUUID();
+        Estabelecimento est = new Estabelecimento();
+        est.setId(estId);
+        Empresa empresaContratada = new Empresa();
+        empresaContratada.setId(empresaId);
+
+        NaoConformidadeRequest request = new NaoConformidadeRequest(
+                estId, "NC sem matriz", null, null, null, null,
+                null, null, false, null, false, null, List.of(), List.of(), empresaId
+        );
+
+        when(estabelecimentoRepository.findById(estId)).thenReturn(Optional.of(est));
+        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresaContratada));
+
+        NaoConformidade saved = buildNc(StatusNaoConformidade.ABERTA);
+        saved.setSeveridade(null);
+        saved.setProbabilidade(null);
+        saved.setNivelRisco(null);
+        saved.setDescricao(null);
+        mockToResponseDeps(saved);
+        when(naoConformidadeRepository.findById(any())).thenReturn(Optional.of(saved));
+
+        NaoConformidadeResponse response = service.create(request);
+
+        assertThat(response).isNotNull();
+
+        // Verify that null values flow through to the entity passed to save()
+        ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
+        verify(naoConformidadeRepository).save(captor.capture());
+        NaoConformidade capturedNc = captor.getValue();
+        assertThat(capturedNc.getNivelRisco()).isNull();
+        assertThat(capturedNc.getDescricao()).isNull();
+        assertThat(capturedNc.getSeveridade()).isNull();
+        assertThat(capturedNc.getProbabilidade()).isNull();
     }
 
     // ─── findAll (EXTERNO) ──────────────────────────────────────────────────────
@@ -420,5 +464,47 @@ class NaoConformidadeServiceTest {
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
         assertThat(captor.getValue().getStatus()).isEqualTo(StatusNaoConformidade.CONCLUIDO);
+    }
+
+    @Test
+    void ativar_quandoFaltamTodosOsCampos_lancaCamposObrigatoriosExceptionComTodosOsCodigos() {
+        Usuario criador = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.TECNICO).build();
+        NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
+        nc.setDescricao(null);
+        nc.setUsuarioCriacao(criador);
+
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+        when(securityHelper.getUsuarioLogado()).thenReturn(criador);
+
+        assertThatThrownBy(() -> service.ativar(ncId))
+                .isInstanceOf(CamposObrigatoriosException.class)
+                .satisfies(ex -> assertThat(((CamposObrigatoriosException) ex).getCamposFaltantes())
+                        .containsExactlyInAnyOrder("MATRIZ_RISCO", "RESPONSAVEL_TRATATIVA", "RESPONSAVEL_NC", "NORMA_VINCULADA", "DESCRICAO"));
+    }
+
+    @Test
+    void ativar_quandoTodosOsCamposPreenchidos_transicionaParaAguardandoTratativa() {
+        Usuario criador = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.TECNICO).build();
+        Usuario responsavel = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.ENGENHEIRO).build();
+        Norma norma = new Norma();
+        norma.setId(UUID.randomUUID());
+
+        NaoConformidade nc = buildNc(StatusNaoConformidade.ABERTA);
+        nc.setUsuarioCriacao(criador);
+        nc.setSeveridade(3);
+        nc.setProbabilidade(2);
+        nc.setResponsavelTratativa(responsavel);
+        nc.setResponsavelNc(responsavel);
+        nc.setNormas(List.of(norma));
+
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+        when(securityHelper.getUsuarioLogado()).thenReturn(criador);
+        mockToResponseDeps(nc);
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
+
+        NaoConformidadeResponse response = service.ativar(ncId);
+
+        assertThat(response).isNotNull();
+        assertThat(nc.getStatus()).isEqualTo(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
     }
 }

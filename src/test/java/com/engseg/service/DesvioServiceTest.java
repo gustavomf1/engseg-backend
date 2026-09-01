@@ -1,10 +1,12 @@
 package com.engseg.service;
 
 import com.engseg.dto.request.AprovarDesvioRequest;
+import com.engseg.dto.request.DesvioRequest;
 import com.engseg.dto.request.ReprovarTrativasDesvioRequest;
 import com.engseg.dto.response.DesvioResponse;
 import com.engseg.entity.*;
 import com.engseg.exception.BusinessException;
+import com.engseg.exception.CamposObrigatoriosException;
 import com.engseg.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import org.mockito.ArgumentCaptor;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -212,5 +215,91 @@ class DesvioServiceTest {
         assertThatThrownBy(() -> service.reprovar(desvioId, new ReprovarTrativasDesvioRequest(List.of(), List.of())))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Apenas o responsável pelo desvio pode reprovar");
+    }
+
+    // ─── create (partial data) ──────────────────────────────────────────────────
+
+    @Test
+    void create_semDescricaoOrientacaoResponsaveis_criaComSucesso() {
+        UUID estId = UUID.randomUUID();
+        UUID empresaId = UUID.randomUUID();
+        Estabelecimento est = new Estabelecimento();
+        est.setId(estId);
+        Empresa empresaContratada = new Empresa();
+        empresaContratada.setId(empresaId);
+
+        DesvioRequest request = new DesvioRequest(
+                estId, "Desvio sem detalhes", null, null, null, false,
+                null, null, List.of(), List.of(), empresaId
+        );
+
+        when(estabelecimentoRepository.findById(estId)).thenReturn(Optional.of(est));
+        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresaContratada));
+
+        Desvio saved = buildDesvio(StatusDesvio.ABERTO);
+        saved.setDescricao(null);
+        saved.setOrientacaoRealizada(null);
+        saved.setResponsavelDesvio(null);
+        saved.setResponsavelTratativa(null);
+        mockToResponseDeps(saved);
+        when(desvioRepository.save(any())).thenReturn(saved);
+        when(desvioRepository.findById(any())).thenReturn(Optional.of(saved));
+
+        Usuario usuarioLogado = Usuario.builder().id(UUID.randomUUID()).email("test@engseg.com").build();
+        when(securityHelper.getUsuarioLogado()).thenReturn(usuarioLogado);
+
+        DesvioResponse response = service.create(request);
+
+        assertThat(response).isNotNull();
+
+        // Verify ArgumentCaptor: the entity passed to save should have null values
+        ArgumentCaptor<Desvio> captor = ArgumentCaptor.forClass(Desvio.class);
+        verify(desvioRepository).save(captor.capture());
+        Desvio captured = captor.getValue();
+
+        assertThat(captured.getDescricao()).isNull();
+        assertThat(captured.getOrientacaoRealizada()).isNull();
+        assertThat(captured.getResponsavelDesvio()).isNull();
+        assertThat(captured.getResponsavelTratativa()).isNull();
+    }
+
+    // ─── abrirTratativa ────────────────────────────────────────────────────────
+
+    @Test
+    void abrirTratativa_quandoFaltamTodosOsCampos_lancaCamposObrigatoriosExceptionComTodosOsCodigos() {
+        Usuario criador = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.TECNICO).build();
+        Desvio desvio = buildDesvio(StatusDesvio.ABERTO);
+        desvio.setDescricao(null);
+        desvio.setOrientacaoRealizada(null);
+        desvio.setUsuarioCriacao(criador);
+
+        when(desvioRepository.findById(desvioId)).thenReturn(Optional.of(desvio));
+        when(securityHelper.getUsuarioLogado()).thenReturn(criador);
+
+        assertThatThrownBy(() -> service.abrirTratativa(desvioId))
+                .isInstanceOf(CamposObrigatoriosException.class)
+                .satisfies(ex -> assertThat(((CamposObrigatoriosException) ex).getCamposFaltantes())
+                        .containsExactlyInAnyOrder("DESCRICAO", "ORIENTACAO_REALIZADA", "RESPONSAVEL_DESVIO", "RESPONSAVEL_TRATATIVA"));
+    }
+
+    @Test
+    void abrirTratativa_quandoTodosOsCamposPreenchidos_transicionaParaAguardandoTratativa() {
+        Usuario criador = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.TECNICO).build();
+        Usuario responsavel = Usuario.builder().id(UUID.randomUUID()).perfil(PerfilUsuario.ENGENHEIRO).build();
+
+        Desvio desvio = buildDesvio(StatusDesvio.ABERTO);
+        desvio.setUsuarioCriacao(criador);
+        desvio.setResponsavelDesvio(responsavel);
+        desvio.setResponsavelTratativa(responsavel);
+
+        when(desvioRepository.findById(desvioId)).thenReturn(Optional.of(desvio));
+        when(securityHelper.getUsuarioLogado()).thenReturn(criador);
+        when(desvioRepository.save(any())).thenReturn(desvio);
+        mockToResponseDeps(desvio);
+
+        DesvioResponse response = service.abrirTratativa(desvioId);
+
+        assertThat(response).isNotNull();
+        assertThat(desvio.getStatus()).isEqualTo(StatusDesvio.AGUARDANDO_TRATATIVA);
     }
 }

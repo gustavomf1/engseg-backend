@@ -3,6 +3,7 @@ package com.engseg.controller;
 import com.engseg.config.SecurityConfig;
 import com.engseg.dto.request.RejeitarRequest;
 import com.engseg.dto.response.NaoConformidadeResponse;
+import com.engseg.exception.CamposObrigatoriosException;
 import com.engseg.security.JwtFilter;
 import com.engseg.security.JwtService;
 import com.engseg.security.UserDetailsServiceImpl;
@@ -25,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -150,8 +152,8 @@ class NaoConformidadeControllerTest {
     void criarNc_externoAutenticado_retorna403() throws Exception {
         // Corpo válido para passar @Valid — a autorização é verificada depois
         String body = String.format(
-                "{\"estabelecimentoId\":\"%s\",\"titulo\":\"Teste\",\"descricao\":\"Desc\",\"severidade\":2,\"probabilidade\":2,\"regraDeOuro\":false,\"reincidencia\":false,\"empresaContratadaId\":\"%s\"}",
-                UUID.randomUUID(), UUID.randomUUID()
+                "{\"estabelecimentoId\":\"%s\",\"titulo\":\"Teste\",\"localizacaoId\":\"%s\",\"descricao\":\"Desc\",\"severidade\":2,\"probabilidade\":2,\"regraDeOuro\":false,\"reincidencia\":false,\"empresaContratadaId\":\"%s\"}",
+                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()
         );
         mockMvc.perform(post("/api/nao-conformidades")
                         .with(csrf())
@@ -257,6 +259,22 @@ class NaoConformidadeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
+    }
+
+    // ─── Campos obrigatórios (422) ──────────────────────────────────────────────
+
+    @Test
+    @WithMockUser(roles = "ENGENHEIRO")
+    void ativar_quandoFaltamCampos_retorna422ComCamposFaltantes() throws Exception {
+        when(naoConformidadeService.ativar(any()))
+                .thenThrow(new CamposObrigatoriosException(
+                        "Preencha os campos obrigatórios antes de enviar para o Plano de Ação.",
+                        List.of("DESCRICAO", "NORMA_VINCULADA")));
+
+        mockMvc.perform(post("/api/nao-conformidades/{id}/ativar", ncId).with(csrf()))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.camposFaltantes[0]").value("DESCRICAO"))
+                .andExpect(jsonPath("$.camposFaltantes[1]").value("NORMA_VINCULADA"));
     }
 
     // ─── helper ───────────────────────────────────────────────────────────────

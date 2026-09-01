@@ -88,6 +88,17 @@ class RelatorioServiceTest {
     }
 
     @Test
+    void gerarRelatorioNcs_comNcSemNivelRisco_naoLancaExcecaoERetornaUmaLinhaDeDados() throws IOException {
+        NaoConformidade nc = buildNc();
+        nc.setNivelRisco(null);
+        when(ncRepository.findParaRelatorio(any(), any(), any(), any(), any())).thenReturn(List.of(nc));
+        byte[] bytes = service.gerarRelatorioNcs(new RelatorioFiltroRequest());
+        try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(bytes))) {
+            assertThat(wb.getSheetAt(0).getLastRowNum()).isEqualTo(1);
+        }
+    }
+
+    @Test
     void gerarRelatorioDesvios_comUmDesvio_retornaUmaLinhaDeDados() throws IOException {
         when(desvioRepository.findParaRelatorio(any(), any(), any(), any(), any())).thenReturn(List.of(buildDesvio()));
         byte[] bytes = service.gerarRelatorioDesvios(new RelatorioFiltroRequest());
