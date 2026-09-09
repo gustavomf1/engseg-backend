@@ -33,8 +33,7 @@ public class NcPushMessageBuilder {
             addIfPresent(destinatarios, responsavelTratativaId);
         } else if ((statusAnterior == AGUARDANDO_TRATATIVA || statusAnterior == EM_AJUSTE_PELO_EXTERNO)
                 && statusNovo == AGUARDANDO_APROVACAO_PLANO) {
-            // Cobre a submissão inicial (AGUARDANDO_TRATATIVA) e o reenvio do plano corrigido
-            // após reprovação (EM_AJUSTE_PELO_EXTERNO) — mesma ação de negócio, mesmo tipo.
+
             tipo = "NC_PLANO_SUBMETIDO";
             addIfPresent(destinatarios, responsavelNcId);
             addIfPresent(destinatarios, criadorId);
@@ -96,8 +95,7 @@ public class NcPushMessageBuilder {
         String rotulo = faseExecucao ? "Validação final" : "Plano";
 
         if (!temMotivoNaFase) {
-            // Veio de um método legado (rejeitarPlano/rejeitarEvidencias) que não preenche
-            // motivo por atividade — usa só o comentário geral da rejeição, sem enumerar.
+
             return rotulo + " da NC \"" + titulo + "\" reprovado" +
                     (comentario != null && !comentario.isBlank() ? ": " + comentario : ".");
         }

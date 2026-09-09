@@ -29,10 +29,8 @@ public class RefreshTokenService {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    /** Resultado da rotação: o usuário dono e o novo refresh token em claro. */
     public record Rotacao(Usuario usuario, String refreshTokenPlano) {}
 
-    /** Cria um novo refresh token para o usuário e devolve o valor em claro (não persistido). */
     @Transactional
     public String emitir(Usuario usuario) {
         String plano = gerarTokenAleatorio();
@@ -47,7 +45,6 @@ public class RefreshTokenService {
         return plano;
     }
 
-    /** Valida o refresh token, revoga-o (rotação) e emite um novo. Lança 401 se inválido. */
     @Transactional
     public Rotacao rotacionar(String refreshTokenPlano) {
         RefreshToken atual = repository.findByTokenHash(hash(refreshTokenPlano))
@@ -65,7 +62,6 @@ public class RefreshTokenService {
         return new Rotacao(usuario, novo);
     }
 
-    /** Revoga o refresh token informado (logout). Silencioso se não existir. */
     @Transactional
     public void revogar(String refreshTokenPlano) {
         if (refreshTokenPlano == null || refreshTokenPlano.isBlank()) return;

@@ -25,7 +25,6 @@ public class DesvioEmailSender {
         String labelStatus = statusNovo == StatusDesvio.CONCLUIDO ? "CONCLUÍDO" : "ABERTO";
         String empresaNome = resolverNomeEmpresa(desvio);
 
-        // Escape HTML entities to prevent XSS
         String titulo = HtmlUtils.htmlEscape(desvio.getTitulo());
         String descricao = HtmlUtils.htmlEscape(desvio.getDescricao() != null ? desvio.getDescricao() : "");
         String estNome = HtmlUtils.htmlEscape(desvio.getEstabelecimento().getNome());
@@ -72,7 +71,6 @@ public class DesvioEmailSender {
                 ? "<p style=\"margin:0 0 8px\"><strong>Comentário:</strong> " + HtmlUtils.htmlEscape(comentario) + "</p>"
                 : "";
 
-        // Escape HTML entities to prevent XSS
         String titulo = HtmlUtils.htmlEscape(desvio.getTitulo());
         String descricao = HtmlUtils.htmlEscape(desvio.getDescricao() != null ? desvio.getDescricao() : "");
         String estNome = HtmlUtils.htmlEscape(desvio.getEstabelecimento().getNome());

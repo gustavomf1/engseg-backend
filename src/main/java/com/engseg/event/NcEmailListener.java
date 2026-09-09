@@ -52,7 +52,7 @@ public class NcEmailListener {
             dinamicos.add(nc.getUsuarioCriacao().getEmail());
         if (nc.getResponsavelNc() != null && nc.getResponsavelNc().getEmail() != null)
             dinamicos.add(nc.getResponsavelNc().getEmail());
-        // responsável pela tratativa só recebe a partir de AGUARDANDO_APROVACAO_PLANO, não na abertura
+
         if (!isCriacao && nc.getResponsavelTratativa() != null && nc.getResponsavelTratativa().getEmail() != null)
             dinamicos.add(nc.getResponsavelTratativa().getEmail());
         if (nc.getEmailsManuais() != null)
@@ -67,7 +67,7 @@ public class NcEmailListener {
             if (nc.getResponsavelNc() != null) {
                 UUID empresaId = nc.getResponsavelNc().getEmpresa().getId();
                 Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
-                // na criação, responsavelTratativa não está em dinamicos mas também não deve receber via padrão
+
                 if (isCriacao && nc.getResponsavelTratativa() != null && nc.getResponsavelTratativa().getEmail() != null)
                     excluidos.add(nc.getResponsavelTratativa().getEmail());
                 emailPadraoRepository

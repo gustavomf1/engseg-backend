@@ -94,8 +94,6 @@ public class NormaService {
 
         String trecho = claudeService.buscarTrecho(norma.getConteudo(), request.prompt());
 
-        // Remove caracteres de controle (< 0x20) que quebram a serialização JSON,
-        // preservando apenas \t (0x09), \n (0x0A) e \r (0x0D)
         String trechoSanitizado = trecho.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]", "");
 
         log.info("[NormaService] buscarTrecho → normaId={} trechoLen={} sanitizadoLen={} preview={}",

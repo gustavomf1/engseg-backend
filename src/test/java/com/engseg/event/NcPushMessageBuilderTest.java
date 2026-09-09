@@ -101,7 +101,7 @@ class NcPushMessageBuilderTest {
 
     @Test
     void reprovacaoPlano_semMotivoPorAtividade_metodoLegado_usaComentarioGeral() {
-        // rejeitarPlano (legado) marca status=REJEITADA mas nunca preenche motivoRejeicao por atividade.
+
         nc.setAtividades(List.of(atividade("Isolar a área", "REJEITADA", null)));
 
         NcKafkaEvent evento = builder.resolver(nc,
@@ -153,8 +153,7 @@ class NcPushMessageBuilderTest {
 
     @Test
     void leDoParCorreto_quandoAtividadeTemAmbasAsFasesPreenchidas() {
-        // Atividade já passou pela fase de plano (aprovada, sem motivo) e está reprovada na execução:
-        // o builder deve ler status/motivoRejeicao OU statusExecucao/motivoRejeicaoExecucao conforme a fase do evento, nunca o par errado.
+
         AtividadePlanoAcao atividade = atividade("Isolar a área", "APROVADA", null);
         atividade.setStatusExecucao("REJEITADA");
         atividade.setMotivoRejeicaoExecucao("evidência fora do padrão");

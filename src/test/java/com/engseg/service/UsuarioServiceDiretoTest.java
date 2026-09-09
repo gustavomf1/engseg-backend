@@ -62,7 +62,6 @@ class UsuarioServiceDiretoTest {
                 PerfilUsuario.ENGENHEIRO, empresaId, true
         );
 
-        // does not throw — creates admin user
         usuarioService.criarDireto(request);
     }
 }

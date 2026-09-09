@@ -36,10 +36,6 @@ public class SecurityHelper {
         return getUsuarioLogado().isAdmin();
     }
 
-    /**
-     * Retorna os estabelecimentos da empresa EXTERNO (via junction table).
-     * Apenas deve ser chamado quando isExterno() == true.
-     */
     public List<UUID> getEstabelecimentosDoExterno() {
         UUID empresaId = getUsuarioLogado().getEmpresa().getId();
         return estabelecimentoEmpresaRepository

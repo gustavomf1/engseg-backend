@@ -60,8 +60,6 @@ class DesvioServiceTest {
         when(usuarioRepository.findByEmail("test@engseg.com")).thenReturn(Optional.empty());
     }
 
-    // ─── helpers ──────────────────────────────────────────────────────────────
-
     private Desvio buildDesvio(StatusDesvio status) {
         Estabelecimento est = new Estabelecimento();
         est.setId(UUID.randomUUID());
@@ -84,8 +82,6 @@ class DesvioServiceTest {
     private void mockToResponseDeps(Desvio desvio) {
         when(trativaDesvioRepository.findByDesvioIdOrderByNumeroAsc(any())).thenReturn(List.of());
     }
-
-    // ─── findAll (EXTERNO) ──────────────────────────────────────────────────────
 
     @Test
     void findAll_quandoExterno_retornaApenasDesviosOndeEhResponsavelTratativa() {
@@ -131,8 +127,6 @@ class DesvioServiceTest {
         verify(desvioRepository, never()).findByEstabelecimentoIdIn(any());
     }
 
-    // ─── findById (EXTERNO) ─────────────────────────────────────────────────────
-
     @Test
     void findById_quandoExternoNaoEhResponsavelTratativa_lancaBusinessException() {
         Usuario externo = Usuario.builder().id(UUID.randomUUID()).build();
@@ -166,8 +160,6 @@ class DesvioServiceTest {
 
         assertThat(result.id()).isEqualTo(desvioId);
     }
-
-    // ─── aprovar/reprovar ───────────────────────────────────────────────────────
 
     @Test
     void aprovar_quandoUsuarioNaoEhResponsavelDesvio_lancaBusinessExceptionMesmoSendoAdmin() {
@@ -217,8 +209,6 @@ class DesvioServiceTest {
                 .hasMessageContaining("Apenas o responsável pelo desvio pode reprovar");
     }
 
-    // ─── create (partial data) ──────────────────────────────────────────────────
-
     @Test
     void create_semDescricaoOrientacaoResponsaveis_criaComSucesso() {
         UUID estId = UUID.randomUUID();
@@ -252,7 +242,6 @@ class DesvioServiceTest {
 
         assertThat(response).isNotNull();
 
-        // Verify ArgumentCaptor: the entity passed to save should have null values
         ArgumentCaptor<Desvio> captor = ArgumentCaptor.forClass(Desvio.class);
         verify(desvioRepository).save(captor.capture());
         Desvio captured = captor.getValue();
@@ -262,8 +251,6 @@ class DesvioServiceTest {
         assertThat(captured.getResponsavelDesvio()).isNull();
         assertThat(captured.getResponsavelTratativa()).isNull();
     }
-
-    // ─── abrirTratativa ────────────────────────────────────────────────────────
 
     @Test
     void abrirTratativa_quandoFaltamTodosOsCampos_lancaCamposObrigatoriosExceptionComTodosOsCodigos() {

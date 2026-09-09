@@ -145,7 +145,7 @@ public class EvidenciaService {
 
     public void desvincularAtividade(UUID evidenciaId) {
         Evidencia evidencia = buscarPorId(evidenciaId);
-        // Apenas remove o vínculo com a atividade — preserva o arquivo no bucket e nos snapshots históricos
+
         evidencia.setAtividadePlanoAcao(null);
         evidenciaRepository.save(evidencia);
     }
@@ -162,7 +162,6 @@ public class EvidenciaService {
             }
         }
 
-        // Remove referência da tabela junction execucao_snapshot_evidencia antes de deletar
         List<ExecucaoSnapshot> snapshots = execucaoSnapshotRepository.findByEvidenciasId(evidencia.getId());
         for (ExecucaoSnapshot snapshot : snapshots) {
             snapshot.getEvidencias().remove(evidencia);
