@@ -5,11 +5,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Lockout de login por conta (em memória). Após {@value #MAX_TENTATIVAS} falhas
- * consecutivas, bloqueia novas tentativas daquele e-mail por {@value #BLOCK_MINUTES} min.
- * Complementa o rate limit por IP ({@link RateLimitFilter}) cobrindo rotação de IP.
- */
 @Service
 public class LoginAttemptService {
 

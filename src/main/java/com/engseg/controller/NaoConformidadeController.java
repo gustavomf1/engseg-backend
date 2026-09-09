@@ -80,10 +80,6 @@ public class NaoConformidadeController {
         return ResponseEntity.ok(naoConformidadeService.ativar(id));
     }
 
-    // -------------------------------------------------------------------------
-    // Novo fluxo: Investigação → Plano → Execução → Validação Final
-    // -------------------------------------------------------------------------
-
     @PostMapping("/{id}/investigacao")
     @PreAuthorize("hasAnyRole('EXTERNO', 'TECNICO', 'ENGENHEIRO')")
     public ResponseEntity<NaoConformidadeResponse> submeterInvestigacao(

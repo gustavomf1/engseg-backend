@@ -29,10 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Testes de segurança dos endpoints de Não Conformidade.
- * Verificam se os @PreAuthorize bloqueiam os perfis não autorizados.
- */
 @WebMvcTest(NaoConformidadeController.class)
 @Import(SecurityConfig.class)
 @ActiveProfiles("test")
@@ -47,11 +43,9 @@ class NaoConformidadeControllerTest {
 
     private final UUID ncId = UUID.randomUUID();
 
-    // ─── Sem autenticação ──────────────────────────────────────────────────────
-
     @Test
     void getAll_semAutenticacao_retorna4xx() throws Exception {
-        // API stateless JWT retorna 403 para requests sem autenticação (sem AuthenticationEntryPoint customizado)
+
         mockMvc.perform(get("/api/nao-conformidades"))
                 .andExpect(status().is4xxClientError());
     }
@@ -63,8 +57,6 @@ class NaoConformidadeControllerTest {
                         .content("{}"))
                 .andExpect(status().is4xxClientError());
     }
-
-    // ─── EXTERNO: acesso permitido ─────────────────────────────────────────────
 
     @Test
     @WithMockUser(roles = "EXTERNO")
@@ -100,8 +92,6 @@ class NaoConformidadeControllerTest {
                         .content(body))
                 .andExpect(status().isOk());
     }
-
-    // ─── EXTERNO: acesso bloqueado (apenas ENGENHEIRO) ─────────────────────────
 
     @Test
     @WithMockUser(roles = "EXTERNO")
@@ -150,7 +140,7 @@ class NaoConformidadeControllerTest {
     @Test
     @WithMockUser(roles = "EXTERNO")
     void criarNc_externoAutenticado_retorna403() throws Exception {
-        // Corpo válido para passar @Valid — a autorização é verificada depois
+
         String body = String.format(
                 "{\"estabelecimentoId\":\"%s\",\"titulo\":\"Teste\",\"localizacaoId\":\"%s\",\"descricao\":\"Desc\",\"severidade\":2,\"probabilidade\":2,\"regraDeOuro\":false,\"reincidencia\":false,\"empresaContratadaId\":\"%s\"}",
                 UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()
@@ -161,8 +151,6 @@ class NaoConformidadeControllerTest {
                         .content(body))
                 .andExpect(status().isForbidden());
     }
-
-    // ─── TECNICO: acesso permitido ─────────────────────────────────────────────
 
     @Test
     @WithMockUser(roles = "TECNICO")
@@ -182,8 +170,6 @@ class NaoConformidadeControllerTest {
                         .content("{}"))
                 .andExpect(status().isForbidden());
     }
-
-    // ─── ENGENHEIRO: acesso completo ───────────────────────────────────────────
 
     @Test
     @WithMockUser(roles = "ENGENHEIRO")
@@ -235,8 +221,6 @@ class NaoConformidadeControllerTest {
                 .andExpect(status().isOk());
     }
 
-    // ─── Validação HTTP (@Valid) ───────────────────────────────────────────────
-
     @Test
     @WithMockUser(roles = "ENGENHEIRO")
     void rejeitarPlano_motivoVazio_retorna400() throws Exception {
@@ -261,8 +245,6 @@ class NaoConformidadeControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ─── Campos obrigatórios (422) ──────────────────────────────────────────────
-
     @Test
     @WithMockUser(roles = "ENGENHEIRO")
     void ativar_quandoFaltamCampos_retorna422ComCamposFaltantes() throws Exception {
@@ -277,45 +259,43 @@ class NaoConformidadeControllerTest {
                 .andExpect(jsonPath("$.camposFaltantes[1]").value("NORMA_VINCULADA"));
     }
 
-    // ─── helper ───────────────────────────────────────────────────────────────
-
     private NaoConformidadeResponse mockNcResponse() {
         return new NaoConformidadeResponse(
-                ncId,                                                    // id
-                "NC-0001",                                               // codigo
-                UUID.randomUUID(),                                       // estabelecimentoId
-                "Estabelecimento",                                       // estabelecimentoNome
-                "NC Teste",                                              // titulo
-                null, null,                                              // localizacaoId, localizacaoNome
-                "Descrição",                                             // descricao
-                null,                                                    // dataRegistro
-                null,                                                    // tecnicoNome
-                false,                                                   // regraDeOuro
-                2,                                                       // severidade
-                2,                                                       // probabilidade
-                com.engseg.entity.NivelRisco.BAIXO,                     // nivelRisco
-                null, null, null, null,                                  // responsavelTratativa id/nome/email/perfil
-                null, null, null, null,                                  // responsavelNc id/nome/email/perfil
-                java.time.LocalDate.now().plusDays(30),                  // dataLimiteResolucao
-                null, null,                                              // usuarioCriacao nome/email
-                com.engseg.entity.StatusNaoConformidade.ABERTA,         // status
-                false, false,                                            // vencida, reincidencia
-                null, null,                                              // ncAnteriorId, ncAnteriorTitulo
-                List.of(), List.of(),                                    // cadeiaReincidencias, reincidencias
-                null, null, null, null, null, null,                      // porques 1-3 + respostas
-                null, null, null, null,                                  // porques 4-5 + respostas
-                null,                                                    // causaRaiz
-                null,                                                    // descricaoExecucao
-                List.of(),                                               // atividades
-                List.of(),                                               // historico
-                List.of(),                                               // investigacaoSnapshots
-                List.of(),                                               // execucaoSnapshots
-                List.of(),                                               // devolutivas
-                List.of(),                                               // execucoes
-                List.of(),                                               // validacoes
-                List.of(),                                               // normas
-                null,                                                    // usuarioCriacaoId
-                null, null                                               // empresaContratadaId, empresaContratadaNome
+                ncId,
+                "NC-0001",
+                UUID.randomUUID(),
+                "Estabelecimento",
+                "NC Teste",
+                null, null,
+                "Descrição",
+                null,
+                null,
+                false,
+                2,
+                2,
+                com.engseg.entity.NivelRisco.BAIXO,
+                null, null, null, null,
+                null, null, null, null,
+                java.time.LocalDate.now().plusDays(30),
+                null, null,
+                com.engseg.entity.StatusNaoConformidade.ABERTA,
+                false, false,
+                null, null,
+                List.of(), List.of(),
+                null, null, null, null, null, null,
+                null, null, null, null,
+                null,
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                null,
+                null, null
         );
     }
 }

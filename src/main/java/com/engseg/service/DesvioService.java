@@ -397,7 +397,6 @@ public class DesvioService {
             motivosSummary.add("Tratativa " + tratativa.getNumero() + ": " + item.motivo());
         }
 
-        // Não-reprovadas desta rodada são implicitamente aceitas
         trativaDesvioRepository.findByDesvioIdAndStatus(id, StatusTratativaDesvio.PENDENTE).stream()
                 .filter(t -> !reprovadaIds.contains(t.getId()))
                 .forEach(t -> { t.setStatus(StatusTratativaDesvio.APROVADO); trativaDesvioRepository.save(t); });

@@ -43,7 +43,7 @@ class EmpresaControllerSecurityTest {
     @Test
     @WithMockUser(roles = "ENGENHEIRO")
     void createEmpresa_engenheiroRole_returns403() throws Exception {
-        // body válido para passar @Valid — a barreira de autorização (@PreAuthorize) é verificada depois
+
         mockMvc.perform(post("/api/empresas")
                 .contentType("application/json")
                 .content("{\"razaoSocial\":\"Empresa Teste\",\"cnpj\":\"00.000.000/0001-00\"}"))
@@ -53,7 +53,7 @@ class EmpresaControllerSecurityTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void createEmpresa_adminRole_doesNotReturn403() throws Exception {
-        // body válido; ADMIN passa @PreAuthorize → serviço retorna null (mock) → 500, mas não 403
+
         mockMvc.perform(post("/api/empresas")
                 .contentType("application/json")
                 .content("{\"razaoSocial\":\"Empresa Teste\",\"cnpj\":\"00.000.000/0001-00\"}"))

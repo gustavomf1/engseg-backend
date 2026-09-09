@@ -21,7 +21,6 @@ public class RefreshToken {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    // Guarda apenas o hash SHA-256 do token (o valor em claro só vai para o cliente).
     @Column(name = "token_hash", nullable = false, unique = true, length = 64)
     private String tokenHash;
 

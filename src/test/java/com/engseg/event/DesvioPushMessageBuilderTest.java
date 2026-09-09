@@ -82,7 +82,7 @@ class DesvioPushMessageBuilderTest {
 
     @Test
     void transicao_nao_mapeada_retorna_null() {
-        // ABERTO -> CONCLUIDO não existe no fluxo normal mas resolver deve retornar null
+
         assertThat(builder.resolver(desvio, ABERTO, CONCLUIDO)).isNull();
     }
 

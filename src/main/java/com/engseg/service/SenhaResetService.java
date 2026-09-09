@@ -52,7 +52,7 @@ public class SenhaResetService {
                         usuario.getId(), otp, LocalDateTime.now());
 
         if (tokenOpt.isEmpty()) {
-            // OTP errado/expirado: conta a tentativa no código ativo e invalida após o limite
+
             tokenRepository
                     .findFirstByUsuarioIdAndUsadoFalseAndOtpExpiresAtAfter(usuario.getId(), LocalDateTime.now())
                     .ifPresent(ativo -> {

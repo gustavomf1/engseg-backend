@@ -28,7 +28,7 @@ public class NormaController {
     public ResponseEntity<List<NormaResponse>> getAll(
             @RequestParam(required = false) Boolean ativo,
             @RequestParam(required = false) UUID empresaId) {
-        // empresaId is accepted for API contract consistency but normas are global entities
+
         return ResponseEntity.ok(normaService.findAll(ativo));
     }
 

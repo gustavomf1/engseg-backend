@@ -1,7 +1,7 @@
 package com.engseg.entity;
 
 public enum StatusNaoConformidade {
-    // Fluxo atual
+
     ABERTA,
     AGUARDANDO_TRATATIVA,
     AGUARDANDO_APROVACAO_PLANO,
@@ -9,7 +9,7 @@ public enum StatusNaoConformidade {
     EM_EXECUCAO,
     AGUARDANDO_VALIDACAO_FINAL,
     CONCLUIDO,
-    // Legado (mantidos para compatibilidade com dados existentes)
+
     EM_TRATAMENTO,
     NAO_RESOLVIDA
 }

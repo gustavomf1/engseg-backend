@@ -74,7 +74,6 @@ public class NaoConformidade extends Ocorrencia {
     @JoinColumn(name = "nc_anterior_id")
     private NaoConformidade ncAnterior;
 
-    // Campos de investigação — 5 Porquês e Causa Raiz (preenchidos pelo Externo)
     @Column(name = "porque_um", columnDefinition = "TEXT")
     private String porqueUm;
 
@@ -108,7 +107,6 @@ public class NaoConformidade extends Ocorrencia {
     @Column(name = "causa_raiz", columnDefinition = "TEXT")
     private String causaRaiz;
 
-    // Descrição do que foi executado antes de enviar evidências para validação
     @Column(name = "descricao_execucao", columnDefinition = "TEXT")
     private String descricaoExecucao;
 

@@ -65,8 +65,6 @@ class UsuarioServiceTest {
         return saved;
     }
 
-    // ─── create ───────────────────────────────────────────────────────────────
-
     @Test
     void create_engenheiroPodeCriarEngenheiro() {
         autenticarComo("TECNICO");
@@ -75,7 +73,6 @@ class UsuarioServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(usuarioRepository.save(any())).thenReturn(usuarioSalvoMock(PerfilUsuario.ENGENHEIRO, empresa));
 
-        // Não deve lançar BusinessException
         service.create(requestComPerfil(PerfilUsuario.ENGENHEIRO));
 
         verify(usuarioRepository).save(any());
@@ -89,7 +86,6 @@ class UsuarioServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("hash");
         when(usuarioRepository.save(any())).thenReturn(usuarioSalvoMock(PerfilUsuario.TECNICO, empresa));
 
-        // Criar TECNICO é permitido para ENGENHEIRO
         service.create(requestComPerfil(PerfilUsuario.TECNICO));
 
         verify(usuarioRepository).save(any());
@@ -98,7 +94,7 @@ class UsuarioServiceTest {
     @Test
     void create_semSenha_lancaIllegalArgumentException() {
         autenticarComo("ENGENHEIRO");
-        // Empresa lookup ocorre antes da verificação de senha
+
         when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresaMock()));
 
         UsuarioRequest req = new UsuarioRequest("Nome", "email@test.com", null, PerfilUsuario.TECNICO, empresaId, null);
@@ -110,12 +106,9 @@ class UsuarioServiceTest {
         verify(usuarioRepository, never()).save(any());
     }
 
-    // ─── update ───────────────────────────────────────────────────────────────
-
     @Test
     void update_engenheiroPodeAlterarQualquerPerfil() {
-        // Engenheiro editando OUTRO engenheiro que já é ENGENHEIRO → não deve lançar
-        // (regra: só bloqueia PROMOVER de outro perfil para ENGENHEIRO)
+
         autenticarComo("ENGENHEIRO");
 
         UUID userId = UUID.randomUUID();
@@ -123,7 +116,7 @@ class UsuarioServiceTest {
 
         Usuario existente = new Usuario();
         existente.setId(userId);
-        existente.setPerfil(PerfilUsuario.ENGENHEIRO); // já é ENGENHEIRO
+        existente.setPerfil(PerfilUsuario.ENGENHEIRO);
         existente.setEmpresa(empresa);
         existente.setNome("Eng Antigo");
         existente.setEmail("eng@test.com");
@@ -132,7 +125,6 @@ class UsuarioServiceTest {
         when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresa));
         when(usuarioRepository.save(any())).thenReturn(existente);
 
-        // Editar dados de quem já é ENGENHEIRO → permitido
         service.update(userId, requestComPerfil(PerfilUsuario.ENGENHEIRO));
 
         verify(usuarioRepository).save(any());

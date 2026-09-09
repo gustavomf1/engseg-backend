@@ -106,7 +106,6 @@ public class OcorrenciaController {
             resultado.add(item);
         }
 
-        // sort by dataRegistro descending
         resultado.sort((a, b) -> {
             String da = String.valueOf(a.get("dataRegistro"));
             String db = String.valueOf(b.get("dataRegistro"));

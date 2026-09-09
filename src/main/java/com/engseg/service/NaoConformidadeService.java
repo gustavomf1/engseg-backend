@@ -55,7 +55,7 @@ public class NaoConformidadeService {
     private final ApplicationEventPublisher eventPublisher;
 
     public List<NaoConformidadeResponse> findAll(StatusNaoConformidade status, UUID estabelecimentoId, UUID empresaId, UUID empresaContratadaId) {
-        // EXTERNO: restrito aos estabelecimentos vinculados à sua empresa
+
         if (securityHelper.isExterno()) {
             List<UUID> permitidos = securityHelper.getEstabelecimentosDoExterno();
             if (permitidos.isEmpty()) return List.of();
@@ -84,7 +84,6 @@ public class NaoConformidadeService {
                     .map(this::toResponse).toList();
         }
 
-        // ENGENHEIRO / TECNICO / ADMIN: filtra por empresa e/ou estabelecimento se informado
         List<NaoConformidade> list;
         if (estabelecimentoId != null) {
             list = status != null
@@ -297,7 +296,6 @@ public class NaoConformidadeService {
             throw new BusinessException("Apenas administradores podem excluir NCs após ativação");
         }
 
-        // Remove arquivos do S3 (evidências da NC e das execuções)
         List<Evidencia> evidenciasNc = evidenciaRepository.findByNaoConformidadeId(id);
         for (Evidencia ev : evidenciasNc) {
             s3StorageService.delete(ev.getUrlArquivo());
@@ -311,13 +309,8 @@ public class NaoConformidadeService {
             }
         }
 
-        // ON DELETE CASCADE no banco cuida de todas as tabelas filhas
         naoConformidadeRepository.delete(nc);
     }
-
-    // -------------------------------------------------------------------------
-    // Novo fluxo: Investigação → Plano → Execução → Validação Final
-    // -------------------------------------------------------------------------
 
     @Transactional
     public NaoConformidadeResponse ativar(UUID id) {
@@ -381,7 +374,7 @@ public class NaoConformidadeService {
         nc.setCausaRaiz(request.causaRaiz());
 
         if (nc.getStatus() == StatusNaoConformidade.EM_AJUSTE_PELO_EXTERNO) {
-            // Mantém atividades APROVADA; remove REJEITADA e adiciona as corrigidas
+
             List<AtividadePlanoAcao> rejeitadas = nc.getAtividades().stream()
                     .filter(a -> "REJEITADA".equals(a.getStatus()))
                     .collect(java.util.stream.Collectors.toList());
@@ -400,7 +393,7 @@ public class NaoConformidadeService {
                 nc.getAtividades().add(atividade);
             }
         } else {
-            // AGUARDANDO_TRATATIVA: substitui tudo
+
             nc.getAtividades().clear();
             for (int i = 0; i < request.atividades().size(); i++) {
                 var item = request.atividades().get(i);
@@ -426,7 +419,6 @@ public class NaoConformidadeService {
                 statusAnterior, StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO,
                 request.emailsManuais(), null, null));
 
-        // Snapshot da investigação submetida
         InvestigacaoSnapshot snapshot = new InvestigacaoSnapshot();
         snapshot.setNaoConformidade(nc);
         snapshot.setPorqueUm(porques.get(0).pergunta());
@@ -528,7 +520,6 @@ public class NaoConformidadeService {
             atividadePlanoAcaoRepository.save(atividade);
         }
 
-        // Determina novo status: se TODAS as atividades são APROVADA e nenhum porquê foi rejeitado → EM_EXECUCAO
         boolean todasAprovadas = nc.getAtividades().stream()
                 .allMatch(a -> "APROVADA".equals(a.getStatus()))
                 && !Boolean.TRUE.equals(request.porqueRejeitado());
@@ -559,7 +550,7 @@ public class NaoConformidadeService {
         investigacaoSnapshotRepository
                 .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
                 .ifPresent(s -> {
-                    // Encode per-activity status into snapshot atividades using "||" delimiter
+
                     s.setAtividades(atividadesRevisadas.stream()
                             .map(a -> {
                                 String suffix = "REJEITADA".equals(a.getStatus())
@@ -594,7 +585,7 @@ public class NaoConformidadeService {
             if (!atividade.getNaoConformidade().getId().equals(id)) {
                 throw new BusinessException("Atividade não pertence a esta NC");
             }
-            // Only update activities not yet approved in execution
+
             if (!"APROVADA".equals(atividade.getStatusExecucao())) {
                 atividade.setDescricaoExecucao(item.descricaoExecucao());
                 atividade.setStatusExecucao("PENDENTE");
@@ -613,7 +604,7 @@ public class NaoConformidadeService {
         execSnapshot.setDescricaoExecucao("");
         execSnapshot.setDataSubmissao(LocalDateTime.now());
         execSnapshot.setStatus("PENDENTE");
-        // Snapshot apenas das atividades enviadas na requisição (não todas da NC)
+
         execSnapshot.setAtividades(request.atividades().stream()
                 .map(item -> {
                     AtividadePlanoAcao a = atividadePlanoAcaoRepository.findById(item.atividadeId()).orElse(null);
@@ -624,7 +615,6 @@ public class NaoConformidadeService {
                 .collect(java.util.stream.Collectors.toCollection(ArrayList::new)));
         execucaoSnapshotRepository.save(execSnapshot);
 
-        // Linka as evidências das atividades submetidas ao snapshot
         List<Evidencia> evidenciasDoSnapshot = new ArrayList<>();
         for (var item : request.atividades()) {
             evidenciasDoSnapshot.addAll(evidenciaRepository.findByAtividadePlanoAcaoId(item.atividadeId()));
@@ -690,7 +680,7 @@ public class NaoConformidadeService {
         execucaoSnapshotRepository
                 .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "PENDENTE")
                 .ifPresent(s -> {
-                    // Encode per-activity execution status + evidence IDs into snapshot
+
                     s.setAtividades(atividadesRevisadasExec.stream()
                             .map(a -> {
                                 String desc = a.getDescricaoExecucao() != null ? a.getDescricaoExecucao() : "";
@@ -736,12 +726,10 @@ public class NaoConformidadeService {
         execSnapshot.setDataSubmissao(LocalDateTime.now());
         execSnapshot.setStatus("PENDENTE");
 
-        // Carry-forward: inclui evidências da última submissão reprovada
         execucaoSnapshotRepository
                 .findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(id, "REPROVADO")
                 .ifPresent(anterior -> execSnapshot.getEvidencias().addAll(anterior.getEvidencias()));
 
-        // Evidências novas (ainda sem snapshot vinculado)
         List<Evidencia> novas = evidenciaRepository
                 .findByNaoConformidadeIdAndTipoEvidenciaAndExecucaoSnapshotIsNull(id, TipoEvidencia.TRATATIVA);
         novas.forEach(e -> e.setExecucaoSnapshot(execSnapshot));
@@ -833,10 +821,6 @@ public class NaoConformidadeService {
                 .toList();
     }
 
-    // -------------------------------------------------------------------------
-    // Scheduled
-    // -------------------------------------------------------------------------
-
     @Transactional
     public void atualizarVencidas() {
         List<NaoConformidade> vencidas = naoConformidadeRepository.findVencidas(LocalDate.now());
@@ -847,15 +831,6 @@ public class NaoConformidadeService {
         naoConformidadeRepository.saveAll(vencidas);
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Valida que a NC selecionada como anterior é de fato o fim da cadeia.
-     * Se já existe outra NC apontando para ela, encontra o fim real e informa o usuário.
-     * O parâmetro excludeId é usado no update para ignorar a própria NC sendo editada.
-     */
     private void validarFimDaCadeia(NaoConformidade ncAnterior, UUID excludeId) {
         List<NaoConformidade> sucessoras = naoConformidadeRepository.findByNcAnteriorId(ncAnterior.getId())
                 .stream()
@@ -864,7 +839,6 @@ public class NaoConformidadeService {
 
         if (sucessoras.isEmpty()) return;
 
-        // Percorre a cadeia até o fim real
         NaoConformidade fim = sucessoras.get(0);
         while (true) {
             List<NaoConformidade> prox = naoConformidadeRepository.findByNcAnteriorId(fim.getId())
@@ -903,7 +877,6 @@ public class NaoConformidadeService {
         List<NormaResponse> normas = nc.getNormas() == null ? List.of() :
                 nc.getNormas().stream().map(this::toNormaResponse).toList();
 
-        // Bulk fetch de evidências por atividade (evita N+1)
         List<UUID> atividadeIds = nc.getAtividades() == null ? List.of() :
                 nc.getAtividades().stream().map(AtividadePlanoAcao::getId).toList();
         Map<UUID, List<EvidenciaResponse>> evidenciasPorAtividade = atividadeIds.isEmpty() ? Map.of() :

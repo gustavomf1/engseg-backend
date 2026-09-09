@@ -55,7 +55,7 @@ public class DesvioEmailListener {
             dinamicos.add(desvio.getUsuarioCriacao().getEmail());
         if (desvio.getResponsavelDesvio() != null && desvio.getResponsavelDesvio().getEmail() != null)
             dinamicos.add(desvio.getResponsavelDesvio().getEmail());
-        // responsável pela tratativa só recebe a partir de AGUARDANDO_TRATATIVA, não na abertura
+
         if (!isCriacao && desvio.getResponsavelTratativa() != null && desvio.getResponsavelTratativa().getEmail() != null)
             dinamicos.add(desvio.getResponsavelTratativa().getEmail());
         if (desvio.getEmailsManuais() != null)
@@ -69,7 +69,7 @@ public class DesvioEmailListener {
             UUID empresaContratadaId = event.getEmpresaContratadaId();
             if (empresaContratadaId != null) {
                 Set<String> excluidos = new HashSet<>(event.getEmailsPadraoExcluidos());
-                // na criação, responsavelTratativa não está em dinamicos mas também não deve receber via padrão
+
                 if (isCriacao && desvio.getResponsavelTratativa() != null && desvio.getResponsavelTratativa().getEmail() != null)
                     excluidos.add(desvio.getResponsavelTratativa().getEmail());
                 emailPadraoRepository

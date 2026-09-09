@@ -65,8 +65,6 @@ class NaoConformidadeServiceTest {
         when(usuarioRepository.findByEmail("test@engseg.com")).thenReturn(Optional.empty());
     }
 
-    // ─── helpers ──────────────────────────────────────────────────────────────
-
     private NaoConformidade buildNc(StatusNaoConformidade status) {
         Estabelecimento est = new Estabelecimento();
         est.setId(UUID.randomUUID());
@@ -112,8 +110,6 @@ class NaoConformidadeServiceTest {
         );
     }
 
-    // ─── create ──────────────────────────────────────────────────────────────────
-
     @Test
     void create_semSeveridadeProbabilidadeDescricao_criaComSucessoSemNivelRisco() {
         UUID estId = UUID.randomUUID();
@@ -143,7 +139,6 @@ class NaoConformidadeServiceTest {
 
         assertThat(response).isNotNull();
 
-        // Verify that null values flow through to the entity passed to save()
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
         NaoConformidade capturedNc = captor.getValue();
@@ -152,8 +147,6 @@ class NaoConformidadeServiceTest {
         assertThat(capturedNc.getSeveridade()).isNull();
         assertThat(capturedNc.getProbabilidade()).isNull();
     }
-
-    // ─── findAll (EXTERNO) ──────────────────────────────────────────────────────
 
     @Test
     void findAll_quandoExterno_retornaApenasNcsOndeEhResponsavelTratativa() {
@@ -199,8 +192,6 @@ class NaoConformidadeServiceTest {
         verify(naoConformidadeRepository, never()).findByEstabelecimentoIdIn(any());
     }
 
-    // ─── findById (EXTERNO) ─────────────────────────────────────────────────────
-
     @Test
     void findById_quandoExternoNaoEhResponsavelTratativa_lancaBusinessException() {
         Usuario externo = Usuario.builder().id(UUID.randomUUID()).build();
@@ -235,14 +226,12 @@ class NaoConformidadeServiceTest {
         assertThat(result.id()).isEqualTo(ncId);
     }
 
-    // ─── submeterInvestigacao ──────────────────────────────────────────────────
-
     @Test
     void submeterInvestigacao_quandoAberta_transicionaParaAguardandoAprovacaoPlano() {
         NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
         mockToResponseDeps(nc);
-        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc)); // segunda chamada
+        when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
 
         service.submeterInvestigacao(ncId, buildInvestigacaoRequest());
 
@@ -279,7 +268,7 @@ class NaoConformidadeServiceTest {
     @Test
     void submeterInvestigacao_substituiAtividadesAnteriores() {
         NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_TRATATIVA);
-        nc.getAtividades().add(new AtividadePlanoAcao()); // atividade prévia
+        nc.getAtividades().add(new AtividadePlanoAcao());
         when(naoConformidadeRepository.findById(ncId)).thenReturn(Optional.of(nc));
         mockToResponseDeps(nc);
 
@@ -290,8 +279,6 @@ class NaoConformidadeServiceTest {
         verify(naoConformidadeRepository).save(captor.capture());
         assertThat(captor.getValue().getAtividades()).hasSize(req.atividades().size());
     }
-
-    // ─── aprovarPlano ──────────────────────────────────────────────────────────
 
     @Test
     void aprovarPlano_quandoAguardandoAprovacaoPlano_transicionaParaEmExecucao() {
@@ -320,8 +307,6 @@ class NaoConformidadeServiceTest {
         verify(naoConformidadeRepository, never()).save(any());
     }
 
-    // ─── rejeitarPlano ────────────────────────────────────────────────────────
-
     @Test
     void rejeitarPlano_quandoAguardandoAprovacaoPlano_transicionaParaEmAjustePeloExterno() {
         NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_APROVACAO_PLANO);
@@ -346,8 +331,6 @@ class NaoConformidadeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("AGUARDANDO_APROVACAO_PLANO");
     }
-
-    // ─── submeterEvidencias ───────────────────────────────────────────────────
 
     @Test
     void submeterEvidencias_quandoEmExecucao_transicionaParaAguardandoValidacaoFinal() {
@@ -374,8 +357,6 @@ class NaoConformidadeServiceTest {
         verify(naoConformidadeRepository, never()).save(any());
     }
 
-    // ─── aprovarEvidencias ────────────────────────────────────────────────────
-
     @Test
     void aprovarEvidencias_quandoAguardandoValidacaoFinal_transicionaParaConcluido() {
         NaoConformidade nc = buildNc(StatusNaoConformidade.AGUARDANDO_VALIDACAO_FINAL);
@@ -384,7 +365,7 @@ class NaoConformidadeServiceTest {
         when(execucaoSnapshotRepository.findFirstByNaoConformidadeIdAndStatusOrderByDataSubmissaoDesc(any(), any()))
                 .thenReturn(Optional.empty());
 
-        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Aprovado", null)); // atividades null → allMatch=true
+        service.aprovarEvidencias(ncId, new AprovarRejeitarRequest("Aprovado", null));
 
         ArgumentCaptor<NaoConformidade> captor = ArgumentCaptor.forClass(NaoConformidade.class);
         verify(naoConformidadeRepository).save(captor.capture());
@@ -400,8 +381,6 @@ class NaoConformidadeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("AGUARDANDO_VALIDACAO_FINAL");
     }
-
-    // ─── rejeitarEvidencias ───────────────────────────────────────────────────
 
     @Test
     void rejeitarEvidencias_quandoAguardandoValidacaoFinal_transicionaParaEmExecucao() {
@@ -427,8 +406,6 @@ class NaoConformidadeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("AGUARDANDO_VALIDACAO_FINAL");
     }
-
-    // ─── aprovarEvidencias: allMatch APROVADA ──────────────────────────────────
 
     @Test
     void aprovarEvidencias_quandoAtividadeNaoAprovada_lancaBusinessException() {

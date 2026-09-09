@@ -113,8 +113,7 @@ class DesvioEmailListenerTest {
 
     @Test
     void abertura_nao_envia_para_responsavel_tratativa_mesmo_quando_e_email_padrao() {
-        // se o email do responsável pela tratativa também estiver cadastrado como padrão,
-        // ainda assim não deve receber na abertura
+
         EmailPadrao padraoTratativa = new EmailPadrao();
         padraoTratativa.setEmail("resp.tratativa@construtora.com");
 

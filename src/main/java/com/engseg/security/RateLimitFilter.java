@@ -11,11 +11,6 @@ import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Rate limit por IP (janela fixa) nos endpoints de autenticação públicos
- * (/api/auth/login e /api/auth/reset/*). Mitiga força-bruta de senha/OTP (A2).
- * IP real lido de X-Forwarded-For (atrás de proxy/Render/nginx).
- */
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final int MAX_REQUESTS = 10;

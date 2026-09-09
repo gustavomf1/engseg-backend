@@ -5,7 +5,6 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
-
 @Entity
 @Table(name = "localizacao")
 @Data

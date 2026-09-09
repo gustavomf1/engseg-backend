@@ -139,7 +139,6 @@ public class RelatorioService {
         List<Desvio> desvios = desvioRepository.findParaRelatorio(
             inicio, fim, filtro.getEstabelecimentoId(), filtro.getEmpresaContratadaId(), null);
 
-        // índices: 0=totalNcs, 1=abertas, 2=emTratamento, 3=concluidas, 4=naoResolvidas, 5=totalDesvios, 6=desviosConcluidos
         Map<String, long[]> resumo = new LinkedHashMap<>();
 
         for (NaoConformidade nc : ncs) {

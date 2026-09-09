@@ -64,8 +64,6 @@ public class EstabelecimentoController {
         return ResponseEntity.ok(estabelecimentoService.reativar(id));
     }
 
-    // -- Empresas vinculadas ao estabelecimento --
-
     @GetMapping("/{id}/empresas")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO', 'EXTERNO')")
     public ResponseEntity<List<EmpresaResponse>> getEmpresas(@PathVariable UUID id) {

@@ -58,7 +58,6 @@ public class AuthService {
         );
     }
 
-    /** Troca um refresh token válido por um novo par (access + refresh rotacionado). */
     public RefreshResponse refresh(String refreshToken) {
         var rotacao = refreshTokenService.rotacionar(refreshToken);
         Usuario usuario = rotacao.usuario();
@@ -66,7 +65,6 @@ public class AuthService {
         return new RefreshResponse(access, rotacao.refreshTokenPlano());
     }
 
-    /** Revoga o refresh token (logout). */
     public void logout(String refreshToken) {
         refreshTokenService.revogar(refreshToken);
     }

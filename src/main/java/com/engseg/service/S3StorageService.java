@@ -49,14 +49,13 @@ public class S3StorageService {
 
         byte[] bytes = file.getBytes();
 
-        // Valida o TIPO REAL pelos magic bytes — não confia no Content-Type do cliente (M3)
         String detected = detectContentType(bytes);
         if (detected == null || !ALLOWED_CONTENT_TYPES.contains(detected)) {
             throw new BusinessException("Tipo de arquivo não permitido. Envie imagens (JPEG, PNG, GIF, WebP) ou PDF.");
         }
 
         String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "arquivo";
-        // Remove path separators e caracteres especiais para evitar path traversal
+
         String safeName = originalName.replaceAll("[^a-zA-Z0-9._\\-]", "_");
         String key = pasta + "/" + UUID.randomUUID() + "_" + safeName;
 
@@ -64,7 +63,7 @@ public class S3StorageService {
                 PutObjectRequest.builder()
                         .bucket(bucket)
                         .key(key)
-                        .contentType(detected) // usa o tipo detectado, não o informado pelo cliente
+                        .contentType(detected)
                         .build(),
                 RequestBody.fromBytes(bytes)
         );
@@ -73,7 +72,6 @@ public class S3StorageService {
         return key;
     }
 
-    /** Detecta o MIME real pelos primeiros bytes (file signature). Retorna null se desconhecido. */
     private String detectContentType(byte[] b) {
         if (b.length >= 3 && (b[0] & 0xFF) == 0xFF && (b[1] & 0xFF) == 0xD8 && (b[2] & 0xFF) == 0xFF) {
             return "image/jpeg";
