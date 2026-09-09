@@ -13,7 +13,7 @@ FROM ordenado
 WHERE nc.id = ordenado.id;
 
 CREATE SEQUENCE nao_conformidade_numero_seq OWNED BY nao_conformidade.numero_sequencial;
-SELECT setval('nao_conformidade_numero_seq', COALESCE((SELECT MAX(numero_sequencial) FROM nao_conformidade), 0));
+SELECT setval('nao_conformidade_numero_seq', COALESCE((SELECT MAX(numero_sequencial) FROM nao_conformidade), 1), (SELECT MAX(numero_sequencial) FROM nao_conformidade) IS NOT NULL);
 ALTER TABLE nao_conformidade ALTER COLUMN numero_sequencial SET DEFAULT nextval('nao_conformidade_numero_seq');
 ALTER TABLE nao_conformidade ALTER COLUMN numero_sequencial SET NOT NULL;
 ALTER TABLE nao_conformidade ADD CONSTRAINT uq_nao_conformidade_numero_sequencial UNIQUE (numero_sequencial);
@@ -30,7 +30,7 @@ FROM ordenado
 WHERE d.id = ordenado.id;
 
 CREATE SEQUENCE desvio_numero_seq OWNED BY desvio.numero_sequencial;
-SELECT setval('desvio_numero_seq', COALESCE((SELECT MAX(numero_sequencial) FROM desvio), 0));
+SELECT setval('desvio_numero_seq', COALESCE((SELECT MAX(numero_sequencial) FROM desvio), 1), (SELECT MAX(numero_sequencial) FROM desvio) IS NOT NULL);
 ALTER TABLE desvio ALTER COLUMN numero_sequencial SET DEFAULT nextval('desvio_numero_seq');
 ALTER TABLE desvio ALTER COLUMN numero_sequencial SET NOT NULL;
 ALTER TABLE desvio ADD CONSTRAINT uq_desvio_numero_sequencial UNIQUE (numero_sequencial);
