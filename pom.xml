@@ -11,10 +11,10 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.engseg</groupId>
-    <artifactId>engseg-api</artifactId>
+    <groupId>com.safecore</groupId>
+    <artifactId>safecore-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>engseg-api</name>
+    <name>safecore-api</name>
     <description>EngSeg - Sistema de Gerenciamento de Não Conformidades</description>
 
     <properties>
