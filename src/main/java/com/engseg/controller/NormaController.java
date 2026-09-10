@@ -59,7 +59,7 @@ public class NormaController {
     }
 
     @PostMapping("/{id}/buscar-trecho")
-    @PreAuthorize("hasAnyRole('TECNICO', 'ENGENHEIRO', 'EXTERNO')")
+    @PreAuthorize("denyAll()") // feature de busca de trecho por IA desabilitada temporariamente
     public ResponseEntity<BuscarTrechoResponse> buscarTrecho(
             @PathVariable UUID id,
             @Valid @RequestBody BuscarTrechoRequest request) {
