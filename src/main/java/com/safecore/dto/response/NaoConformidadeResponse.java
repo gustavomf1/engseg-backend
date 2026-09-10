@@ -1,0 +1,66 @@
+package com.safecore.dto.response;
+
+import com.safecore.entity.NivelRisco;
+import com.safecore.entity.StatusNaoConformidade;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+public record NaoConformidadeResponse(
+        UUID id,
+        String codigo,
+        UUID estabelecimentoId,
+        String estabelecimentoNome,
+        String titulo,
+        UUID localizacaoId,
+        String localizacaoNome,
+        String descricao,
+        LocalDateTime dataRegistro,
+        String tecnicoNome,
+        boolean regraDeOuro,
+        Integer severidade,
+        Integer probabilidade,
+        NivelRisco nivelRisco,
+        UUID responsavelTrativaId,
+        String responsavelTrativaNome,
+        String responsavelTrativaEmail,
+        String responsavelTrativaPerfil,
+        UUID responsavelNcId,
+        String responsavelNcNome,
+        String responsavelNcEmail,
+        String responsavelNcPerfil,
+        LocalDate dataLimiteResolucao,
+        String usuarioCriacaoNome,
+        String usuarioCriacaoEmail,
+        StatusNaoConformidade status,
+        boolean vencida,
+        boolean reincidencia,
+        UUID ncAnteriorId,
+        String ncAnteriorTitulo,
+        List<NcResumoResponse> cadeiaReincidencias,
+        List<NcResumoResponse> reincidencias,
+        String porqueUm,
+        String porqueUmResposta,
+        String porqueDois,
+        String porqueDoisResposta,
+        String porqueTres,
+        String porqueTresResposta,
+        String porqueQuatro,
+        String porqueQuatroResposta,
+        String porqueCinco,
+        String porqueCincoResposta,
+        String causaRaiz,
+        String descricaoExecucao,
+        List<AtividadeResponse> atividades,
+        List<HistoricoNcResponse> historico,
+        List<InvestigacaoSnapshotResponse> investigacaoSnapshots,
+        List<ExecucaoSnapshotResponse> execucaoSnapshots,
+        List<DevolutivaResponse> devolutivas,
+        List<ExecucaoAcaoResponse> execucoes,
+        List<ValidacaoResponse> validacoes,
+        List<NormaResponse> normas,
+        UUID usuarioCriacaoId,
+        UUID empresaContratadaId,
+        String empresaContratadaNome
+) {}

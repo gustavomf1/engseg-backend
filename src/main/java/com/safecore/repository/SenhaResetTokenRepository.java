@@ -1,0 +1,23 @@
+package com.safecore.repository;
+
+import com.safecore.entity.SenhaResetToken;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface SenhaResetTokenRepository extends JpaRepository<SenhaResetToken, UUID> {
+
+    List<SenhaResetToken> findByUsuarioIdAndUsadoFalse(UUID usuarioId);
+
+    Optional<SenhaResetToken> findByUsuarioIdAndOtpAndUsadoFalseAndOtpExpiresAtAfter(
+            UUID usuarioId, String otp, LocalDateTime agora);
+
+    Optional<SenhaResetToken> findFirstByUsuarioIdAndUsadoFalseAndOtpExpiresAtAfter(
+            UUID usuarioId, LocalDateTime agora);
+
+    Optional<SenhaResetToken> findByResetTokenAndUsadoFalseAndResetTokenExpiresAtAfter(
+            UUID resetToken, LocalDateTime agora);
+}

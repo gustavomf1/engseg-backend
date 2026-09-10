@@ -1,0 +1,49 @@
+package com.safecore.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDate;
+import java.util.UUID;
+
+@Entity
+@Table(name = "empresa")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Empresa {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(name = "razao_social", nullable = false)
+    private String razaoSocial;
+
+    @Column(nullable = false, unique = true)
+    private String cnpj;
+
+    @Column(name = "nome_fantasia")
+    private String nomeFantasia;
+
+    private String email;
+
+    private String telefone;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_mae_id")
+    private Empresa empresaMae;
+
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(nullable = false, length = 1)
+    @Builder.Default
+    private boolean ativo = true;
+
+    @Convert(converter = BooleanToSNConverter.class)
+    @Column(name = "exibir_no_seletor", nullable = false, length = 1)
+    @Builder.Default
+    private boolean exibirNoSeletor = true;
+
+    @Column(name = "dt_inativacao")
+    private LocalDate dtInativacao;
+}

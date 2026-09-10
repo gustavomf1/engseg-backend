@@ -1,9 +1,0 @@
-package com.engseg.entity;
-
-public enum MeuPapelFiltro {
-    REGISTRANTE,
-    RESPONSAVEL_NC,
-    RESPONSAVEL_TRATATIVA_NC,
-    RESPONSAVEL_DESVIO,
-    RESPONSAVEL_TRATATIVA_DESVIO
-}

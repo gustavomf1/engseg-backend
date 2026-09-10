@@ -1,0 +1,142 @@
+package com.safecore.controller;
+
+import com.safecore.dto.response.DesvioResponse;
+import com.safecore.dto.response.NaoConformidadeResponse;
+import com.safecore.entity.Evidencia;
+import com.safecore.entity.MeuPapelFiltro;
+import com.safecore.entity.TipoEvidencia;
+import com.safecore.repository.EvidenciaRepository;
+import com.safecore.service.DesvioService;
+import com.safecore.service.NaoConformidadeService;
+import com.safecore.service.SecurityHelper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/ocorrencias")
+@RequiredArgsConstructor
+public class OcorrenciaController {
+
+    private final DesvioService desvioService;
+    private final NaoConformidadeService naoConformidadeService;
+    private final EvidenciaRepository evidenciaRepository;
+    private final SecurityHelper securityHelper;
+
+    private void putPrimeiraEvidencia(Map<String, Object> item, List<Evidencia> evidencias) {
+        evidencias.stream().findFirst().ifPresent(e -> {
+            item.put("primeiraEvidenciaId", e.getId().toString());
+            item.put("primeiraEvidenciaNome", e.getNomeArquivo());
+        });
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO', 'EXTERNO')")
+    public ResponseEntity<List<Map<String, Object>>> listarTodas(
+            @RequestParam(required = false) UUID estabelecimentoId,
+            @RequestParam(required = false) UUID empresaId,
+            @RequestParam(required = false) UUID empresaContratadaId,
+            @RequestParam(required = false) MeuPapelFiltro meuPapel) {
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        List<DesvioResponse> desviosList = desvioService.findAll(estabelecimentoId, empresaId);
+        if (empresaContratadaId != null) {
+            desviosList = desviosList.stream()
+                    .filter(d -> empresaContratadaId.equals(d.empresaContratadaId()))
+                    .toList();
+        }
+        for (DesvioResponse d : desviosList) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("tipo", "DESVIO");
+            item.put("id", d.id());
+            item.put("codigo", d.codigo());
+            item.put("titulo", d.titulo());
+            item.put("localizacao", d.localizacaoNome());
+            item.put("descricao", d.descricao());
+            item.put("dataRegistro", d.dataRegistro());
+            item.put("status", d.status());
+            item.put("estabelecimentoNome", d.estabelecimentoNome());
+            item.put("usuarioCriacaoEmail", d.usuarioCriacaoEmail());
+            item.put("usuarioCriacaoId", d.usuarioCriacaoId());
+            item.put("responsavelDesvioId", d.responsavelDesvioId());
+            item.put("responsavelDesvioNome", d.responsavelDesvioNome());
+            item.put("responsavelTratativaId", d.responsavelTratativaId());
+            item.put("responsavelTrativaNome", d.responsavelTrativaNome());
+            item.put("empresaContratadaId", d.empresaContratadaId());
+            item.put("empresaContratadaNome", d.empresaContratadaNome());
+            putPrimeiraEvidencia(item, evidenciaRepository.findByDesvioId(d.id()));
+            resultado.add(item);
+        }
+
+        for (NaoConformidadeResponse nc : naoConformidadeService.findAll(null, estabelecimentoId, empresaId, empresaContratadaId)) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("tipo", "NAO_CONFORMIDADE");
+            item.put("id", nc.id());
+            item.put("codigo", nc.codigo());
+            item.put("titulo", nc.titulo());
+            item.put("localizacao", nc.localizacaoNome());
+            item.put("descricao", nc.descricao());
+            item.put("dataRegistro", nc.dataRegistro());
+            item.put("regraDeOuro", nc.regraDeOuro());
+            item.put("status", nc.status());
+            item.put("dataLimiteResolucao", nc.dataLimiteResolucao());
+            item.put("nivelRisco", nc.nivelRisco());
+            item.put("severidade", nc.severidade());
+            item.put("probabilidade", nc.probabilidade());
+            item.put("estabelecimentoNome", nc.estabelecimentoNome());
+            item.put("responsavelNcId", nc.responsavelNcId());
+            item.put("responsavelNcNome", nc.responsavelNcNome());
+            item.put("responsavelTrativaId", nc.responsavelTrativaId());
+            item.put("responsavelTrativaNome", nc.responsavelTrativaNome());
+            item.put("usuarioCriacaoEmail", nc.usuarioCriacaoEmail());
+            item.put("usuarioCriacaoId", nc.usuarioCriacaoId());
+            item.put("vencida", nc.vencida());
+            item.put("reincidencia", nc.reincidencia());
+            item.put("quantidadeAtividades", nc.atividades() != null ? nc.atividades().size() : 0);
+            item.put("quantidadeHistorico", nc.historico() != null ? nc.historico().size() : 0);
+            item.put("empresaContratadaId", nc.empresaContratadaId());
+            item.put("empresaContratadaNome", nc.empresaContratadaNome());
+            putPrimeiraEvidencia(item,
+                    evidenciaRepository.findByNaoConformidadeIdAndTipoEvidencia(
+                            nc.id(), TipoEvidencia.OCORRENCIA));
+            resultado.add(item);
+        }
+
+        resultado.sort((a, b) -> {
+            String da = String.valueOf(a.get("dataRegistro"));
+            String db = String.valueOf(b.get("dataRegistro"));
+            return db.compareTo(da);
+        });
+
+        if (meuPapel != null) {
+            UUID userId = securityHelper.getUsuarioLogado().getId();
+            resultado = resultado.stream()
+                .filter(item -> switch (meuPapel) {
+                    case REGISTRANTE -> userId.equals(item.get("usuarioCriacaoId"));
+                    case RESPONSAVEL_NC -> {
+                        if (!"NAO_CONFORMIDADE".equals(item.get("tipo"))) yield false;
+                        yield userId.equals(item.get("responsavelNcId"));
+                    }
+                    case RESPONSAVEL_TRATATIVA_NC -> {
+                        if (!"NAO_CONFORMIDADE".equals(item.get("tipo"))) yield false;
+                        yield userId.equals(item.get("responsavelTrativaId"));
+                    }
+                    case RESPONSAVEL_DESVIO -> {
+                        if (!"DESVIO".equals(item.get("tipo"))) yield false;
+                        yield userId.equals(item.get("responsavelDesvioId"));
+                    }
+                    case RESPONSAVEL_TRATATIVA_DESVIO -> {
+                        if (!"DESVIO".equals(item.get("tipo"))) yield false;
+                        yield userId.equals(item.get("responsavelTratativaId"));
+                    }
+                })
+                .collect(Collectors.toList());
+        }
+
+        return ResponseEntity.ok(resultado);
+    }
+}
