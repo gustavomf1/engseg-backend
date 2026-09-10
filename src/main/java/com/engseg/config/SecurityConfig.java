@@ -90,7 +90,8 @@ public class SecurityConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost",
                 "http://localhost:*",
-                "https://engseg-web.onrender.com"
+                "https://engseg-web.onrender.com",
+                "https://app.safecoreteste.online"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
