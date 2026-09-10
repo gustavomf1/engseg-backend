@@ -1,0 +1,68 @@
+package com.safecore.controller;
+
+import com.safecore.dto.request.CriarUsuarioDiretoRequest;
+import com.safecore.dto.request.UsuarioRequest;
+import com.safecore.dto.response.UsuarioResponse;
+import com.safecore.service.UsuarioService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/usuarios")
+@RequiredArgsConstructor
+public class UsuarioController {
+
+    private final UsuarioService usuarioService;
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
+    public ResponseEntity<List<UsuarioResponse>> getAll(
+            @RequestParam(required = false) Boolean ativo,
+            @RequestParam(required = false) UUID empresaId) {
+        return ResponseEntity.ok(usuarioService.findAll(ativo, empresaId));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENGENHEIRO', 'TECNICO')")
+    public ResponseEntity<UsuarioResponse> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.findById(id));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioResponse> create(@Valid @RequestBody UsuarioRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.create(request));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioResponse> update(@PathVariable UUID id, @Valid @RequestBody UsuarioRequest request) {
+        return ResponseEntity.ok(usuarioService.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        usuarioService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/reativar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioResponse> reativar(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.reativar(id));
+    }
+
+    @PostMapping("/direto")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioResponse> criarDireto(@Valid @RequestBody CriarUsuarioDiretoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.criarDireto(request));
+    }
+}

@@ -1,0 +1,132 @@
+package com.safecore.service;
+
+import com.safecore.dto.request.UsuarioRequest;
+import com.safecore.entity.*;
+import com.safecore.repository.EmpresaRepository;
+import com.safecore.repository.UsuarioRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UsuarioServiceTest {
+
+    @Mock UsuarioRepository usuarioRepository;
+    @Mock EmpresaRepository empresaRepository;
+    @Mock PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    UsuarioService service;
+
+    private final UUID empresaId = UUID.randomUUID();
+
+    private void autenticarComo(String role) {
+        var auth = new UsernamePasswordAuthenticationToken(
+                "caller@engseg.com", null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    private UsuarioRequest requestComPerfil(PerfilUsuario perfil) {
+        return new UsuarioRequest("Nome Teste", "novo@engseg.com", "senha123", perfil, empresaId, null);
+    }
+
+    private Empresa empresaMock() {
+        Empresa empresa = new Empresa();
+        empresa.setId(empresaId);
+        empresa.setRazaoSocial("EngSeg");
+        empresa.setCnpj("00.000.000/0001-00");
+        return empresa;
+    }
+
+    private Usuario usuarioSalvoMock(PerfilUsuario perfil, Empresa empresa) {
+        Usuario saved = new Usuario();
+        saved.setId(UUID.randomUUID());
+        saved.setNome("Nome Teste");
+        saved.setEmail("novo@engseg.com");
+        saved.setPerfil(perfil);
+        saved.setEmpresa(empresa);
+        saved.setAtivo(true);
+        return saved;
+    }
+
+    @Test
+    void create_engenheiroPodeCriarEngenheiro() {
+        autenticarComo("TECNICO");
+        Empresa empresa = empresaMock();
+        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresa));
+        when(passwordEncoder.encode(any())).thenReturn("hash");
+        when(usuarioRepository.save(any())).thenReturn(usuarioSalvoMock(PerfilUsuario.ENGENHEIRO, empresa));
+
+        service.create(requestComPerfil(PerfilUsuario.ENGENHEIRO));
+
+        verify(usuarioRepository).save(any());
+    }
+
+    @Test
+    void create_engenheiroPodeCriarTecnico() {
+        autenticarComo("ENGENHEIRO");
+        Empresa empresa = empresaMock();
+        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresa));
+        when(passwordEncoder.encode(any())).thenReturn("hash");
+        when(usuarioRepository.save(any())).thenReturn(usuarioSalvoMock(PerfilUsuario.TECNICO, empresa));
+
+        service.create(requestComPerfil(PerfilUsuario.TECNICO));
+
+        verify(usuarioRepository).save(any());
+    }
+
+    @Test
+    void create_semSenha_lancaIllegalArgumentException() {
+        autenticarComo("ENGENHEIRO");
+
+        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresaMock()));
+
+        UsuarioRequest req = new UsuarioRequest("Nome", "email@test.com", null, PerfilUsuario.TECNICO, empresaId, null);
+
+        assertThatThrownBy(() -> service.create(req))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Senha é obrigatória");
+
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    void update_engenheiroPodeAlterarQualquerPerfil() {
+
+        autenticarComo("ENGENHEIRO");
+
+        UUID userId = UUID.randomUUID();
+        Empresa empresa = empresaMock();
+
+        Usuario existente = new Usuario();
+        existente.setId(userId);
+        existente.setPerfil(PerfilUsuario.ENGENHEIRO);
+        existente.setEmpresa(empresa);
+        existente.setNome("Eng Antigo");
+        existente.setEmail("eng@test.com");
+
+        when(usuarioRepository.findById(userId)).thenReturn(Optional.of(existente));
+        when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresa));
+        when(usuarioRepository.save(any())).thenReturn(existente);
+
+        service.update(userId, requestComPerfil(PerfilUsuario.ENGENHEIRO));
+
+        verify(usuarioRepository).save(any());
+    }
+}

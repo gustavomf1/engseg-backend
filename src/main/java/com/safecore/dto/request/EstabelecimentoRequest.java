@@ -1,0 +1,17 @@
+package com.safecore.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
+
+public record EstabelecimentoRequest(
+        @NotBlank String nome,
+        @NotBlank String codigo,
+        @NotNull UUID empresaId,
+        String cep,
+        String logradouro,
+        String numero,
+        String bairro,
+        String cidade,
+        String estado
+) {}

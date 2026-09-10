@@ -1,0 +1,15 @@
+package com.safecore.entity;
+
+public enum StatusNaoConformidade {
+
+    ABERTA,
+    AGUARDANDO_TRATATIVA,
+    AGUARDANDO_APROVACAO_PLANO,
+    EM_AJUSTE_PELO_EXTERNO,
+    EM_EXECUCAO,
+    AGUARDANDO_VALIDACAO_FINAL,
+    CONCLUIDO,
+
+    EM_TRATAMENTO,
+    NAO_RESOLVIDA
+}
